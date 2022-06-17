@@ -1,0 +1,7 @@
+{% block footer %}
+<footer>
+    {% for message in get_flashed_messages() %}
+        <div class="flash px-3">{{ message }}</div>
+    {% endfor %}
+</footer>
+{% endblock %}

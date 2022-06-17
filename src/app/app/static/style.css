@@ -1,0 +1,25 @@
+/*
+ * Main stylesheet for all pages
+ *
+ */
+
+.nav-link {
+    border-radius: 10%;
+    transition: color 0.4s ease-out;
+}
+
+.nav-link:hover {
+    color: var(--bs-secondary) !important;
+}
+
+nav {
+    margin-bottom: 5%;
+}
+
+footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+}
