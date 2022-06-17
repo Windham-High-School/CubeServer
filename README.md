@@ -1,5 +1,5 @@
 # CubeServer
-Software to manage, store, score, and publish data received by Wifi-equipped microcontrollers for a school contest
+Software to manage, store, score, and publish data received by Wifi-equipped microcontrollers for managing a school contest
 
 ## Goals:
 - Sets up the pi as an access point
