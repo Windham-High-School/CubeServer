@@ -1,4 +1,6 @@
 # CubeServer
+[![CodeQL](https://github.com/snorklerjoe/CubeServer/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/snorklerjoe/CubeServer/actions/workflows/codeql-analysis.yml)
+
 Software to manage, store, score, and publish data received by Wifi-equipped microcontrollers for managing a school contest
 
 ## Goals:
