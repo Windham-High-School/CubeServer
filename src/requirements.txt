@@ -1,1 +1,4 @@
-Flask>=2.1.2,<3.0
+Flask>=2.1.2,<3.0          # Flask core for web app
+Flask-PyMongo>=2.3.0,<3.0  # MongoDB access
+pymongo-model>=2.0.2       # MongoDB object modeling
+better-profanity>=0.7.0    # Profanity checking/filtering

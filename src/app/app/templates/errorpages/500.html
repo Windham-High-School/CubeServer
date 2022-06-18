@@ -2,12 +2,17 @@
 {% block title %}500 Internal Server Error{% endblock %}
 
 {% block header %}
-    <h4>500 Internal Server Error</h4>
+    <h4 class="alert alert-danger">500 Internal Server Error</h4>
 {% endblock %}
 
 {% block content %}
-    <h6>There was an issue, but we don't really know what it was.</h6>
-    <p>
-        Try refreshing your page. If that doesn't work, that's a bummer.
-    </p>
+    <div class="alert alert-primary" role="alert">
+        <h5 class="alert-heading">You have reached the Coughlin Brothers <strike>Mortuary</strike> Server.</h5>
+        <p>
+            We're deeply sorry we are not able to load this page right now, but we will try to resolve the issue as soon as humanly possible.
+        </p>
+        <p>
+            The server had an error- Try refreshing or waiting a little bit.
+        </p>
+    </div>
 {% endblock %}

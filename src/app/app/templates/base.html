@@ -2,7 +2,7 @@
 <html>
     <head>
         {% block head %}
-            <title>{% block title %}{% endblock %} - CubeServer</title>
+            <title>{% block title %}{% endblock %} - {{ config['CONSTANTS'].SHORT_TITLE }}</title>
 
             <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -17,7 +17,7 @@
     <body>
         {% include 'navbar.html' %}
 
-        <section class="container content" role="main">
+        <section class="container content bg-light alert" role="main">
             <header class="container">
                 {% block header %}{% endblock %}
             </header>

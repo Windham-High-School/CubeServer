@@ -2,11 +2,11 @@
 {% block title %}Home{% endblock %}
 
 {% block header %}
-    <h4>Home</h4>
+    <h4>{{ config['CONSTANTS'].LONG_TITLE }}</h4>
 {% endblock %}
 
 {% block content %}
     <p>
-        Lorem Ipsum...
+        {{ config['CONSTANTS'].HOME_DESCRIPTION }}
     </p>
 {% endblock %}

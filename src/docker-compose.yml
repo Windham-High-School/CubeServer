@@ -1,12 +1,54 @@
 version: '3'
 services:
-  web:
-    build: ./
-    volumes:
-      - ./app:/app
-    ports:
-      - "8080:80"
+  # Main application container:
+  app:
+    container_name: flask_app
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Dockerfile
     environment:
+      # MongoDB credentials:
+      - MONGODB_DATABASE=flaskdb
+      - MONGODB_USERNAME=flask
+      - MONGODB_HOSTNAME=mongodb
+      - MONGODB_PASSWORD=LXUa2AYh5ArNkLkEZC8TCkCfKjE2nYVejvrTcPT82J6dRpJtmnEm6JhWsBnuGJWL
+      # Flask config:
       - FLASK_APP=app/main.py
       - FLASK_DEBUG=1
       - 'RUN=flask run --host=0.0.0.0 --port=80'
+    volumes:
+      - ./app:/app
+    ports: # Bind the port for the web server
+      - "8080:80"
+    depends_on:
+      - mongodb
+    networks:
+      - frontend
+      - backend
+  # Database container:
+  mongodb:
+    container_name: flask_mongodb
+    image: mongo:5.0
+    volumes: # Corresponds with volume at the bottom
+      - mongodb-data:/data/db
+    restart: unless-stopped
+    command: mongod --auth
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: flask
+      MONGO_INITDB_ROOT_PASSWORD: LXUa2AYh5ArNkLkEZC8TCkCfKjE2nYVejvrTcPT82J6dRpJtmnEm6JhWsBnuGJWL
+      MONGO_INITDB_DATABASE: flaskdb
+      MONGODB_DATA_DIR: /data/db
+      MONDODB_LOG_DIR: /dev/null
+    networks:
+      - backend
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+
+volumes:
+  mongodb-data:
+    driver: local
