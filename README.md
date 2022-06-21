@@ -7,6 +7,7 @@
 
 [![CodeQL](https://github.com/snorklerjoe/CubeServer/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/snorklerjoe/CubeServer/actions/workflows/codeql-analysis.yml)
 [![Pyre](https://github.com/snorklerjoe/CubeServer/actions/workflows/pyre.yml/badge.svg)](https://github.com/snorklerjoe/CubeServer/actions/workflows/pyre.yml)
+[![Dependency Review](https://github.com/snorklerjoe/CubeServer/actions/workflows/dependency-review.yml/badge.svg)](https://github.com/snorklerjoe/CubeServer/actions/workflows/dependency-review.yml)
 
 Software to manage, store, score, and publish data received by Wifi-equipped microcontrollers for managing a school contest
 
