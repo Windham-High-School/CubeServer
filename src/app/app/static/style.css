@@ -30,5 +30,16 @@ footer {
 }
 
 .content {
-    height: 50%;
+    min-height: 50%;
+    height: fit-content;
+}
+
+.container {
+    border-radius: 5px;
+    padding: 10px;
+}
+
+.btn {
+    background-color: var(--bs-secondary);
+    color: var(--bs-dark);
 }

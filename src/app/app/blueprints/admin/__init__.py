@@ -4,4 +4,4 @@ bp = Blueprint('admin', __name__, url_prefix='/admin', template_folder='template
 
 @bp.route('/')
 def admin_home():
-    return render_template('errorpages/unimplemented.html')
+    return render_template('errorpages/unimplemented.html.jinja2')

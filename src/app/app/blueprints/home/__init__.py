@@ -4,4 +4,4 @@ bp = Blueprint('home', __name__, url_prefix='/', template_folder='templates')
 
 @bp.route('/')
 def home():
-    return render_template('home.html')
+    return render_template('home.html.jinja2')

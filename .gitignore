@@ -1,1 +1,9 @@
 src/.mysql-data/*
+src/app/secret_key.txt
+*.pyc
+*.pyo
+__pycache__/
+pip-log.txt
+pip-delete-this-directory.txt
+*.egg-info/
+*.egg

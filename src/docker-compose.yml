@@ -4,6 +4,8 @@ services:
   app:
     container_name: flask_app
     restart: unless-stopped
+    volumes:
+      - ./app:/app
     build:
       context: .
       dockerfile: Dockerfile
@@ -17,8 +19,6 @@ services:
       - FLASK_APP=app/main.py
       - FLASK_DEBUG=1
       - 'RUN=flask run --host=0.0.0.0 --port=80'
-    volumes:
-      - ./app:/app
     ports: # Bind the port for the web server
       - "8080:80"
     depends_on:

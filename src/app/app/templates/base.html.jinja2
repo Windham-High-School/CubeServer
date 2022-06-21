@@ -1,3 +1,7 @@
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/fixes.html" as fixes %}
+{% import "bootstrap/utils.html" as util %}
+
 <!doctype html>
 <html>
     <head>
@@ -7,7 +11,12 @@
             <meta name="viewport" content="width=device-width, initial-scale=1">
 
             <!-- Bootswatch theme: -->
-            <link rel="stylesheet" href="{{ url_for('static', filename='themes/cyborg/bootstrap.min.css') }}">
+            {# Select a theme based on user preferences if available: #}
+            {% if 'theme' in request.cookies %}
+                <link rel="stylesheet" href="{{ url_for('static', filename=('themes/%s/bootstrap.min.css' % request.cookies.get('theme'))) }}">
+            {% else %}
+                <link rel="stylesheet" href="{{ url_for('static', filename='themes/quartz/bootstrap.min.css') }}">
+            {% endif %}
 
             <!-- Stylesheet: -->
             <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -15,9 +24,12 @@
         {% endblock %}
     </head>
     <body>
-        {% include 'navbar.html' %}
+        {% include 'navbar.html.jinja2' %}
 
-        <section class="container content bg-light alert" role="main">
+        {{util.flashed_messages()}}
+
+
+        <section class="container jumbotron content bg-dark" role="main">
             <header class="container">
                 {% block header %}{% endblock %}
             </header>
@@ -27,14 +39,17 @@
             </div>
         </section>
 
-        {% include 'footer.html' %}
+        {% include 'footer.html.jinja2' %}
 
         {% block scripts %}
-            <!--Bootstrap and JQuery:-->
+            <!--Bootstrap and JQuery-->
             <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
             
-            <!--Base JavaScript:-->
+            <!--js-cookie-->
+            <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js" integrity="sha256-0H3Nuz3aug3afVbUlsu12Puxva3CP4EhJtPExqs54Vg=" crossorigin="anonymous"></script>
+
+            <!--Base JavaScript-->
             <script src="{{ url_for('static', filename='/js/common.js') }}"></script>
         {% endblock %}
     </body>

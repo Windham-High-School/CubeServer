@@ -1,10 +1,12 @@
 """
 This defines constants used throughout the code.
 
-This defines values that cannot be set with the Admin panel but are "hard-coded"
-into the .
-Code regarding values set by the Admin panel can be found in app.app.models.config.
-A recompile is required to implement any changes made here.
+This defines values that cannot be set with the Admin panel but are
+"hard-coded" into the software.
+Code regarding values set by the Admin panel can be found in
+app.app.models.config.
+A restart (or a recompile in some configurations) of the docker container is
+required to implement changes from this file.
 """
 
 # Contest names:
@@ -22,7 +24,10 @@ HOME_DESCRIPTION = "Thunder. Time. Tech.\nTeams compete with data to win."
 
 # Teams:
 
-TEAM_MAXCHARS = 30
+TEAM_MIN_MEMBERS = 2
+"""Minimum number of members to make a team"""
+
+TEAM_MAX_CHARS = 30
 """Maximum number of characters in a team name"""
 
 TEAM_FILTER_PROFANITY = True
@@ -47,6 +52,14 @@ COMMENT_FILTER_PROFANITY = True
 
 ADMIN_INVITE_TIMEOUT = 96
 """Hours before an admin sign-up invitation expires"""
+
+
+
+# Behind-the-scenes stuff (kindly leave alone unless you know what you're doing):
+
+SECRET_KEY_FILE = "/app/secret_key.txt"
+"""Where the value of flask's config variable SECRET_KEY is stored.
+This should be in the .gitignore!"""
 
 
 
