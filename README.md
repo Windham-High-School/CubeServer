@@ -6,6 +6,7 @@
 [![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/en/2.1.x/)
 
 [![CodeQL](https://github.com/snorklerjoe/CubeServer/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/snorklerjoe/CubeServer/actions/workflows/codeql-analysis.yml)
+[![Pyre](https://github.com/snorklerjoe/CubeServer/actions/workflows/pyre.yml/badge.svg)](https://github.com/snorklerjoe/CubeServer/actions/workflows/pyre.yml)
 
 Software to manage, store, score, and publish data received by Wifi-equipped microcontrollers for managing a school contest
 
