@@ -30,16 +30,32 @@ footer {
 }
 
 .content {
-    min-height: 50%;
+    min-height: 30%;
     height: fit-content;
 }
 
 .container {
     border-radius: 5px;
     padding: 10px;
+    margin-bottom: 10px;
+    margin-top: 10px;
 }
 
 .btn {
     background-color: var(--bs-secondary);
     color: var(--bs-dark);
+}
+
+.container {
+    margin-left: 2.5%;
+    margin-right: 2.5%;
+}
+
+.jumbotron, .container-fluid {
+    width: 95%;
+}
+
+.selected {
+    font-weight: bold;
+    text-shadow: 1px 1px rgba(0, 0, 0, 0.6);
 }

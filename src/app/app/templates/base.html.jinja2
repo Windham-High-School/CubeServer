@@ -1,6 +1,7 @@
 {% import "bootstrap/wtf.html" as wtf %}
 {% import "bootstrap/fixes.html" as fixes %}
 {% import "bootstrap/utils.html" as util %}
+{% import "_macros.html.jinja2" as macros %}
 
 <!doctype html>
 <html>
@@ -15,7 +16,7 @@
             {% if 'theme' in request.cookies %}
                 <link rel="stylesheet" href="{{ url_for('static', filename=('themes/%s/bootstrap.min.css' % request.cookies.get('theme'))) }}">
             {% else %}
-                <link rel="stylesheet" href="{{ url_for('static', filename='themes/quartz/bootstrap.min.css') }}">
+                <link rel="stylesheet" href="{{ url_for('static', filename=('themes/%s/bootstrap.min.css' % config['CONSTANTS'].DEFAULT_THEME)) }}">
             {% endif %}
 
             <!-- Stylesheet: -->
@@ -28,7 +29,7 @@
 
         {{util.flashed_messages()}}
 
-
+        {% block body %}
         <section class="container jumbotron content bg-dark" role="main">
             <header class="container">
                 {% block header %}{% endblock %}
@@ -38,6 +39,8 @@
                 {% block content %}{%endblock %}
             </div>
         </section>
+
+        {% endblock %}
 
         {% include 'footer.html.jinja2' %}
 

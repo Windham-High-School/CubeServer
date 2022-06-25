@@ -2,7 +2,7 @@
 
 from model.pymongo_model import SimpleModel
 
-from app import mongo
+from ....app import mongo
 
 
 class Rules(SimpleModel):
@@ -14,6 +14,7 @@ class Rules(SimpleModel):
     collection = mongo.db.rulesets
 
     def __init__(self, max_strikes: int, min_points: int, daily_pings: int):
+        super().__init__()
         self.max_strikes = max_strikes
         self.min_points = min_points
         self.daily_pings = daily_pings

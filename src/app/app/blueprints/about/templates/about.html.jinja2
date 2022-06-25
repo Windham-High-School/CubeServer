@@ -1,0 +1,24 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Home{% endblock %}
+
+{% block header %}
+    <h4>{{ config['CONSTANTS'].SHORT_TITLE }} Credits</h4>
+{% endblock %}
+
+{% block content %}
+    <h5>Development</h5>
+    <p class="px-3">
+        {{ config['CONSTANTS'].CREDITS }}
+    </p>
+
+    <hr>
+
+    <h5>Themes & Style</h5>
+    <p class="px-3">
+        Style and layout with <a target="_blank" href="https://getbootstrap.com/">Bootstrap</a> (MIT License)
+    </p>
+    <p class="px-3">
+        <a target="_blank" href="https://bootswatch.com/">Bootswatch</a> themes by Thomas Park (MIT License)
+    </p>
+
+{% endblock %}

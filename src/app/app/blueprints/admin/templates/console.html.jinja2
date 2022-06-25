@@ -1,0 +1,53 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Admin{% endblock %}
+
+{% block header %}
+    <h4>Admin Dashboard</h4>
+{% endblock %}
+
+{% block content %}
+    <p>Lorem Ipsum</p>
+{% endblock %}
+
+{% block body %}
+{{ super() }}
+    <div class="row justify-content-md-center container container-fluid text-center">
+        {{macros.startbox("Box #10", "col")}}
+            <pre>
+Hello Mama and Dad, I had to call collect
+'Cause I ain't got a cent to my name
+Well I'm sleepin' in the hotel doorway
+And tonight they say it's gonna rain
+And if you'd only send me some money
+I'll be back on my feet again
+Send it in care of the Sunday Mission
+Box number ten.
+            </pre>
+        {{macros.endbox()}}
+        
+        {{macros.startbox("Box #11", "col")}}
+            <p>
+                Lorem Ipsum
+            </p>
+        {{macros.endbox()}}
+
+        {{macros.startbox("System", "col")}}
+            <b>Uptime: </b>
+            <p id="uptime_counter">LOADING...</p>
+        {{macros.endbox()}}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script>
+        // TODO: Uptime could be incremented without calling back to the server each second to see if a second has really gone by:
+        function updateUptimeCounter(){
+            $.get("/admin/uptime", function(data) {
+                $("#uptime_counter").html(data);
+                setTimeout(updateUptimeCounter, 1000);
+            });
+        }
+        updateUptimeCounter();
+    </script>
+{% endblock %}

@@ -7,14 +7,17 @@ Command-line flags:
 
 from secrets import token_hex
 from os.path import exists
-from config import SECRET_KEY_FILE
 from sys import argv
 
+from .config import SECRET_KEY_FILE, SECRET_KEY_FILE_ENCODING
+
 def write_new_key():
-    with open(SECRET_KEY_FILE, "w") as file:
+    """Writes a new key to the key file"""
+    with open(SECRET_KEY_FILE, "w", encoding=SECRET_KEY_FILE_ENCODING) as file:
         file.write(token_hex(128))
 
 def check_secrets():
+    """Writes a new key only if one does not already exist"""
     if not exists(SECRET_KEY_FILE):
         print("Generating secret file.")
         write_new_key()

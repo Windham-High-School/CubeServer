@@ -1,12 +1,15 @@
+"""Flask blueprint to handle team-related actions"""
+
 from flask import Blueprint, flash, redirect, render_template
 
-from app import app
-from app.blueprints.team import registration_form
+from ....app import app
+from . import registration_form
 
 bp = Blueprint('team', __name__, url_prefix='/team', template_folder='templates')
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
+    """Renders the team registration page"""
     if app.config['REGISTRATION_OPEN']:
         form = registration_form.RegistrationForm()
         try:
@@ -20,5 +23,5 @@ def register():
 
 @bp.route('/success')
 def success():
+    """Renders a message in teh event of successful team registration"""
     return render_template('success.html.jinja2')
-
