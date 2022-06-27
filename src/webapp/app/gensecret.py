@@ -9,7 +9,7 @@ from secrets import token_hex
 from os.path import exists
 from sys import argv
 
-from .config import SECRET_KEY_FILE, SECRET_KEY_FILE_ENCODING
+from app.config import SECRET_KEY_FILE, SECRET_KEY_FILE_ENCODING
 
 def write_new_key():
     """Writes a new key to the key file"""

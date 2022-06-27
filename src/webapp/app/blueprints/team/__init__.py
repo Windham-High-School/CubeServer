@@ -1,16 +1,16 @@
 """Flask blueprint to handle team-related actions"""
 
 from flask import Blueprint, flash, redirect, render_template
+from flask import current_app
 
-from ....app import app
-from . import registration_form
+from app.blueprints.team import registration_form
 
 bp = Blueprint('team', __name__, url_prefix='/team', template_folder='templates')
 
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     """Renders the team registration page"""
-    if app.config['REGISTRATION_OPEN']:
+    if current_app.config['REGISTRATION_OPEN']:
         form = registration_form.RegistrationForm()
         try:
             if form.validate_on_submit():

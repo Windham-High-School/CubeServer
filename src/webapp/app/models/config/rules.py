@@ -2,7 +2,7 @@
 
 from model.pymongo_model import SimpleModel
 
-from ....app import mongo
+from app import mongo
 
 
 class Rules(SimpleModel):

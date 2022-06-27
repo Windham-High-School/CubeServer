@@ -5,8 +5,8 @@ import random
 import string
 from model.pymongo_model import SimpleModel
 
-from .user import User
-from ...app import mongo, config
+from app.models.user import User
+from app import mongo, config
 
 @unique
 class TeamLevel(Enum):

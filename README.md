@@ -25,6 +25,7 @@ Software to manage, store, score, and publish data received by Wifi-equipped mic
 ## Building/running:
 Use Docker-Compose to build and run:
 ```bash
+cd src/
 docker-compose build
 docker-compose up
 ```

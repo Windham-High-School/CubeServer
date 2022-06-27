@@ -1,6 +1,6 @@
 """Allows running the app on a development server"""
 
-from app import app
+import app
 
 if __name__ == "__main__":
     # Only for debugging while developing

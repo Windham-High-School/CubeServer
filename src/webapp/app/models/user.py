@@ -6,9 +6,8 @@ from secrets import token_urlsafe
 from hmac import HMAC
 from model.pymongo_model import SimpleModel
 
-from ...app import mongo
-from ...app import app
-from ...app import config
+from app import mongo
+from app import app, config
 
 @unique
 class UserLevel(Enum):
