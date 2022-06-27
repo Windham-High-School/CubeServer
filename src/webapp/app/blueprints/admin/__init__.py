@@ -4,13 +4,19 @@ from datetime import timedelta
 from math import floor
 from flask import Blueprint, render_template
 from uptime import uptime
+from flask_table import Table
+from app.models.team import Team, TeamTable
 
 bp = Blueprint('admin', __name__, url_prefix='/admin', template_folder='templates')
 
 @bp.route('/')
 def admin_home():
     """Renders the admin console"""
-    return render_template('console.html.jinja2')
+    # Fetch teams from database and populate a table:
+    teams = Team.collection.find()
+    teams_table = TeamTable(teams, 'admin_home')
+    # Render the template:
+    return render_template('console.html.jinja2', teams_table = teams_table.__html__())
 
 @bp.route('/uptime')
 def uptime_string():

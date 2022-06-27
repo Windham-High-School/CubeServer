@@ -16,6 +16,7 @@ setup(name='app',
             'better-profanity>=0.7.0',
             'Flask-WTF>=1.0.1',
             'Flask-Bootstrap>=3.3',
-            'uptime>=3.0.0'
+            'uptime>=3.0.0',
+            'Flask-Table>=0.5.0'
       ]
      )

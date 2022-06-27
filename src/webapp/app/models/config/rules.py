@@ -9,7 +9,7 @@ from app import mongo
 
 class Rules(SimpleModel):
     """Defines the exact rules for a game.
-    
+
     There will be a separate Rules object for JV and Varsity teams
     """
 

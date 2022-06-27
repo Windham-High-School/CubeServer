@@ -5,3 +5,4 @@ better-profanity>=0.7.0    # Profanity checking/filtering
 Flask-WTF>=1.0.1           # Flask-WTForms for handling forms and captcha
 Flask-Bootstrap>=3.3       # Bootstrap integration with Flask
 uptime>=3.0.0              # For server stats
+Flask-Table>=0.5.0         # For rendering tables
