@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(name='app',
       version='0.0.1',
-      description='Web app for software to manage, store, score, and publish data' \
+      description='Web app for software to manage, store, score, and publish data'
                   'received from Wifi-equipped microcontrollers for a school contest',
       author='Joseph R. Freeston',
       url='https://github.com/snorklerjoe/CubeServer',

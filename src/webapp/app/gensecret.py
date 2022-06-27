@@ -24,6 +24,7 @@ def check_secrets():
     else:
         print("Leaving existing secret file.")
 
+
 if __name__ == "__main__":
     if "-h" in argv or "--help" in argv:
         print(__doc__)
