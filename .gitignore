@@ -9,6 +9,7 @@ pip-delete-this-directory.txt
 venv/
 .venv
 
+build/
 develop-eggs/
 dist/
 downloads/
