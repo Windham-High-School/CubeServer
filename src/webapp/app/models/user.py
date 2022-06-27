@@ -24,17 +24,6 @@ class User(SimpleModel):
 
     collection = mongo.db.users
 
-    @classmethod
-    def invite(cls, level : UserLevel, email: str = "") -> tuple:
-        """Creates a blank user to serve as an invitation to create a login
-
-        returns a tuple of the User object created alongside a string of
-        the key stored as their default password."""
-
-        key = token_urlsafe(16)
-        user = User(token_urlsafe(8), level, email=email, pwd=User._hashpwd(key))
-        return user, key
-
     def __init__(self, name: str, level: UserLevel, uid: str = "",
         email: str = "", pwd: bytes = b""):
         """Creates a User object.
@@ -54,6 +43,17 @@ class User(SimpleModel):
             self.uid = uuid.uuid1()
         else:
             self.uid = uid
+
+    @classmethod
+    def invite(cls, level : UserLevel, email: str = "") -> tuple:
+        """Creates a blank user to serve as an invitation to create a login
+
+        returns a tuple of the User object created alongside a string of
+        the key stored as their default password."""
+
+        key = token_urlsafe(16)
+        user = User(token_urlsafe(8), level, email=email, pwd=User._hashpwd(key))
+        return user, key
 
     @staticmethod
     def _hashpwd(pwd: str) -> bytes:

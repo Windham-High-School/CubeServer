@@ -12,14 +12,10 @@ def register():
     """Renders the team registration page"""
     if current_app.config['REGISTRATION_OPEN']:
         form = registration_form.RegistrationForm()
-        try:
-            if form.validate_on_submit():
-                return redirect('/success')
-        except AttributeError:
-            print(dir(form))
+        if form.validate_on_submit():
+            return redirect('/success')
         return render_template('register.html.jinja2', form=form)
-    else:
-        return render_template('regclosed.html.jinja2')
+    return render_template('regclosed.html.jinja2')
 
 @bp.route('/success')
 def success():

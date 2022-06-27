@@ -1,4 +1,6 @@
-"""Models the game rules"""
+"""Models the game rules
+
+See app.models.team for more information regarding the game aspect"""
 
 from model.pymongo_model import SimpleModel
 
