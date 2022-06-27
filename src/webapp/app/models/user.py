@@ -24,7 +24,7 @@ class User(SimpleModel):
 
     collection = mongo.db.users
 
-    def __init__(self, name: str, level: UserLevel, uid: str = "",
+    def __init__(self, name: str, level: UserLevel,
         email: str = "", pwd: bytes = b""):
         """Creates a User object.
 
@@ -39,10 +39,7 @@ class User(SimpleModel):
         self.email = email
         self.pwd = pwd
         self.level = level
-        if uid is None:
-            self.uid = uuid.uuid1()
-        else:
-            self.uid = uid
+        self.uid = uuid.uuid1()
 
     @classmethod
     def invite(cls, level : UserLevel, email: str = "") -> tuple:

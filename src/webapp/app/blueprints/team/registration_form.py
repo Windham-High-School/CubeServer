@@ -9,7 +9,7 @@ from app import config
 class RegistrationForm(flask_wtf.FlaskForm):
     """Defines the form used to register a team"""
 
-    team_name = StringField('Team Name', validators=[Length(min=1, max=config.TEAM_MAX_CHARS,
+    team_name = StringField('Team Name', validators=[Length(min=1, max=config.TEAM_MAX_CHARS, \
                             message=f"Please provide a team name under {config.TEAM_MAX_CHARS} characters.")])
 
     _members_message = f"Must have at least {config.TEAM_MIN_MEMBERS} members in a team."
