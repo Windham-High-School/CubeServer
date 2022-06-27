@@ -1,10 +1,8 @@
 # CubeServer
 [![CodeQL](https://github.com/snorklerjoe/CubeServer/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/snorklerjoe/CubeServer/actions/workflows/codeql-analysis.yml)
 [![Pylint](https://github.com/snorklerjoe/CubeServer/actions/workflows/pylint.yml/badge.svg)](https://github.com/snorklerjoe/CubeServer/actions/workflows/pylint.yml)
+[![Maintainability](https://api.codeclimate.com/v1/badges/0c7fad7ea7ff1a8380e0/maintainability)](https://codeclimate.com/github/snorklerjoe/CubeServer/maintainability)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-[![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)](https://python.org)
-[![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)](https://flask.palletsprojects.com/en/2.1.x/)
 
 Software to manage, store, score, and publish data received by Wifi-equipped microcontrollers for managing a school contest
 
@@ -13,6 +11,8 @@ Software to manage, store, score, and publish data received by Wifi-equipped mic
 - Receives/responds to TCP packets from clients
 - Stores data in a database
 - A leaderboard and admin web app
+
+Note that these goals are not yet fully implemented.
 
 ## Overview of user-side processes:
 - Once allowed by the Admin panel, team sign-ups will happen via the website
@@ -28,3 +28,5 @@ docker-compose build
 docker-compose up
 ```
 
+## Customization:
+The rules and workings of the "game" may be customized and/or modified as described in [CUSTOMIZATION.md](./CUSTOMIZATION.md).
