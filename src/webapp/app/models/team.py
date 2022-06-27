@@ -1,6 +1,7 @@
 """Models teams of participants"""
 
 from enum import Enum, unique
+from typing import List
 import random
 import string
 from model.pymongo_model import SimpleModel
@@ -37,12 +38,12 @@ class Team(SimpleModel):
         # TODO: Use a pre-existing library to do this; it seems dumb to do this manually:
         return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(config.TEAM_SECRET_LENGTH))
 
-    def __init__(self, name: str, weightClass: TeamLevel, members: list = None,
+    def __init__(self, name: str, weight_class: TeamLevel, members: List[User] = None,
                     score: int = 0, strikes: int = 0, status: TeamStatus = TeamStatus.UNAPPROVED,
                     secret: str = gen_secret()):
         super().__init__()
         self.name = name
-        self.weight_class = weightClass
+        self.weight_class = weight_class
         self.members = members
         self.status = status
         self._strikes = strikes

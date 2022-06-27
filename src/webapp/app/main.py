@@ -1,4 +1,4 @@
-"""Allows running the app on a development server"""
+"""Allows running/serving the web application."""
 
 import app
 
