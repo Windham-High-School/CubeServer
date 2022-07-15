@@ -111,7 +111,6 @@ class Team(PyMongoModel):
     @property
     def members(self) -> List[User]:
         """Returns the User objects"""
-        print(User.find())
         return [User.find_by_id(member_id) for member_id in self._members]
 
     @property

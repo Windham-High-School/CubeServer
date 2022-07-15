@@ -20,9 +20,6 @@ def admin_home():
     """Renders the admin console"""
     # Fetch teams from database and populate a table:
     team_objects = [Team.decode(team) for team in Team.collection.find()]
-    print(team_objects)
-    for team in team_objects:
-        print(vars(team))
     teams_table = AdminTeamTable(team_objects)
     # Render the template:
     return render_template(
@@ -39,7 +36,6 @@ def team_change_endpoint(identifier, field):
     # TODO: Check for authentication
     if request.method == 'POST':
         team = Team.find_by_id(ObjectId(identifier))
-        print(Team.encode(team))
         team.set_attr_from_string(field, request.form.get('item'))
         team.save()
         return redirect(url_for('.admin_home'))

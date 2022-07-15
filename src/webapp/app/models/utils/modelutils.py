@@ -186,7 +186,6 @@ class PyMongoModel(Encodable):
         """Encodes this into a dictionary for BSON to be happy"""
         if '_id' not in vars(self) or self._id is None:
             self._id = ObjectId()
-        print("ID:", self._id)
         dictionary: Mapping[str, Tuple[str, Any]] = {}
         for (field, codec) in zip(self._fields, self._fields.values()):
             if codec:  # Encode each field:
@@ -199,9 +198,6 @@ class PyMongoModel(Encodable):
                 value = getattr(self, field)
                 #dictionary[field] = (_locatable_name(type(value)), value)
                 dictionary[field] = ("None", value)
-            print("ENCODING")
-            print(field, codec)
-            print(dictionary[field])
         dictionary['_id'] = self._id
         return dictionary
 
