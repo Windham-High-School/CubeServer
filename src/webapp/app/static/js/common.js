@@ -19,3 +19,7 @@ $("#toggleTheme").click(function() {
     }
     location.reload();
 })
+
+$("select").attr("aria-label", ".form-select-sm")
+    .addClass("form-select")
+    .addClass("form-select-sm");

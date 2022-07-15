@@ -23,10 +23,17 @@ Note that these goals are not yet fully implemented.
 ## Building/running:
 Use Docker-Compose to build and run:
 ```bash
-cd src/
 docker-compose build
 docker-compose up
 ```
 
 ## Customization:
 The rules and workings of the "game" may be customized and/or modified as described in [CUSTOMIZATION.md](./CUSTOMIZATION.md).
+
+## Todos:
+* Finish implementing goals
+  * Admin panel/login
+  * Backend/receiving datapoints
+  * Leaderboard 
+* Clean up docstrings to use Sphynx markup for parameter/return definitions
+* Probably more I'm forgetting

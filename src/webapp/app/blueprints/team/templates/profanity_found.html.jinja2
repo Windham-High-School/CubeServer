@@ -1,0 +1,10 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Not Nice.{% endblock %}
+
+{% block header %}
+    <h4>Profanity Detected</h4>
+{% endblock %}
+
+{% block content %}
+    <pre class="alert alert-danger">{{message}}</pre>
+{% endblock %}

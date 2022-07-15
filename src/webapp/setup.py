@@ -12,7 +12,6 @@ setup(name='app',
       install_requires=[
             'Flask>=2.1.2,<3.0',
             'Flask-PyMongo>=2.3.0,<3.0',
-            'pymongo-model>=2.0.2',
             'better-profanity>=0.7.0',
             'Flask-WTF>=1.0.1',
             'Flask-Bootstrap>=3.3',

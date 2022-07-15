@@ -1,48 +1,52 @@
 """Models teams of participants"""
 
 from enum import Enum, unique
+from typing import List, Optional
 from math import ceil
 import secrets
-from typing import List
-from model.pymongo_model import SimpleModel
-from flask import url_for
-from flask_table import Table, Col
 
+from app.models.utils import Encodable, PyMongoModel
 from app.models.user import User
 from app import mongo, config
+
+__all__ = ['TeamLevel', 'TeamStatus', 'TeamHealth', 'Team']
 
 @unique
 class TeamLevel(Enum):
     """Enumerates the "weight classes" that a team can participate in"""
 
-    JUNIOR_VARSITY = 1
-    VARSITY = 2
-    PSYCHO_KILLER = 3   # Qu'est-ce que c'est, better run run run run...
+    JUNIOR_VARSITY = "Junior Varsity"
+    VARSITY = "Varsity"
+    PSYCHO_KILLER = "Talking Head"   # Qu'est-ce que c'est, better run run run run...
 
     def __repr__(self):
         """Forms a string representation of a TeamLevel value"""
-        return ['', 'Junior Varsity', 'Varsity', 'Talking Head'][self.value]
+        return self.value
+
 
 @unique
 class TeamStatus(Enum):
     """Handles states of approval, participation, disqualification, & elimination"""
 
-    UNAPPROVED = 0
-    DISQUALIFIED = 1
-    ELIMINATED = 2
-    PARTICIPATING = 3
+    UNAPPROVED = "Awaiting Approval"
+    PARTICIPATING = "Participating"
+    DISQUALIFIED = "Disqualified"
+    ELIMINATED = "Eliminated"
 
     def __repr__(self):
         """Forms a string representation of a TeamStatus value"""
-        return ['Awaiting Approval', 'Disqualified', 'Eliminated', 'Participating'][self.value]
+        return self.value
 
-class TeamHealth:
-    """Encapsulates the elements of the game that relate to a team's health and rank
+
+class TeamHealth(Encodable):
+    """Encapsulates the elements of the game that relate to a
+    team's health and rank
     i.e. score and strike counts, etc."""
 
     def __init__(self, score: int = 0, strikes: int = 0):
         self.score = score
         self.strikes = strikes
+        super().__init__()
 
     def __eq__(self, other):
         if isinstance(other, TeamHealth):
@@ -57,67 +61,77 @@ class TeamHealth:
         """Doles out a strike!"""
         self.strikes += 1
 
-class Team(SimpleModel):
+    def encode(self) -> dict:
+        return {"score": self.score, "strikes": self.strikes}
+
+    @classmethod
+    def decode(cls, value: dict):
+        health = cls()
+        health.score = value["score"]
+        health.strikes = value["strikes"]
+        return health
+
+
+class Team(PyMongoModel):
     """Models a team"""
 
-    collection = mongo.db.teams
+    collection = mongo.db.get_collection('teams')
 
     @classmethod
     def _gen_secret(cls) -> str:
-        """Generates a crypto-safe secret of the length defined by config.TEAM_SECRET_LENGTH"""
-        return secrets.token_hex(ceil(config.TEAM_SECRET_LENGTH / 2))[:config.TEAM_SECRET_LENGTH]
+        """Generates a crypto-safe secret of the length defined by
+        config.TEAM_SECRET_LENGTH"""
+        return secrets.token_hex(ceil(config.TEAM_SECRET_LENGTH / 2)) \
+            [:config.TEAM_SECRET_LENGTH]
 
-    def __init__(self, name: str, weight_class: TeamLevel, health: TeamHealth = TeamHealth(),
-                    status: TeamStatus = TeamStatus.UNAPPROVED):
+    def __init__(self, name: str = "",
+                 weight_class: Optional[TeamLevel] = TeamLevel.PSYCHO_KILLER,
+                 health: TeamHealth = TeamHealth(),
+                 status: TeamStatus = TeamStatus.UNAPPROVED):
         super().__init__()
         self.name = name
         self.weight_class = weight_class
-        self.members = []
+        self._members = []
         self.status = status
-        self._health = health
-        self._secret = Team._gen_secret()
+        self.health = health
+        self.secret = Team._gen_secret()
 
     def add_member(self, member: User):
         """Adds a member (a User object) to the team"""
-        if not member in self.members:
-            self.members += [member]
+        if not member.id in self._members:
+            self._members += [member.id]
 
     def drop_member(self, member: User) -> bool:
         """Drops a member (a User object) from the team"""
-        if not member in self.members:
+        if member.id not in self._members:
             return False
-        self.members.remove(member)
+        self._members.remove(member.id)
         return True
 
     @property
-    def health(self):
-        """Returns the current health of this team"""
-        return self._health
+    def members(self) -> List[User]:
+        """Returns the User objects"""
+        print(User.find())
+        return [User.find_by_id(member_id) for member_id in self._members]
 
     @property
-    def score(self):
-        """Returns the current score for this team"""
-        return self._health.score
+    def members_str(self) -> str:
+        """Returns a human-readable string listing representations
+        of the members"""
+        return ', '.join(str(member) for member in self.members)
 
     @property
-    def strikes(self):
-        """Returns the current number of strikes for this team"""
-        return self._health.strikes
+    def members_names_str(self) -> str:
+        """Returns a human-readable string listing representations
+        of the members"""
+        return ', '.join(member.name for member in self.members)
 
-class TeamTable(Table):
-    """Allows a group of Team objects to be displayed in an HTML table"""
+    @property
+    def strikes(self) -> int:
+        """Returns the number of strikes from the TeamHealth object"""
+        return self.health.strikes
 
-    allow_sort = True
-
-    name            = Col('Team Name')
-    weight_class    = Col('Division')
-    status          = Col('Status')
-    strikes         = Col('Strikes')
-    score           = Col('Score')
-
-    def __init__(self, items: List[Team], endpoint: str, **kwargs):
-        self._endpoint = endpoint
-        super().__init__(items, **kwargs)
-
-    def sort_url(self, col_id, reverse=False):
-        return url_for(self._endpoint, sort=col_id, direction='desc' if reverse else 'asc')
+    @property
+    def score(self) -> int:
+        """Returns the number of points from the TeamHealth object"""
+        return self.health.score

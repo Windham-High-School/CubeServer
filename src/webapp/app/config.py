@@ -46,11 +46,13 @@ TEAM_MIN_MEMBERS: int = 2
 TEAM_MAX_CHARS: int = 30
 """Maximum number of characters in a team name"""
 
-TEAM_FILTER_PROFANITY: bool = True
-"""Whether or not to filter the team name input with the Python library better-profanity"""
+CHECK_PROFANITY: bool = True
+"""Whether to check names, etc. for profanity."""
 
-NAME_FILTER_PROFANITY: bool = True
-"""Whether or not to filter the user name inputs with the Python library better-profanity"""
+PROFANITY_MESSAGE: str = "Not Funny. \n" \
+                         "We think you used some bad words in your input. \n" \
+                         "Profanity is not allowed by the administrator."
+"""The message to use if profanity is detected in the user's input"""
 
 TEAM_SECRET_LENGTH: int = 5
 """Number of characters in the team's secret ID"""
@@ -60,7 +62,7 @@ TEAM_SECRET_LENGTH: int = 5
 # Boxes:
 
 COMMENT_FILTER_PROFANITY: bool = True
-"""Whether or not to filter profanity from comments posted by the boxes"""
+"""Whether to filter profanity from comments posted by the boxes"""
 
 
 

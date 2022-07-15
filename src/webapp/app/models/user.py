@@ -1,36 +1,41 @@
 """Models users, teams, and privilege data"""
 
-import uuid
 from enum import Enum, unique
+from typing import Optional
 from secrets import token_urlsafe
 from hmac import HMAC
-from model.pymongo_model import SimpleModel
+
+from app.models.utils import PyMongoModel
 
 from app import mongo
 from app import app, config
+
+
+__all__ = ['UserLevel', 'User']
 
 @unique
 class UserLevel(Enum):
     """Enumerates site-wide permission levels"""
 
-    SUSPENDED = 0
-    SPECTATOR = 1
-    PARTICIPANT = 2
-    ADMIN = 3
+    SUSPENDED = "Suspended"
+    SPECTATOR = "Spectator"
+    PARTICIPANT = "Participant"
+    ADMIN = "Admin"
 
 
-class User(SimpleModel):
+class User(PyMongoModel):
     """Models a user"""
 
     collection = mongo.db.users
 
-    def __init__(self, name: str, level: UserLevel,
-        email: str = "", pwd: bytes = b""):
+    def __init__(self, name: str = "", level: UserLevel = UserLevel.SUSPENDED,
+        email: Optional[str] = None, pwd: bytes = b""):
         """Creates a User object.
 
         If uid is left None, one is generated.
         The email is optional.
-        If no password hash is provided in pwd, then the user will not be able to log in.
+        If no password hash is provided in pwd,
+        then the user will not be able to log in.
         """
 
         super().__init__()
@@ -39,7 +44,6 @@ class User(SimpleModel):
         self.email = email
         self.pwd = pwd
         self.level = level
-        self.uid = uuid.uuid1()
 
     @classmethod
     def invite(cls, level : UserLevel, email: str = "") -> tuple:
@@ -57,3 +61,9 @@ class User(SimpleModel):
         """Runs the known HMAC hash algorithm on the given string."""
         return HMAC(app.config["SECRET_KEY"].encode(config.ENCODING),
             msg=pwd.encode(config.ENCODING), digestmod=config.CRYPTO_HASH_ALGORITHM).digest()
+
+    def __str__(self) -> str:
+        return (
+            self.name +
+            (f" ({self.email})" if self.email else "")
+        )

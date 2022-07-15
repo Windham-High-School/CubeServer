@@ -2,21 +2,45 @@
 
 from datetime import timedelta
 from math import floor
-from flask import Blueprint, render_template
+from bson import ObjectId
+from flask import Blueprint, redirect, render_template, request, url_for
 from uptime import uptime
-from flask_table import Table
-from app.models.team import Team, TeamTable
+from app.models.team import Team
+from app.tables.team import AdminTeamTable
 
-bp = Blueprint('admin', __name__, url_prefix='/admin', template_folder='templates')
+bp = Blueprint(
+    'admin',
+    __name__,
+    url_prefix='/admin',
+    template_folder='templates'
+)
 
 @bp.route('/')
 def admin_home():
     """Renders the admin console"""
     # Fetch teams from database and populate a table:
-    teams = Team.collection.find()
-    teams_table = TeamTable(teams, 'admin_home')
+    team_objects = [Team.decode(team) for team in Team.collection.find()]
+    print(team_objects)
+    for team in team_objects:
+        print(vars(team))
+    teams_table = AdminTeamTable(team_objects)
     # Render the template:
-    return render_template('console.html.jinja2', teams_table = teams_table.__html__())
+    return render_template(
+        'console.html.jinja2',
+        teams_table = teams_table.__html__()
+    )
+
+@bp.route('/table_endpoint/<identifier>/<field>', methods = ['POST', 'DELETE'])
+def team_change_endpoint(identifier, field):
+    """Action for forms within the table of teams"""
+    # TODO: Check for authentication
+    if request.method == 'POST':
+        team = Team.find_by_id(ObjectId(identifier))
+        print(Team.encode(team))
+        team.set_attr_from_string(field, request.form.get('item'))
+        team.save()
+        return redirect(url_for('.admin_home'))
+    return render_template("/errorpages/unimplemented.html.jinja2")
 
 @bp.route('/uptime')
 def uptime_string():

@@ -28,7 +28,7 @@ services:
       - backend
   # Database container:
   mongodb:
-    container_name: flask_mongodb
+    container_name: cube_mongodb
     image: mongo:5.0
     volumes: # Corresponds with volume at the bottom
       - mongodb-data:/data/db

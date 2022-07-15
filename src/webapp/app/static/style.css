@@ -44,16 +44,13 @@ footer {
     padding: 10px;
     margin-bottom: 10px;
     margin-top: 10px;
+    margin-left: 2.5%;
+    margin-right: 2.5%;
 }
 
 .btn {
     background-color: var(--bs-secondary);
     color: var(--bs-dark);
-}
-
-.container {
-    margin-left: 2.5%;
-    margin-right: 2.5%;
 }
 
 .jumbotron, .container-fluid {
@@ -63,4 +60,20 @@ footer {
 .selected {
     font-weight: bold;
     text-shadow: 1px 1px rgba(0, 0, 0, 0.6);
+}
+
+.horizontal-scroll {
+    overflow-x: auto;
+}
+
+.vertical-scroll {
+    overflow-y: auto;
+}
+
+table.dataTable {
+    border-collapse: collapse !important;
+}
+
+select {
+    width: fit-content !important;
 }

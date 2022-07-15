@@ -1,12 +1,15 @@
 """Outlines the form used to register a new team"""
 
-import flask_wtf
+# TODO: Improve PEP-8 compatibility
+
+from flask_wtf import FlaskForm
 from wtforms import StringField, RadioField, SubmitField
 from wtforms.validators import DataRequired, Length
 
 from app import config
+from app.models.team import TeamLevel
 
-class RegistrationForm(flask_wtf.FlaskForm):
+class RegistrationForm(FlaskForm):
     """Defines the form used to register a team"""
 
     team_name = StringField('Team Name', validators=[Length(min=1, max=config.TEAM_MAX_CHARS, \
@@ -19,6 +22,6 @@ class RegistrationForm(flask_wtf.FlaskForm):
     member3 = StringField('Member #3', validators=[DataRequired(message=_members_message)] if config.TEAM_MIN_MEMBERS > 2 else [])
     member4 = StringField('Member #4', validators=[DataRequired(message=_members_message)] if config.TEAM_MIN_MEMBERS > 3 else [])
 
-    classification = RadioField('Class', validators=[DataRequired(message="Please select either Varsity or J.V.")], choices = ["Varsity", "J.V."])
+    classification = RadioField('Class', validators=[DataRequired(message="Please select either Varsity or J.V.")], choices=[TeamLevel.VARSITY.value, TeamLevel.JUNIOR_VARSITY.value])
 
     submit = SubmitField('Register!')

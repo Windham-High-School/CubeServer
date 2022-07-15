@@ -22,6 +22,9 @@
             <!-- Stylesheet: -->
             <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
+            <!-- DataTables table styling: -->
+            <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-colvis-2.2.3/b-html5-2.2.3/b-print-2.2.3/cr-1.5.6/fh-3.2.4/r-2.3.0/sc-2.0.7/sp-2.0.2/datatables.min.css"/>
+
         {% endblock %}
     </head>
     <body>
@@ -52,8 +55,15 @@
             <!--js-cookie-->
             <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js" integrity="sha256-0H3Nuz3aug3afVbUlsu12Puxva3CP4EhJtPExqs54Vg=" crossorigin="anonymous"></script>
 
+            <!--DataTables-->
+            <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+            <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+            <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-colvis-2.2.3/b-html5-2.2.3/b-print-2.2.3/cr-1.5.6/fh-3.2.4/r-2.3.0/sc-2.0.7/sp-2.0.2/datatables.min.js"></script>
+
+
             <!--Base JavaScript-->
             <script src="{{ url_for('static', filename='/js/common.js') }}"></script>
+            <script src="{{ url_for('static', filename='/js/table.js') }}"></script>
         {% endblock %}
     </body>
 </html>
