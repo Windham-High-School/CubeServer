@@ -2,6 +2,7 @@
 
 from enum import Enum
 from typing import List, Mapping, Optional, Tuple
+from flask import render_template_string
 from flask_table import Col, html
 from flask_wtf import FlaskForm
 from wtforms import SelectField, HiddenField, SubmitField
@@ -43,11 +44,13 @@ def _render_form(
     html += "</form>"
     return html
 
+
 class EnumCol(Col):
     """A Column for Enums, hence the name, EnumCol."""
 
     def td_format(self, content: Enum):
         return content.value
+
 
 class DropDownEnumCol(Col):
     """A Column with a drop-down box to select an option from an Enum"""
@@ -106,3 +109,34 @@ class DropDownEnumCol(Col):
             content=content,
             escape_content=False,
             attrs=td_attrs | self.td_html_attrs)
+
+
+class TeamOptionsCol(Col):
+    """A Column with a menu of options
+    Requires the inclusion of static/js/admin.js to communcate with the api"""
+
+    html_template = (
+        "<div>\n"
+        "<button title=\"delete\" onclick=\"deleteTeam('{{id}}')\""
+        "class=\"btn btn-danger\">&#10060;</button>\n"
+        "</div>\n"
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def custom_td_format(
+        self,
+        doc_id: str
+    ):
+        """A custom version of td_format, renamed to avoid
+        PyLint from getting upset from the different parameter list
+        This creates a form for each cell."""
+        return render_template_string(TeamOptionsCol.html_template, id=doc_id)
+
+    def td_contents(self, item, attr_list) -> str:
+        return (
+            self.custom_td_format(
+                str(item.id)
+            )
+        )

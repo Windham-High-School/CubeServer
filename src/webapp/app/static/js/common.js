@@ -20,6 +20,7 @@ $("#toggleTheme").click(function() {
     location.reload();
 })
 
+// Form select input classing:
 $("select").attr("aria-label", ".form-select-sm")
     .addClass("form-select")
     .addClass("form-select-sm");

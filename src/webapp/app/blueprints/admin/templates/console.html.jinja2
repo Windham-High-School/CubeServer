@@ -44,6 +44,8 @@ Box number ten.
 
 {% block scripts %}
 {{ super() }}
+    <script src="{{ url_for('static', filename='/js/admin.js') }}"></script>
+
     <script>
         // TODO: Uptime could be incremented without calling back to the server each second to see if a second has really gone by:
         function updateUptimeCounter(){

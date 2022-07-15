@@ -4,7 +4,7 @@ from typing import List
 from flask_table import Table, Col
 
 from app.models.team import Team, TeamLevel, TeamStatus
-from app.tables.columns import DropDownEnumCol, EnumCol
+from app.tables.columns import DropDownEnumCol, EnumCol, TeamOptionsCol
 
 __all__ = ['AdminTeamTable', 'LeaderboardTeamTable']
 
@@ -26,6 +26,7 @@ class AdminTeamTable(Table):
     score           = Col('Score')
     strikes         = Col('Strikes')
     secret          = Col('Secret')
+    id              = TeamOptionsCol('Options')
 
     def __init__(self, items: List[Team], **kwargs):
         """Initializes the table"""

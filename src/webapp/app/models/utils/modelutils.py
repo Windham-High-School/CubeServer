@@ -270,7 +270,7 @@ class PyMongoModel(Encodable):
     def remove(self):
         """Removes this document from the collection"""
         if self._id:
-            self.collection.remove({"_id": self._id})
+            self.collection.delete_one({"_id": self._id})
 
     @classmethod
     def find(cls, *args, **kwargs):

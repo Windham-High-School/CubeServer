@@ -30,9 +30,12 @@ def admin_home():
         teams_table = teams_table.__html__()
     )
 
+# The team modification API endpoint:
+# TODO (low priority): Implement a RESTful API instead of the hokey one I made
 @bp.route('/table_endpoint/<identifier>/<field>', methods = ['POST', 'DELETE'])
 def team_change_endpoint(identifier, field):
-    """Action for forms within the table of teams"""
+    """Endpoint for the team modification API
+    -- Action for forms within the table of teams"""
     # TODO: Check for authentication
     if request.method == 'POST':
         team = Team.find_by_id(ObjectId(identifier))
@@ -40,6 +43,9 @@ def team_change_endpoint(identifier, field):
         team.set_attr_from_string(field, request.form.get('item'))
         team.save()
         return redirect(url_for('.admin_home'))
+    if request.method == 'DELETE':
+        team = Team.find_by_id(ObjectId(identifier))
+        team.remove()
     return render_template("/errorpages/unimplemented.html.jinja2")
 
 @bp.route('/uptime')
