@@ -13,7 +13,7 @@ def home():
     return render_template('home.html.jinja2')
 
 @bp.route('/stats')
-def admin_home():
+def leaderboard():
     """Renders the leaderboard/stats"""
     # Fetch teams from database and populate a table:
     team_objects = [Team.decode(team) for team in Team.collection.find(
