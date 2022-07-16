@@ -9,8 +9,3 @@ app.register_blueprint(home.bp)
 app.register_blueprint(admin.bp)
 app.register_blueprint(team.bp)
 app.register_blueprint(about.bp)
-
-
-if __name__ == "__main__":
-    # Only for debugging while developing
-    app.run(host="0.0.0.0", debug=True, port=8080)
