@@ -5,7 +5,7 @@ This defines values that cannot be set with the Admin panel but are
 "hard-coded" into the software.
 Code regarding values set by the Admin panel can be found in
 app.app.models.config.
-A restart (or a recompile in some configurations) of the docker container is
+A recompile of the docker container is
 required to implement changes from this file.
 """
 
@@ -14,6 +14,16 @@ from hashlib import algorithms_available
 ############################
 # Configuration variables: #
 ############################
+
+
+# Default Credentials:
+DEFAULT_ADMIN_USERNAME: str = "admin"
+"""This is the default first user"""
+
+DEFAULT_ADMIN_PASSWORD: str = "12345"
+"""This is the default password for the admin user.
+This can be changed after the first login."""
+
 
 # User interface stuff:
 CREDITS: str = ""
@@ -66,14 +76,8 @@ COMMENT_FILTER_PROFANITY: bool = True
 
 
 
-# Admin Users:
-
-ADMIN_INVITE_TIMEOUT: int = 96
-"""Hours before an admin sign-up invitation expires"""
-
-
-
-# Behind-the-scenes stuff- Kindly leave alone unless you know what you're doing ;)
+# Behind-the-scenes stuff - this could easily make stuff break -
+# Kindly leave this alone unless you know what you're doing ;)
 
 ENCODING: str = "utf-8"
 """The string encoding to use by default in cases where this matters
@@ -81,9 +85,13 @@ ENCODING: str = "utf-8"
 Please don't change this in an existing setup unless you understand
 that it may render all user passwords and tokens invalidated. :)  """
 
-SECRET_KEY_FILE: str = "/app/secret_key.txt"
+SECRET_KEY_FILE: str = "/secret/secret_key.txt"
 """Where the value of flask's config variable SECRET_KEY is stored.
-This should be in the .gitignore!"""
+This should be in the .gitignore for good practice.
+Also, this MUST correspond with the volume mounted in docker-compose.yml
+so that the secret key can be persistent across rebuilds and not invalidate
+everyone's passwords and connections, since that would be really bad in
+a production environment."""
 
 SECRET_KEY_FILE_ENCODING: str = ENCODING
 """The encoding to use for the file which will store flask's SECRET_KEY"""

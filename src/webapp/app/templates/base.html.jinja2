@@ -14,16 +14,19 @@
             <!-- Bootswatch theme: -->
             {# Select a theme based on user preferences if available: #}
             {% if 'theme' in request.cookies %}
-                <link rel="stylesheet" href="{{ url_for('static', filename=('themes/%s/bootstrap.min.css' % request.cookies.get('theme'))) }}">
+                <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename=('themes/%s/bootstrap.min.css' % request.cookies.get('theme'))) }}">
             {% else %}
-                <link rel="stylesheet" href="{{ url_for('static', filename=('themes/%s/bootstrap.min.css' % config['CONSTANTS'].DEFAULT_THEME)) }}">
+                <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename=('themes/%s/bootstrap.min.css' % config['CONSTANTS'].DEFAULT_THEME)) }}">
             {% endif %}
 
             <!-- Stylesheet: -->
-            <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+            <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
 
             <!-- DataTables table styling: -->
             <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-colvis-2.2.3/b-html5-2.2.3/b-print-2.2.3/cr-1.5.6/fh-3.2.4/r-2.3.0/sc-2.0.7/sp-2.0.2/datatables.min.css"/>
+
+            <!-- Loading.io Loading Animation -->
+            <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/loadingio/loading.css@v2.0.0/dist/loading.min.css">
 
         {% endblock %}
     </head>

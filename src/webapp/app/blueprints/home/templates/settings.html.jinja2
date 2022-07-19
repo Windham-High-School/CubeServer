@@ -1,0 +1,10 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Profile{% endblock %}
+
+{% block header %}
+    <h4>Edit Info</h4>
+{% endblock %}
+
+{% block content %}
+    <a href={{ url_for('home.activation') }}>Reset Username/Password/Email</a>
+{% endblock %}

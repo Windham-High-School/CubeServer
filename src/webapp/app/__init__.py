@@ -2,12 +2,13 @@
 and publish data received from Wifi-equipped microcontrollers for a school contest"""
 
 import os
-from flask import Flask, render_template
+from flask import Flask
 from flask_pymongo import PyMongo
 from flask_bootstrap import Bootstrap
+from flask_login import LoginManager
 
-from .gensecret import check_secrets
 from . import config
+from .gensecret import check_secrets
 
 # Configure application:
 app = Flask(__name__,
@@ -32,3 +33,7 @@ app.config['REGISTRATION_OPEN'] = True  # TODO: Load config from database
 check_secrets() # Double-check that the secret_file is actually there...
 with open(config.SECRET_KEY_FILE, "r", encoding=config.SECRET_KEY_FILE_ENCODING) as secret_file:
     app.config['SECRET_KEY'] = secret_file.read()
+
+# Login Manager:
+login_manager = LoginManager()
+login_manager.init_app(app)

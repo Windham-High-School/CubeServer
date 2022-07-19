@@ -214,8 +214,11 @@ class PyMongoModel(Encodable):
         )
 
     @classmethod
-    def decode(cls, value: Mapping[str, Any]) -> Encodable:
-        """Populates an object from a dictionary of the document"""
+    def decode(cls, value: Optional[Mapping[str, Any]]) -> Optional[Encodable]:
+        """Populates an object from a dictionary of the document
+        This returns None only if the bson value given is None"""
+        if value is None:  # Limit a potential failure
+            return None
         new_object = cls()
         new_object._id = value.pop("_id")
         for field_name, (field_type_name, val) in zip(value, value.values()):
@@ -270,16 +273,23 @@ class PyMongoModel(Encodable):
 
     @classmethod
     def find(cls, *args, **kwargs):
-        """Finds documents from the collection"""
+        """Finds documents from the collection
+        Arguments are the same as those for PyMongo.collection's find()."""
         return [
             cls.decode(document)
             for document in cls.collection.find(*args, **kwargs)
         ]
+    
+    @classmethod
+    def find_one(cls, *args, **kwargs):
+        """Finds a document from the collection
+        Arguments are the same as those for PyMongo's find_one()."""
+        return cls.decode(cls.collection.find_one(*args, **kwargs))
 
     @classmethod
     def find_by_id(cls, identifier):
         """Finds a document from the collection, given the id"""
-        return cls.find({'_id': ObjectId(identifier)})[0]
+        return cls.find_one({'_id': ObjectId(identifier)})
 
     def set_attr_from_string(self, field_name: str, value: str):
         """Decodes and updates a single string value to the document object"""

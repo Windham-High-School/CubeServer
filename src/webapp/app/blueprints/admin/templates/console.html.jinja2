@@ -29,10 +29,21 @@ Box number ten.
             </pre>
         {{macros.endbox()}}
         
-        {{macros.startbox("Box #11", "col")}}
+        {{macros.startbox("Add a User", "col")}}
             <p>
-                Lorem Ipsum
+                <a href={{ url_for('admin.edit_users') }}>Edit/delete users</a>
             </p>
+            <hr>
+            <p>
+                Invite a new user:
+            </p>
+            <form method="POST" action="useradd" class="form">
+                {{ user_form.hidden_tag() }}
+                {{ wtf.form_errors(user_form, hiddens="only") }}
+
+                {{ wtf.form_field(user_form.level) }}
+                {{ wtf.form_field(user_form.submit) }}
+            </form>
         {{macros.endbox()}}
 
         {{macros.startbox("System", "col")}}

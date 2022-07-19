@@ -3,11 +3,12 @@
 # TODO: Improve PEP-8 compatibility
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, RadioField, SubmitField
+from wtforms import StringField, RadioField, SubmitField, ValidationError
 from wtforms.validators import DataRequired, Length
 
 from app import config
 from app.models.team import TeamLevel
+from app.models.user import User
 
 class RegistrationForm(FlaskForm):
     """Defines the form used to register a team"""
@@ -25,3 +26,15 @@ class RegistrationForm(FlaskForm):
     classification = RadioField('Class', validators=[DataRequired(message="Please select either Varsity or J.V.")], choices=[TeamLevel.VARSITY.value, TeamLevel.JUNIOR_VARSITY.value])
 
     submit = SubmitField('Register!')
+
+    @staticmethod
+    def validate_member1(_, field):
+        """Validates the username to ensure that it exists in the database"""
+        if User.find_by_username(field.data) is not None:
+            raise ValidationError(
+                "This user already exists in the database..."
+                "Contact an administrator for a solution.")
+    
+    validate_member2 = validate_member1
+    validate_member3 = validate_member1
+    validate_member4 = validate_member1

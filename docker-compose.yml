@@ -4,8 +4,8 @@ services:
   app:
     container_name: flask_app
     restart: unless-stopped
-    #volumes:
-    #  - ./app:/app
+    volumes:
+      - flask-secret:/secret/
     build:
       context: .
       dockerfile: Dockerfile
@@ -51,4 +51,6 @@ networks:
 
 volumes:
   mongodb-data:
+    driver: local
+  flask-secret:
     driver: local

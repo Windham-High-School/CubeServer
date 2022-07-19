@@ -1,3 +1,5 @@
+{# TODO: Use a macro to simplify these links up a bit: #}
+
 {% block navbar %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
@@ -15,10 +17,6 @@
                     <a class="nav-link {{'active' if request.endpoint != 'home.leaderboard' else 'disabled selected'}}" href="/stats">Leaderboard
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link {{'active' if request.endpoint != 'admin.admin_home' else 'disabled selected'}}" href="/admin">Admin
-                    </a>
-                </li>
                 {% if config['REGISTRATION_OPEN'] %}
                 <li class="nav-item">
                     <a class="nav-link {{'active' if request.endpoint != 'team.register' else 'disabled selected'}}" href="/team/register">Register a Team
@@ -27,6 +25,21 @@
                 {% endif %}
             </ul>
             <ul class="navbar-nav me-auto">
+                {% if session['username'] %}
+                <li class="nav-item">
+                    <a class="nav-link {{'active' if request.endpoint != 'home.logout' else 'disabled selected'}}" href={{ url_for('home.logout') }}>Sign Out
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{'active' if request.endpoint != 'home.settings' else 'disabled selected'}}" href={{ url_for('home.settings') }}>Profile
+                    </a>
+                </li>
+                {% else %}
+                 <li class="nav-item">
+                    <a class="nav-link {{'active' if request.endpoint != 'home.login' else 'disabled selected'}}" href={{ url_for('home.login') }}>Sign In
+                    </a>
+                </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link active text-secondary" target="_blank" href="https://github.com/snorklerjoe/CubeServer/">Source Code
                     </a>

@@ -1,0 +1,10 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Log In{% endblock %}
+
+{% block header %}
+    <h4>Log In</h4>
+{% endblock %}
+
+{% block content %}
+    {{wtf.quick_form(form)}}
+{% endblock %}

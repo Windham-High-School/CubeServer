@@ -1,0 +1,14 @@
+{% extends "base.html.jinja2" %}
+{% block title %}User Invitation{% endblock %}
+
+{% block header %}
+    <h4>New User Invitation</h4>
+{% endblock %}
+
+{% block content %}
+    <div class="alert alert-info">
+        <p>Invitation Link: <pre>{{link}}</pre></p>
+        <p>Unactivated username: <pre>{{username}}</pre></p>
+        <p>Activation Password: <pre>{{password}}</pre></p>
+    </div>
+{% endblock %}

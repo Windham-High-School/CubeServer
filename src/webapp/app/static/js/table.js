@@ -10,7 +10,7 @@ $(document).ready( function () {
             enable: false
         },
         lengthMenu: [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "All"] ],
-        scrollY: 300,
+        scrollY: true,
         scrollCollapse: true,
         scrollX: true,
         autoWidth : true,

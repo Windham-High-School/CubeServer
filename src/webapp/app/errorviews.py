@@ -2,7 +2,7 @@
 
 from flask import render_template
 
-from app import app
+from app import app, login_manager
 
 # Error Handlers:
 @app.errorhandler(404)
@@ -15,7 +15,6 @@ def page_not_found(_):
 def bad_request(_):
     """400 handler"""
     return render_template('errorpages/400.html.jinja2'), 400
-
 
 @app.errorhandler(403)
 def forbidden(_):

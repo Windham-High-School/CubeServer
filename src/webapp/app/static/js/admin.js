@@ -5,15 +5,15 @@
 
 
 // API Functions
-function deleteTeam(teamId) {
+function deleteItem(item, id) {
     // TODO: Replace confirm() and alert() with a nice-looking Bootstrap modal
-    var confirmationMessage = `Are you certain you wish to DELETE team #${teamId} FOREVER?\n
+    var confirmationMessage = `Are you certain you wish to DELETE object #${id} FOREVER?\n
 This action is PERMANANT and CANNOT BE UNDONE!`;
     var secondConfirmationMessage = `FINAL CHANCE-- There's no going back after this!\n
 Are you ABSOLUTELY CERTAIN?`;
     if (confirm(confirmationMessage) && confirm(secondConfirmationMessage)) {
         $.ajax({
-            url: `table_endpoint/${teamId}/*`,
+            url: `table_endpoint/${item}/${id}/*`,
             type: 'DELETE',
             success: function(result) {
                 alert("Team deleted.");

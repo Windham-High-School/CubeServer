@@ -1,5 +1,6 @@
 """Defines custom column types for flask-table"""
 
+from abc import ABC, abstractmethod
 from enum import Enum
 from typing import List, Mapping, Optional, Tuple
 from flask import render_template_string
@@ -52,12 +53,15 @@ class EnumCol(Col):
         return content.value
 
 
+# TODO: Add CSRF protection to these forms
 class DropDownEnumCol(Col):
     """A Column with a drop-down box to select an option from an Enum"""
 
-    def __init__(self, name, enum_class, *args, exclude_option=None, **kwargs):
+    # TODO: Neaten this constructor:
+    def __init__(self, name, enum_class, *args, model_type: str="Team", exclude_option=None, **kwargs):
         """Specify the column name and the class of the Enum"""
         super().__init__(name, *args, **kwargs)
+        self.model_type = model_type
         self.enum_class = enum_class
         options = [(option.value, option.value) for option in enum_class]
         if exclude_option is not None:
@@ -85,7 +89,7 @@ class DropDownEnumCol(Col):
         attr_name = attr_list[0]
         return _render_form(
             form_instance,
-            action=f"table_endpoint/{identifier}/{attr_name}",
+            action=f"table_endpoint/{self.model_type}/{identifier}/{attr_name}",
         )
 
     def td_contents(self, item, attr_list):
@@ -111,19 +115,20 @@ class DropDownEnumCol(Col):
             attrs=td_attrs | self.td_html_attrs)
 
 
-class TeamOptionsCol(Col):
+# TODO: Add more options? Perhaps the ability to make custom BSON modifications
+class OptionsCol(Col):
     """A Column with a menu of options
     Requires the inclusion of static/js/admin.js to communcate with the api"""
 
-    html_template = (
-        "<div>\n"
-        "<button title=\"delete\" onclick=\"deleteTeam('{{id}}')\""
-        "class=\"btn btn-danger\">&#10060;</button>\n"
-        "</div>\n"
-    )
-
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, model_type: str="Team", **kwargs):
         super().__init__(*args, **kwargs)
+        self.html_template = (
+            "<div>\n"
+            "<button title=\"delete\" "
+            f"onclick=\"deleteItem('{model_type}', '{{{{id}}}}')\" "
+            "class=\"btn btn-danger\">&#10060;</button>\n"
+            "</div>\n"
+        )
 
     def custom_td_format(
         self,
@@ -132,7 +137,7 @@ class TeamOptionsCol(Col):
         """A custom version of td_format, renamed to avoid
         PyLint from getting upset from the different parameter list
         This creates a form for each cell."""
-        return render_template_string(TeamOptionsCol.html_template, id=doc_id)
+        return render_template_string(self.html_template, id=doc_id)
 
     def td_contents(self, item, attr_list) -> str:
         return (

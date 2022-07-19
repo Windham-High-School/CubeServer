@@ -1,9 +1,10 @@
 """Models users, teams, and privilege data"""
 
 from enum import Enum, unique
-from typing import Optional
+from typing import Optional, cast
 from secrets import token_urlsafe
-from hmac import HMAC
+from hmac import HMAC, compare_digest
+from flask_login import UserMixin
 
 from app.models.utils import PyMongoModel
 
@@ -23,7 +24,14 @@ class UserLevel(Enum):
     ADMIN = "Admin"
 
 
-class User(PyMongoModel):
+@unique
+class UserActivation(Enum):
+    """Enumerates options for user activation/deactivation"""
+
+    ACTIVATED = "Activated"
+    DEACTIVATED = "Deactivated"
+
+class User(PyMongoModel, UserMixin):
     """Models a user"""
 
     collection = mongo.db.users
@@ -32,7 +40,6 @@ class User(PyMongoModel):
         email: Optional[str] = None, pwd: bytes = b""):
         """Creates a User object.
 
-        If uid is left None, one is generated.
         The email is optional.
         If no password hash is provided in pwd,
         then the user will not be able to log in.
@@ -44,6 +51,7 @@ class User(PyMongoModel):
         self.email = email
         self.pwd = pwd
         self.level = level
+        self.activated = UserActivation.DEACTIVATED
 
     @classmethod
     def invite(cls, level : UserLevel, email: str = "") -> tuple:
@@ -67,3 +75,24 @@ class User(PyMongoModel):
             self.name +
             (f" ({self.email})" if self.email else "")
         )
+    
+    @property
+    def is_active(self):
+        return ( self.activated == UserActivation.ACTIVATED and
+                 self.level != UserLevel.SUSPENDED )
+
+    def activate(self, name: str, email: str, password: str):
+        """Activates this user account for login"""
+        self.name = name
+        self.email = email
+        self.pwd = User._hashpwd(password)
+        self.activated = UserActivation.ACTIVATED
+
+    def verify_pwd(self, pwd) -> bool:
+        """Checks the supplied password against the stored hash"""
+        return compare_digest(self._hashpwd(pwd), self.pwd)
+
+    @classmethod
+    def find_by_username(cls, name):
+        """Returns the first known user with that username"""
+        return cast(User, super().find_one({"name": name}))
