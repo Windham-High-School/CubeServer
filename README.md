@@ -32,8 +32,6 @@ The rules and workings of the "game" may be customized and/or modified as descri
 
 ## Todos:
 * Finish implementing goals
-  * Admin panel/login
   * Backend/receiving datapoints
-  * Leaderboard 
 * Clean up docstrings to use Sphynx markup for parameter/return definitions
 * Probably more I'm forgetting
