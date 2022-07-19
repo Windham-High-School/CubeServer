@@ -7,6 +7,7 @@ from flask_pymongo import PyMongo
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 
+from ._version import *
 from . import config
 from .gensecret import check_secrets
 

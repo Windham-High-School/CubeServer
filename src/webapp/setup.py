@@ -3,8 +3,12 @@
 from setuptools import setup, find_packages
 
 
+# Load __version__ from file:
+with open("app/_version.py", "r", encoding="utf-8") as version_file:
+      exec(version_file.read())
+
 # Metadata:
-VERSION: str = "0.0.1rc"
+VERSION: str = __version__
 """Version string"""
 
 AUTHORS: str = "Joseph R. Freeston"
