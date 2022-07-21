@@ -33,5 +33,8 @@ The rules and workings of the "game" may be customized and/or modified as descri
 ## Todos:
 * Finish implementing goals
   * Backend/receiving datapoints
+* Security concerns:
+  * Reimplement webapp password storage to use Bcrypt instead of just an HMAC hash; Each password should have its own salt for better security
+  * Limit failed login attempts per user per time interval
+    - via a database field OR (better option seems to be) using a local dictionary
 * Clean up docstrings to use Sphynx markup for parameter/return definitions
-* Probably more I'm forgetting
