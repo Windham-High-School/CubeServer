@@ -1,3 +1,4 @@
+Gunicorn>=20.1.0,<21.0     # WSGI server
 Flask>=2.1.2,<3.0          # Flask core for web app
 Flask-PyMongo>=2.3.0,<3.0  # MongoDB access
 better-profanity>=0.7.0    # Profanity checking/filtering
