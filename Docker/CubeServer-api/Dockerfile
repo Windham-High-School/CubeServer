@@ -2,6 +2,19 @@ FROM python:3.10-slim-bullseye
 
 WORKDIR /app
 
+# Helper files:
+COPY Docker/CubeServer-api/gen_ssl_cert.sh /
+RUN chmod +x /gen_ssl_cert.sh
+RUN /gen_ssl_cert.sh
+
+COPY Docker/CubeServer-api/gunicorn.conf.py /
+
+# Entrypoint:
+COPY Docker/CubeServer-api/gunicorn_start.sh /
+RUN chmod +x /gunicorn_start.sh
+ENTRYPOINT [ "/gunicorn_start.sh" ]
+
+# Requirements:
 COPY Docker/CubeServer-api/requirements.txt /tmp/
 RUN pip3 install -r /tmp/requirements.txt
 
@@ -9,12 +22,6 @@ RUN pip3 install -r /tmp/requirements.txt
 COPY ./src/CubeServer-common/ /tmp/common
 RUN pip3 install /tmp/common
 RUN rm -r /tmp/common
-
-# Entrypoint:
-COPY Docker/CubeServer-api/gunicorn_start.sh /
-RUN chmod +x /gunicorn_start.sh
-
-ENTRYPOINT [ "/gunicorn_start.sh" ]
 
 # API package itself:
 COPY ./src/CubeServer-api/ /app/

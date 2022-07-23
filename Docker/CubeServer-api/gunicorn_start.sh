@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-gunicorn cubeserver_api:app -w 2 --threads 2 -b 0.0.0.0:80
+gunicorn --chdir /app/ cubeserver_api:app -c /gunicorn.conf.py

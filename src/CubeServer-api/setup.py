@@ -31,6 +31,7 @@ setup(name='CubeServer-api',
       install_requires=[
             'Flask>=2.1.2,<3.0',
             'Flask-RESTful>=0.3.9,<1.0',
-            'CubeServer-common'
+            'CubeServer-common',
+            'Flask-HTTPAuth>=4.7.0,<5.0'
       ]
      )
