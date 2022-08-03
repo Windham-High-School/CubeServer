@@ -1,4 +1,8 @@
 # Customization
+
+# Customizing the build/installation
+Build variables are found in [.env](./.env)
+
 ## Customizing the game:
 To customize the game rules and elements beyond the options available in the admin panel, see the following files:
 
