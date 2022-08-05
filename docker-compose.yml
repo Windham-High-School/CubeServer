@@ -2,33 +2,57 @@ version: '3'
 services:
   # Main application container:
   app:
-    container_name: flask_app
+    container_name: ${PROJECT_NAME}-app
     restart: unless-stopped
     volumes:
       - flask-secret:/secret/
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: Docker/CubeServer-app/Dockerfile
     environment:
       # MongoDB credentials:
       - MONGODB_DATABASE=flaskdb
       - MONGODB_USERNAME=flask
       - MONGODB_HOSTNAME=mongodb
-      - MONGODB_PASSWORD=LXUa2AYh5ArNkLkEZC8TCkCfKjE2nYVejvrTcPT82J6dRpJtmnEm6JhWsBnuGJWL
-      # Flask config:
-      - FLASK_APP=app/main.py
-      - FLASK_DEBUG=1
-      - 'RUN=flask run --host=0.0.0.0 --port=80'
+      - MONGODB_PASSWORD=${MONGODB_PWD}
     ports: # Bind the port for the web server
-      - "8080:80"
+      - "${WEBAPP_PORT}:80"
     depends_on:
       - mongodb
     networks:
       - frontend
       - backend
+  # API server container:
+  api:
+    container_name: ${PROJECT_NAME}-api
+    restart: unless-stopped
+    volumes:
+      - flask-secret:/secret/
+      - api-ssl-cert:/etc/ssl/api_cert/
+    build:
+      context: .
+      dockerfile: Docker/CubeServer-api/Dockerfile
+      args:
+        CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}"
+        CERT_SUBJALTNAME: "${API_ALT_ADDR}"
+        CERT_EXP_DAYS: ${API_CERT_EXP_DAYS}
+    environment:
+      # MongoDB credentials:
+      - MONGODB_DATABASE=flaskdb
+      - MONGODB_USERNAME=flask
+      - MONGODB_HOSTNAME=mongodb
+      - MONGODB_PASSWORD=${MONGODB_PWD}
+    ports: # Bind the port for the web server
+      - "${API_PORT}:443"
+    depends_on:
+      - mongodb
+      - accesspoint
+    networks:
+      - api
+      - backend
   # Database container:
   mongodb:
-    container_name: cube_mongodb
+    container_name: ${PROJECT_NAME}-mongodb
     image: mongo:5.0
     volumes: # Corresponds with volume at the bottom
       - mongodb-data:/data/db
@@ -42,15 +66,47 @@ services:
       MONDODB_LOG_DIR: /dev/null
     networks:
       - backend
+  # WiFi Access Point
+  accesspoint:
+    container_name: ${PROJECT_NAME}-accesspoint
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: Docker/access-point/Dockerfile
+    environment:
+      # HOSTAPD params:
+      COUNTRY: ${COUNTRY}
+      AP_INTERFACE: ${AP_INTERFACE}
+      AP_SSID: ${AP_SSID}
+      AP_CHANNEL: ${AP_CHANNEL}
+      # DHCPD params:
+      DHCP_SUBNET: ${DHCP_SUBNET}
+      DHCP_NETMASK: ${DHCP_NETMASK}
+      DHCP_RANGE_LOW: ${DHCP_RANGE_HIGH}
+      DHCP_BROADCAST_ADDR: ${DHCP_BROADCAST_ADDR}
+      DHCP_ROUTER_ADDR: ${DHCP_ROUTER_ADDR}
+      DHCP_DEFAULT_LEASE_TIME: ${DHCP_DEFAULT_LEASE_TIME}
+      DHCP_MAX_LEASE_TIME: ${DHCP_MAX_LEASE_TIME}
+      # Interfaces stuff:
+      INTERFACE_API: api_access_net
+    cap_add:
+      - NET_ADMIN
+    network_mode: host
 
 networks:
   frontend:
     driver: bridge
   backend:
     driver: bridge
+  api:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: api_access_net
 
 volumes:
   mongodb-data:
     driver: local
   flask-secret:
+    driver: local
+  api-ssl-cert:
     driver: local

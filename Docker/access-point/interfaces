@@ -1,0 +1,7 @@
+auto ${AP_INTERFACE}
+iface ${AP_INTERFACE} inet static
+        address ${DHCP_ROUTER_ADDR}
+        netmask ${DHCP_NETMASK}
+
+auto ${INTERFACE_API}
+iface ${INTERFACE_API} inet dhcp
