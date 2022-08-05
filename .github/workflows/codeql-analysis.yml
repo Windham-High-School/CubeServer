@@ -65,8 +65,10 @@ jobs:
     #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
 
     - run: |
-       echo "Installing Python module..."
-       python3 -m pip install src/webapp
+       echo "Installing Python modules..."
+       python3 -m pip install src/CubeServer-common
+       python3 -m pip install src/CubeServer-app
+       python3 -m pip install src/CubeServer-api
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
