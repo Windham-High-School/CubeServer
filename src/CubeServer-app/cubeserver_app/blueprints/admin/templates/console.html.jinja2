@@ -50,6 +50,11 @@ Box number ten.
             <b>Uptime: </b>
             <p id="uptime_counter">LOADING...</p>
         {{macros.endbox()}}
+
+        {{macros.startbox("Data Browser", "col")}}
+            <b>Data: </b>
+            <p>Click <a href={{ url_for('admin.data_table') }}>here</a> to see all logged data</p>
+        {{macros.endbox()}}
     </div>
 {% endblock %}
 

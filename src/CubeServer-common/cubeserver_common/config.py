@@ -26,7 +26,7 @@ This can be changed after the first login."""
 
 
 # User interface stuff:
-CREDITS: str = ""
+CREDITS: str = "Joseph R. Freeston, Ryan Burbo"
 """The development credits to be shown in the about page
     (Add your own name here if you contributed!!!) """
 

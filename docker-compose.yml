@@ -2,7 +2,7 @@ version: '3'
 services:
   # Main application container:
   app:
-    container_name: flask_app
+    container_name: ${PROJECT_NAME}-app
     restart: unless-stopped
     volumes:
       - flask-secret:/secret/
@@ -24,7 +24,7 @@ services:
       - backend
   # API server container:
   api:
-    container_name: flask_api
+    container_name: ${PROJECT_NAME}-api
     restart: unless-stopped
     volumes:
       - flask-secret:/secret/
@@ -52,7 +52,7 @@ services:
       - backend
   # Database container:
   mongodb:
-    container_name: cube_mongodb
+    container_name: ${PROJECT_NAME}-mongodb
     image: mongo:5.0
     volumes: # Corresponds with volume at the bottom
       - mongodb-data:/data/db
@@ -68,7 +68,7 @@ services:
       - backend
   # WiFi Access Point
   accesspoint:
-    container_name: cube_ap
+    container_name: ${PROJECT_NAME}-accesspoint
     restart: unless-stopped
     build:
       context: .

@@ -16,4 +16,5 @@ cp /etc/ssl/build_api_cert/* /etc/ssl/api_cert/
 fi
 
 echo "Starting GUnicorn..."
+export PYTHONUNBUFFERED=TRUE  # Log Python output
 gunicorn --chdir /app/ cubeserver_api:app -c /gunicorn.conf.py

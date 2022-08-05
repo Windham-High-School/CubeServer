@@ -1,15 +1,13 @@
 """A web application for software to manage, store, score,
 and publish data received from Wifi-equipped microcontrollers for a school contest"""
 
-import os
 from flask import Flask
-from flask_pymongo import PyMongo
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 
 from cubeserver_common import config
-from cubeserver_common.models import PyMongoModel
 from cubeserver_common.gensecret import check_secrets
+from cubeserver_common import configure_db
 
 from ._version import *
 
@@ -23,11 +21,7 @@ app = Flask(__name__,
 Bootstrap(app)
 
 # Configure MongoDB:
-app.config["MONGO_URI"] = 'mongodb://' + os.environ['MONGODB_USERNAME'] \
-    + ':' + os.environ['MONGODB_PASSWORD'] + '@' + os.environ['MONGODB_HOSTNAME'] \
-        + ':27017/' + os.environ['MONGODB_DATABASE'] + '?authSource=admin'
-mongo = PyMongo(app)
-PyMongoModel.update_mongo_client(mongo)
+configure_db(app)
 
 # Load configuration:
 app.config['CONSTANTS'] = config

@@ -37,6 +37,11 @@ class TeamStatus(Enum):
         """Forms a string representation of a TeamStatus value"""
         return self.value
 
+    @property
+    def is_active(self) -> bool:
+        """Returns true if this team can upload data"""
+        return self == TeamStatus.PARTICIPATING
+
 
 class TeamHealth(Encodable):
     """Encapsulates the elements of the game that relate to a
@@ -134,3 +139,8 @@ class Team(PyMongoModel):
     def score(self) -> int:
         """Returns the number of points from the TeamHealth object"""
         return self.health.score
+
+    @classmethod
+    def find_by_name(cls, name):
+        """Returns the first known team with that name"""
+        return super().find_one({"name": name})

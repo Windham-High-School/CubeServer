@@ -3,14 +3,16 @@
 from datetime import timedelta
 from math import floor
 from bson import ObjectId
-from flask import abort, Blueprint, redirect, render_template, request, url_for
+from flask import abort, Blueprint, render_template, request, url_for
 from flask_login import current_user, login_required
 from uptime import uptime
+from cubeserver_common.models.datapoint import DataPoint
 from cubeserver_common.models.utils import EnumCodec
 from cubeserver_common.models.team import Team
 from cubeserver_common.models.user import User, UserLevel
 from cubeserver_app.tables.team import AdminTeamTable
 from cubeserver_app.tables.users import AdminUserTable
+from cubeserver_app.tables.datapoints import AdminDataTable
 
 from .user_form import InvitationForm
 
@@ -110,3 +112,14 @@ def uptime_string():
     return f"{time_delta.days}&nbsp;Days, {time_delta.seconds//3600}&nbsp;" \
         f"Hours, {(time_delta.seconds//60)%60}&nbsp;Minutes, " \
         f"{floor(time_delta.seconds%60)}&nbsp;Seconds"
+
+@bp.route('/data')
+@login_required
+def data_table():
+    """Shows all of the data in a big table"""
+    table = AdminDataTable(DataPoint.find())
+    # Render the template:
+    return render_template(
+        'data_table.html.jinja2',
+        table = table.__html__()
+    )

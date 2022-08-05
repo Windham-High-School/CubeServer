@@ -30,6 +30,7 @@ setup(name='CubeServer-common',
       packages=find_packages(),
       install_requires=[
             'Flask>=2.1.2,<3.0',
-            'Flask-PyMongo>=2.3.0,<3.0'
+            'Flask-PyMongo>=2.3.0,<3.0',
+            'Flask-Login>=0.6.1'
       ]
      )

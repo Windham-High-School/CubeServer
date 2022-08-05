@@ -46,10 +46,13 @@ def _render_form(
 
 
 class EnumCol(Col):
-    """A Column for Enums, hence the name, EnumCol."""
+    """A Column for Enums, hence the name, EnumCol.
+    :) """
 
     def td_format(self, content: Enum):
-        return content.value
+        if content:
+            return content.value
+        return ""
 
 
 # TODO: Add CSRF protection to these forms

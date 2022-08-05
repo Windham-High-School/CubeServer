@@ -41,7 +41,7 @@ class LeaderboardTeamTable(Table):
     """Allows a group of Team objects to be displayed in an HTML table"""
 
     allow_sort = False  # Let's avoid flask-table's built-in sorting
-    classes = ["table", "table-striped", "datatable", "display"]
+    classes = ["table", "table-striped", "datatable", "display", "leaderboardtable"]
     thead_classes = ["thead-dark"]
     border = True
 
