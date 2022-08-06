@@ -4,14 +4,14 @@
 from datetime import datetime
 from flask import request
 from flask_restful import Resource
-from flask_httpauth import HTTPDigestAuth
+from flask_httpauth import HTTPBasicAuth
 from json import dumps, loads
 
 from cubeserver_common.models.config.rules import Rules
 from cubeserver_common.models.team import Team
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 
-auth = HTTPDigestAuth()
+auth = HTTPBasicAuth()
 
 @auth.get_password
 def get_team_secret(team_name: str) -> str:
