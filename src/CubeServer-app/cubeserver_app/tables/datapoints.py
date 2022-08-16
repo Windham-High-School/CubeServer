@@ -12,7 +12,7 @@ class AdminDataTable(Table):
     """Allows a group of DataPoint objects to be displayed in an HTML table"""
 
     allow_sort = False  # Let's avoid flask-table's built-in sorting
-    classes = ["table", "table-striped", "datatable", "display", "bg-dark"]
+    classes = ["table", "table-striped", "datatable", "display", "bg-dark", "datapoints-table"]
     thead_classes = ["thead-dark"]
     border = True
 
@@ -34,7 +34,7 @@ class LeaderboardDataTable(Table):
     """Allows a group of DataPoint objects to be displayed in an HTML table"""
 
     allow_sort = False  # Let's avoid flask-table's built-in sorting
-    classes = ["table", "table-striped", "datatable", "display"]
+    classes = ["table", "table-striped", "datatable", "display", "datapoints-table"]
     thead_classes = ["thead-dark"]
     border = True
 

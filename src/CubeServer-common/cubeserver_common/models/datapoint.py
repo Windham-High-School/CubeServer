@@ -4,6 +4,7 @@ from enum import Enum, unique
 from typing import Any, Optional
 from datetime import datetime
 
+from pymongo import DESCENDING
 from bson import ObjectId
 from cubeserver_common.models.utils import PyMongoModel
 
@@ -77,3 +78,7 @@ class DataPoint(PyMongoModel):
     def find_by_team(cls, team):
         """Returns a list of datapoints by a team id"""
         return cls.find({'team_reference': ObjectId(team.id)})
+
+    @classmethod
+    def find(cls, *args, **kwargs):
+        return cls.find_sorted(*args, **kwargs, key="moment", order=DESCENDING)

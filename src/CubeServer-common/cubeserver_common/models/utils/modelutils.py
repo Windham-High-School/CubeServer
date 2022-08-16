@@ -7,7 +7,7 @@ from pydoc import locate
 from bson import ObjectId
 from bson import _BUILT_IN_TYPES as BSON_TYPES
 from bson.codec_options import TypeCodec, TypeRegistry
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 from pymongo.collection import Collection
 
 from .dummycodec import DummyCodec
@@ -296,6 +296,16 @@ class PyMongoModel(Encodable):
             for document in cls.collection.find(*args, **kwargs)
         ]
     
+    @classmethod
+    def find_sorted(cls, *args, key: str=..., order=ASCENDING, **kwargs):
+        """Same a find(), but with sorting!"""
+        if key is ...:
+            raise ValueError("No sorting key was specified")
+        return [
+                    cls.decode(document)
+                    for document in cls.collection.find(*args, **kwargs).sort(key, order)
+                ]
+
     @classmethod
     def find_one(cls, *args, **kwargs):
         """Finds a document from the collection
