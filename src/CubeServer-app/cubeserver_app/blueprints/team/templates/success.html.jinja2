@@ -6,33 +6,53 @@
 {% endblock %}
 
 {% block content %}
-    <div class="alert alert-info">
+    <div>
         <h3>Success!</h3>
-        <hr>
-        <h4>Your secret identifier is</h4>
-        <h1 class="alert alert-warning">{{secret}}</h1>
-        <hr>
-        <p>Do <b>NOT</b> lose this-- only an administrator has the access to 
-        check your secret identifier.</p>
-        <p>You will need to put this into your code as described in the 
-        instructions given in the tutorial.</p>
-        <hr>
-        <p>
-            Your team will appear on the leaderboard upon approval by an
-            administrator.
+        <p class="alert alert-warning">
+            You must choose one of the following options before closing your browser or your microcontroller will be locked from posting data!
         </p>
-        <hr>
-        <p><i>What's the point of a secret identifier?</i></p>
-        <p>
-            To ensure that the competition remains fair and trustworthy, 
-            this secret is used by the api to ensure that no other team is 
-            capable of impersonating your data. This eliminates the 
-            possibility of one team attempting to sabotage another by sending 
-            false data, as well as reducing unfair cooperation between teams.
-            The server can then verify that your data is legitimately
-            coming from your microcontroller.
-        </p>
+
+        <a href={{ url_for('config.index') }}><h4>See easiest programming options</h4></a>
         <hr>
         <h2>Good Luck!</h2>
+        <hr>
+        <h3>No, I'm an advanced user and want to do stuff my self:</h3>
+        <div class="alert alert-info">
+            <h4>Your secret identifier is</h4>
+            <h1 class="alert alert-warning">{{secret}}</h1>
+            <p>Use this in your code</p>
+            <hr>
+            <p>Do <b>NOT</b> lose this-- only an administrator has the access to 
+            check your secret identifier.</p>
+            <p>You will need to put this into your code as described in the 
+            instructions given in the tutorial.</p>
+            <hr>
+            <p>
+                Your team will appear on the leaderboard upon approval by an
+                administrator.
+            </p>
+            <hr>
+            <p><i>What's the point of a secret identifier?</i></p>
+            <p>
+                To ensure that the competition remains fair and trustworthy, 
+                this secret is used by the api to ensure that no other team is 
+                capable of impersonating your data. This eliminates the 
+                possibility of one team attempting to sabotage another by sending 
+                false data, as well as reducing unfair cooperation between teams.
+                The server can then verify that your data is legitimately
+                coming from your microcontroller.
+            </p>
+            <hr>
+            <h2>Good Luck!</h2>
+        </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    window.addEventListener('beforeunload', (event) => {
+      event.returnValue = `Select an option or your team will be locked!`;
+    });
+</script>
 {% endblock %}

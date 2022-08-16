@@ -15,6 +15,9 @@ cp -r /etc/ssl/api_cert /ect/ssl/api_cert_backup
 cp /etc/ssl/build_api_cert/* /etc/ssl/api_cert/
 fi
 
+echo "Generating SHA1 Fingerprint for client constants code generation..."
+openssl x509 -in /etc/ssl/api_cert/cert.pem -fingerprint -sha1 -noout | cut -d "=" -f2 > /etc/ssl/api_cert/sha1_fingerprint.txt
+
 echo "Starting GUnicorn..."
 export PYTHONUNBUFFERED=TRUE  # Log Python output
 gunicorn --chdir /app/ cubeserver_api:app -c /gunicorn.conf.py

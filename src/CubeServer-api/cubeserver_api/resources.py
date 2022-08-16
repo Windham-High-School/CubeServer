@@ -2,10 +2,12 @@
 """
 
 from datetime import datetime
+from time import time
+
 from flask import request
 from flask_restful import Resource
 from flask_httpauth import HTTPBasicAuth
-from json import dumps, loads
+from json import dumps, loads, decoder
 
 from cubeserver_common.models.config.rules import Rules
 from cubeserver_common.models.team import Team
@@ -18,6 +20,7 @@ def get_team_secret(team_name: str) -> str:
     """Returns the secret code of a team by name
     (The digest username is the team name)"""
     team = Team.find_by_name(team_name)
+    print(f"Request from {team_name}")
     if team and team.status.is_active:
         return team.secret
     return None
@@ -31,7 +34,12 @@ class Data(Resource):
         team = Team.find_by_name(auth.username())
         print(f"Data submission from: {team.name}")
         # Get DataClass and cast the value:
-        data_str = loads(request.form['data'])
+        print(request.form)
+        try:
+            data_str = loads(request.form['data'])
+        except decoder.JSONDecodeError:
+            return request.form, 400
+        print(data_str)
         data_class = DataClass(data_str['type'])
         data_value = data_class.datatype(data_str['value'])
         # Create the DataPoint object:
@@ -54,7 +62,8 @@ class Status(Resource):
 
     def get(self):
         team = Team.find_by_name(auth.username())
-        return dumps({
+        return {
             "datetime": datetime.now().isoformat(),
+            "unix_time": int(time()),
             "status": {"score": team.score, "strikes": team.strikes}
-        }), 200
+        }, 200

@@ -40,7 +40,8 @@ def register():
                     user.save()
                     team.add_member(user)
             team.save()
-            session['TEAM_SECRET'] = team.secret
+            session['team_secret'] = team.secret
+            session['team_name'] = team.name
             return redirect('/team/success')
         return render_template('register.html.jinja2', form=form)
     return render_template('regclosed.html.jinja2')
@@ -48,11 +49,11 @@ def register():
 @bp.route('/success')
 def success():
     """Renders a message in the event of successful team registration"""
-    if 'TEAM_SECRET' not in session:
+    if 'team_secret' not in session:
         return redirect('/')
     return render_template(
         'success.html.jinja2',
-        secret = session.pop('TEAM_SECRET')
+        secret = session['team_secret']
     )
 
 @bp.route('/not-nice')
