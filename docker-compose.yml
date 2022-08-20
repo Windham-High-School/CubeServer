@@ -26,6 +26,7 @@ services:
       - "${WEBAPP_PORT}:80"
     depends_on:
       - mongodb
+      - api
     networks:
       - frontend
       - backend
@@ -40,7 +41,8 @@ services:
       context: .
       dockerfile: Docker/CubeServer-api/Dockerfile
       args:
-        CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}"
+        CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}/"
+#        CERT_SUBJ: "${API_ADDR}"
         CERT_SUBJALTNAME: "${API_ALT_ADDR}"
         CERT_EXP_DAYS: ${API_CERT_EXP_DAYS}
     environment:
@@ -85,6 +87,7 @@ services:
       COUNTRY: ${COUNTRY}
       AP_INTERFACE: ${AP_INTERFACE}
       AP_SSID: ${AP_SSID}
+      API_ADDR: ${API_ADDR}
       AP_CHANNEL: ${AP_CHANNEL}
       # DHCPD params:
       DHCP_SUBNET: ${DHCP_SUBNET}

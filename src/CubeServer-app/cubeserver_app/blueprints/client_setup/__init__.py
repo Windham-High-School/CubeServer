@@ -13,6 +13,8 @@ bp = Blueprint('config', __name__, url_prefix='/setup', template_folder='templat
 
 with open("/api_cert/sha1_fingerprint.txt", "r") as fingerprint_file:
     sha_fingerprint = fingerprint_file.read()
+with open("/api_cert/sha256_fingerprint.txt", "r") as fingerprint_file:
+    sha_fingerprint_256 = fingerprint_file.read()
 
 
 @bp.route('/')
@@ -28,7 +30,8 @@ def header_file():
         timestamp=datetime.now().isoformat(),
         team_name=(session['team_name'] if 'team_name' in session else None),
         team_secret=(session['team_secret'] if 'team_secret' in session else None),
-        server_fingerprint=sha_fingerprint.strip()
+        server_fingerprint=sha_fingerprint.strip(),
+        server_fingerprint_256=sha_fingerprint_256.strip()
     )
 
 @bp.route('/client_config.py')
@@ -39,7 +42,8 @@ def py_file():
         timestamp=datetime.now().isoformat(),
         team_name=(session['team_name'] if 'team_name' in session else None),
         team_secret=(session['team_secret'] if 'team_secret' in session else None),
-        server_fingerprint=sha_fingerprint.strip()
+        server_fingerprint=sha_fingerprint.strip(),
+        server_fingerprint_256=sha_fingerprint_256.strip()
     )
 
 # TODO: The library packaging could be written much better
