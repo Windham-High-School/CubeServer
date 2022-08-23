@@ -10,10 +10,20 @@ echo "Subject: $1"
 echo "alt subj: $2"
 echo "EXPIRES IN $3 DAYS"
 if [ ! -f "/etc/ssl/build_api_cert/cert.pem" ]; then
+    cd /etc/ssl/build_api_cert/
+    echo
+    echo "Generating a new certificate..."
     echo "Generating a new self-signed SSL certificate..."
     openssl req -new -newkey rsa:4096 -days $3 -nodes -x509 \
-        -subj "$1" -addext "subjectAltName = $2" \
-        -keyout /etc/ssl/build_api_cert/key.key -out /etc/ssl/build_api_cert/cert.pem
+        -subj "$1" -addext "subjectAltName=IP:$2" \
+        -keyout key.key -out cert.pem
+    echo
+    echo "Checking the certificate..."
+    openssl verify -CAfile cert.pem cert.pem
+    if [ $? != 0 ]; then
+        echo "There's something wrong with the certificate."
+        exit 1
+    fi
 else
     echo "An SSL certificate already exists; leaving that one."
 fi

@@ -15,6 +15,9 @@ cat /etc/network/interfaces
 echo "dnsmasq:"
 envsubst </etc/dnsmasq.conf | sponge /etc/dnsmasq.conf
 cat /etc/dnsmasq.conf
+echo "isc-dhcp-server:"
+envsubst </etc/default/isc-dhcp-server | sponge /etc/default/isc-dhcp-server
+cat /etc/default/isc-dhcp-server
 
 # Move forward to execute the start script...
 /bin/sh /start.sh

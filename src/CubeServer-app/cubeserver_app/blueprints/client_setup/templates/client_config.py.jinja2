@@ -22,7 +22,7 @@ TEAM_SECRET = "{{team_secret if team_secret else '123abc'}}"
 given at the time of registration, inside quotes.
 This is necessary to authorize posts to the server
 to prevent teams from impersonating one another.
-""""
+"""
 
 
 # You can leave this alone:
@@ -40,3 +40,11 @@ steal data from other teams. Basically, this makes sure
 that your team's data stays SAFE, which is what you want
 by means of fancy cryptography maths.
 """
+
+# Connection configuration:
+CONF_AP_SSID = "{{ssid}}"
+CONF_API_CN = "{{common_name}}"
+CONF_API_HOST = "{{base_url}}"
+API_PORT = {{port}}
+
+SERVER_CERT = "{{server_cert}}"

@@ -8,6 +8,7 @@ ADD Docker/access-point/hostapd.conf /etc/hostapd/hostapd.conf
 
 # Configure DHCPD
 ADD Docker/access-point/dhcpd.conf /etc/dhcp/dhcpd.conf
+ADD Docker/access-point/isc-dhcp-server /etc/default/isc-dhcp-server
 RUN touch /var/lib/dhcp/dhcpd.leases
 
 # Configure DNS server:

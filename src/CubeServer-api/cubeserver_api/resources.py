@@ -34,11 +34,9 @@ class Data(Resource):
         team = Team.find_by_name(auth.username())
         print(f"Data submission from: {team.name}")
         # Get DataClass and cast the value:
-        print(request.form)
-        try:
+        data_str = request.get_json()
+        if data_str is None:
             data_str = loads(request.form['data'])
-        except decoder.JSONDecodeError:
-            return request.form, 400
         print(data_str)
         data_class = DataClass(data_str['type'])
         data_value = data_class.datatype(data_str['value'])
