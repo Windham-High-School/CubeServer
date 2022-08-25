@@ -2,7 +2,7 @@ from multiprocessing import cpu_count
 
 # gunicorn configuration
 
-loglevel = "debug"
+loglevel = "info"
 
 workers = cpu_count()
 
