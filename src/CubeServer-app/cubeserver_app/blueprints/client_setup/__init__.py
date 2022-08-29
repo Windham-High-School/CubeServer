@@ -35,8 +35,8 @@ def header_file():
         server_fingerprint=sha_fingerprint.strip(),
         server_fingerprint_256=sha_fingerprint_256.strip(),
         ssid=environ['AP_SSID'],
-        common_name=environ['API_ADDR'],
-        base_url="https://"+environ['API_ADDR'],
+        common_name=environ['API_ALT_ADDR'],
+        base_url="https://"+environ['API_ALT_ADDR'],
         port=environ['API_PORT']
     )
 

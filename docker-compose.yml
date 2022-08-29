@@ -95,6 +95,7 @@ services:
       AP_INTERFACE: ${AP_INTERFACE}
       AP_SSID: ${AP_SSID}
       API_ADDR: ${API_ADDR}
+      API_PORT: ${API_PORT}
       AP_CHANNEL: ${AP_CHANNEL}
       # DHCPD params:
       DHCP_SUBNET: ${DHCP_SUBNET}
