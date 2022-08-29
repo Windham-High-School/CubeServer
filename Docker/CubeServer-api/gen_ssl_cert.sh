@@ -2,7 +2,11 @@
 # Generates a new self-signed SSL certificate w/ OpenSSL
 # Usage: bash gen_ssl_cert.sh [subj] [altName] [days'TillExpiration]
 
-#TODO: check to see if the arguments are specified before relying on them
+if [ "$#" -ne 3 ]; then
+    echo "Illegal number of parameters."
+    echo "USAGE: bash gen_ssl_cert.sh [subj] [altName] [days'TillExpiration]"
+    exit 1
+fi
 
 # Make sure the directory exists...
 mkdir -p /etc/ssl/build_api_cert/

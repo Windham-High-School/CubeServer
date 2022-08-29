@@ -7,6 +7,7 @@ from datetime import datetime
 from pymongo import DESCENDING
 from bson import ObjectId
 from cubeserver_common.models.utils import PyMongoModel
+from cubeserver_common.models.team import Team
 
 
 __all__ = ['DataPoint', 'DataClass']
@@ -82,3 +83,7 @@ class DataPoint(PyMongoModel):
     @classmethod
     def find(cls, *args, **kwargs):
         return cls.find_sorted(*args, **kwargs, key="moment", order=DESCENDING)
+
+    @property
+    def team_str(self):
+        return Team.find_by_id(self.team_reference).name

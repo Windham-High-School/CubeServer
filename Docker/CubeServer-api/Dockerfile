@@ -5,8 +5,6 @@ ARG CERT_SUBJ
 ARG CERT_SUBJALTNAME
 ARG CERT_EXP_DAYS
 
-# TODO: Make these ENVs more easily configurable and documented ^^
-
 WORKDIR /app
 
 # Helper files:

@@ -17,7 +17,7 @@
                     <a class="nav-link {{'active' if request.endpoint != 'home.leaderboard' else 'disabled selected'}}" href="/stats">Leaderboard
                     </a>
                 </li>
-                {% if config['REGISTRATION_OPEN'] %}
+                {% if config['CONFIGURABLE'].registration_open %}
                 <li class="nav-item">
                     <a class="nav-link {{'active' if request.endpoint != 'team.register' else 'disabled selected'}}" href="/team/register">Register a Team
                     </a>

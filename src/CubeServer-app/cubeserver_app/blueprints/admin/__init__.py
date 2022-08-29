@@ -66,7 +66,8 @@ def table_endpoint(table, identifier, field):
         return abort(403)
     model_class = {
         "Team":Team,
-        "User":User
+        "User":User,
+        "DataPoint":DataPoint
     }[table]
     if request.method == 'POST':
         model_obj = model_class.find_by_id(ObjectId(identifier))

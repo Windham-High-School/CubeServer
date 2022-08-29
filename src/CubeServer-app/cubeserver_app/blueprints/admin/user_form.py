@@ -10,5 +10,5 @@ class InvitationForm(FlaskForm):
     from the admin panel"""
 
     level = SelectField(
-        'Permissions', choices=[level.value for level in UserLevel])
-    submit = SubmitField('Invite Users')
+        'Permission Level', choices=[level.value for level in UserLevel])
+    submit = SubmitField('Invite User')

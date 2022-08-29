@@ -16,7 +16,7 @@ Are you ABSOLUTELY CERTAIN?`;
             url: `table_endpoint/${item}/${id}/*`,
             type: 'DELETE',
             success: function(result) {
-                alert("Team deleted.");
+                alert("Object deleted.");
                 location.reload();
             },
             fail: function(result) {

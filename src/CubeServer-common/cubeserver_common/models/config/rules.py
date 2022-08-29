@@ -39,6 +39,7 @@ class Rules(PyMongoModel):
         datapoint.save()
         return True
 
+    # The initial instance is created in cubeserver_common/__init__.py
     @staticmethod
     def retrieve_instance() -> PyMongoModel:
         """Retrieves the current ruleset"""

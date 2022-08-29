@@ -23,9 +23,14 @@ Bootstrap(app)
 # Configure MongoDB:
 configure_db(app)
 
+# Import models ONLY AFTER the db is configured:
+from cubeserver_common.models.config.conf import Conf
+
 # Load configuration:
 app.config['CONSTANTS'] = config
-app.config['REGISTRATION_OPEN'] = True  # TODO: Load config from database
+db_config = Conf.retrieve_instance()
+app.config['CONFIGURABLE'] = db_config
+#app.config['REGISTRATION_OPEN'] = db_config.registration_open
 
 # Load SECRET_KEY:
 # Double-check that the secret_file is actually there...

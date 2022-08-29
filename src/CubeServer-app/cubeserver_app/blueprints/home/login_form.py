@@ -15,11 +15,6 @@ class LoginForm(FlaskForm):
     password = PasswordField('Secret Password', validators=[
         InputRequired("Now, how do you intend to log in without a password?")
     ])
-    
-    #remember_me = BooleanField('Remember Me', default=True)
-    # TODO: Fix remember-me--
-    # There was an issue regarding the session vars and
-    # auto-login in the navbar jinja2 code.
 
     submit = SubmitField('Log In')
 

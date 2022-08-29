@@ -16,7 +16,8 @@ $(document).ready( function () {
         autoWidth : true,
         fixedColumns:   {
             "leftColumns": 1
-        }
+        },
+        keepConditions: true
     } );
 
     $('.leaderboardtable').DataTable( {
@@ -31,7 +32,8 @@ $(document).ready( function () {
         autoWidth : true,
         fixedColumns:   {
             "leftColumns": 1
-        }
+        },
+        keepConditions: true
     } );
 
     $('.datapoints-table').DataTable( {
@@ -46,7 +48,8 @@ $(document).ready( function () {
         autoWidth : true,
         fixedColumns:   {
             "leftColumns": 1
-        }
+        },
+        keepConditions: true
     } );
 
 });

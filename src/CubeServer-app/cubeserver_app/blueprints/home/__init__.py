@@ -48,9 +48,11 @@ def activation():
     # GET variables from the invitation link:
     form = UserActivationForm()
     user = None
+    updating = False
     if current_user and current_user.is_authenticated \
        and current_user.is_active:
         user = current_user
+        updating = True
     else:
         inactive_username = request.args.get('user')
         activation_token = request.args.get('token')
@@ -73,6 +75,9 @@ def activation():
                 session.clear()
             flash('Successfully reset account. Try logging in.')
             return redirect(url_for('home.login'))
+        if updating:
+            form.username.data = user.name
+            form.email.data = user.email
         return render_template(
             'activation_form.html.jinja2',
             form=form

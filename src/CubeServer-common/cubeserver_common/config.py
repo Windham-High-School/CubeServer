@@ -43,8 +43,9 @@ SHORT_TITLE: str = "CubeServer"
 LONG_TITLE: str = "The JagSat Prize"
 """A longer name that describes the prize. This should still be succinct."""
 
-HOME_DESCRIPTION: str = "Thunder. Time. Tech.\nTeams compete with data to win."
-"""A brief description of this whole thing which will appear on the home page"""
+DEFAULT_HOME_DESCRIPTION: str = "Thunder. Time. Tech.\nTeams compete with data to win."
+"""A brief description of this whole thing which will appear on the home page
+This can be changed by an admin user at any point during the competition!"""
 
 
 

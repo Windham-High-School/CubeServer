@@ -4,7 +4,7 @@ from typing import List
 from flask_table import Table, Col
 
 from cubeserver_common.models.datapoint import DataPoint, DataClass
-from cubeserver_app.tables.columns import DropDownEnumCol, EnumCol
+from cubeserver_app.tables.columns import OptionsCol, EnumCol
 
 __all__ = ['AdminDataTable', 'LeaderboardDataTable']
 
@@ -17,8 +17,10 @@ class AdminDataTable(Table):
     border = True
 
     moment            = Col('Datetime')
+    team_str          = Col('Team')
     category          = EnumCol('Category')
     value_with_unit   = Col('Value')
+    id                = OptionsCol('Options', model_type="DataPoint")
 
     def __init__(self, items: List[DataPoint], **kwargs):
         """Initializes the table"""
