@@ -4,6 +4,7 @@ from enum import Enum, unique
 from typing import Optional, cast
 from secrets import token_urlsafe
 from hmac import HMAC, compare_digest
+from bcrypt import hashpw, gensalt, checkpw
 from flask_login import UserMixin
 
 from cubeserver_common.models.utils import PyMongoModel
@@ -64,9 +65,10 @@ class User(PyMongoModel, UserMixin):
 
     @staticmethod
     def _hashpwd(pwd: str) -> bytes:
-        """Runs the known HMAC hash algorithm on the given string."""
-        return HMAC(gensecret.check_secrets().encode(config.ENCODING),
-            msg=pwd.encode(config.ENCODING), digestmod=config.CRYPTO_HASH_ALGORITHM).digest()
+        """Runs the bcrypt hash algorithm on the given string."""
+        return hashpw(pwd.encode('utf-8'), gensalt())
+        #return HMAC(gensecret.check_secrets().encode(config.ENCODING),
+        #    msg=pwd.encode(config.ENCODING), digestmod=config.CRYPTO_HASH_ALGORITHM).digest()
 
     def __str__(self) -> str:
         return (
@@ -88,7 +90,8 @@ class User(PyMongoModel, UserMixin):
 
     def verify_pwd(self, pwd) -> bool:
         """Checks the supplied password against the stored hash"""
-        return compare_digest(self._hashpwd(pwd), self.pwd)
+        return checkpw(pwd.encode('utf-8'), self.pwd)
+        #return compare_digest(self._hashpwd(pwd), self.pwd)
 
     @classmethod
     def find_by_username(cls, name):
