@@ -4,6 +4,7 @@ and publish data received from Wifi-equipped microcontrollers for a school conte
 from flask import Flask
 from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
+from flask_apscheduler import APScheduler
 
 from cubeserver_common import config
 from cubeserver_common.gensecret import check_secrets
@@ -24,13 +25,22 @@ Bootstrap(app)
 configure_db(app)
 
 # Import models ONLY AFTER the db is configured:
+from cubeserver_common.models.user import clear_bad_attempts
 from cubeserver_common.models.config.conf import Conf
 
 # Load configuration:
 app.config['CONSTANTS'] = config
-db_config = Conf.retrieve_instance()
-app.config['CONFIGURABLE'] = db_config
-#app.config['REGISTRATION_OPEN'] = db_config.registration_open
+
+def update_conf(app):
+    """Updates the conf periodically"""
+    app.config['CONFIGURABLE'] = Conf.retrieve_instance()
+
+scheduler = APScheduler()
+scheduler.add_job(func=update_conf, args=[app], trigger='interval', id='configsync', seconds=30)
+scheduler.add_job(func=clear_bad_attempts, trigger='interval', id='clearbadattempts', seconds=30)
+scheduler.start()
+
+update_conf(app)
 
 # Load SECRET_KEY:
 # Double-check that the secret_file is actually there...

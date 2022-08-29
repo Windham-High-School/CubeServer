@@ -3,9 +3,10 @@
 from datetime import timedelta
 from math import floor
 from bson import ObjectId
-from flask import abort, Blueprint, render_template, request, url_for
+from flask import abort, Blueprint, render_template, request, url_for, current_app
 from flask_login import current_user, login_required
 from uptime import uptime
+from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.datapoint import DataPoint
 from cubeserver_common.models.utils import EnumCodec
 from cubeserver_common.models.team import Team
@@ -15,6 +16,7 @@ from cubeserver_app.tables.users import AdminUserTable
 from cubeserver_app.tables.datapoints import AdminDataTable
 
 from .user_form import InvitationForm
+from .config_form import ConfigurationForm
 
 bp = Blueprint(
     'admin',
@@ -32,11 +34,19 @@ def admin_home():
         return abort(403)
     # Fetch teams from database and populate a table:
     teams_table = AdminTeamTable(Team.find())
+
+    # Populate configuration form:
+    conf_form = ConfigurationForm()
+    db_conf = Conf.retrieve_instance()
+    conf_form.registration_open.data = db_conf.registration_open
+    conf_form.home_description.data = db_conf.home_description
+
     # Render the template:
     return render_template(
         'console.html.jinja2',
         teams_table = teams_table.__html__(),
-        user_form = InvitationForm()
+        user_form = InvitationForm(),
+        config_form = conf_form
     )
 
 @bp.route('/users')
@@ -106,6 +116,23 @@ def useradd():
         )
     return abort(500)
 
+@bp.route('/configchange', methods=['POST'])
+@login_required
+def conf_change():
+    """Modifies the configuration"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    form = ConfigurationForm()
+    if form.validate_on_submit():
+        db_conf = Conf.retrieve_instance()
+        db_conf.registration_open = form.registration_open.data
+        db_conf.home_description = form.home_description.data
+        db_conf.save()
+        current_app.config['CONFIGURABLE'] = db_conf
+        return render_template('redirect_back.html.jinja2')
+    return abort(500)
+
 @bp.route('/uptime')
 def uptime_string():
     """Provides a GET action to retrive the uptime of the server"""
@@ -118,6 +145,9 @@ def uptime_string():
 @login_required
 def data_table():
     """Shows all of the data in a big table"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
     table = AdminDataTable(DataPoint.find())
     # Render the template:
     return render_template(

@@ -13,6 +13,13 @@ from cubeserver_common import gensecret
 
 __all__ = ['UserLevel', 'User']
 
+
+recent_bad_login_attempts = {}
+
+def clear_bad_attempts():
+    global recent_bad_login_attempts
+    recent_bad_login_attempts.clear()
+
 @unique
 class UserLevel(Enum):
     """Enumerates site-wide permission levels"""
@@ -90,7 +97,15 @@ class User(PyMongoModel, UserMixin):
 
     def verify_pwd(self, pwd) -> bool:
         """Checks the supplied password against the stored hash"""
-        return checkpw(pwd.encode('utf-8'), self.pwd)
+        result = checkpw(pwd.encode('utf-8'), self.pwd)
+        if not result:
+            if self.name not in recent_bad_login_attempts:
+                recent_bad_login_attempts[self.name] = 0
+            recent_bad_login_attempts[self.name] += 1
+        if self.name in recent_bad_login_attempts and \
+           recent_bad_login_attempts[self.name] > 100:
+            return False
+        return result
         #return compare_digest(self._hashpwd(pwd), self.pwd)
 
     @classmethod

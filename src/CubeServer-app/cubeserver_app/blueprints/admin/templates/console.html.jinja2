@@ -15,47 +15,65 @@
 
 {% block body %}
 {{ super() }}
-    <div class="row justify-content-md-center container container-fluid text-center">
-        {{macros.startbox("Box #10", "col")}}
-            <pre>
-Hello Mama and Dad, I had to call collect
-'Cause I ain't got a cent to my name
-Well I'm sleepin' in the hotel doorway
-And tonight they say it's gonna rain
-And if you'd only send me some money
-I'll be back on my feet again
-Send it in care of the Sunday Mission
-Box number ten.
-            </pre>
-            <b>RIP</b> Jim Croce & Maury Muehleisen
-        {{macros.endbox()}}
-        
-        {{macros.startbox("Users", "col")}}
-            <p>
-                <a href={{ url_for('admin.edit_users') }}>Edit/delete users</a>
-            </p>
-            <hr>
-            <p>
-                Invite a new user:
-            </p>
-            <form method="POST" action="useradd" class="form">
-                {{ user_form.hidden_tag() }}
-                {{ wtf.form_errors(user_form, hiddens="only") }}
+    <div class="justify-content-md-center container container-fluid text-center">
+        <div class="row">
+            {{macros.startbox("Users", "col")}}
+                <p>
+                    <a href={{ url_for('admin.edit_users') }}>Edit/delete users</a>
+                </p>
+                <hr>
+                <p>
+                    Invite a new user:
+                </p>
+                <form method="POST" action="useradd" class="form">
+                    {{ user_form.hidden_tag() }}
+                    {{ wtf.form_errors(user_form, hiddens="only") }}
 
-                {{ wtf.form_field(user_form.level) }}
-                {{ wtf.form_field(user_form.submit) }}
-            </form>
-        {{macros.endbox()}}
+                    {{ wtf.form_field(user_form.level) }}
+                    {{ wtf.form_field(user_form.submit) }}
+                </form>
+            {{macros.endbox()}}
 
-        {{macros.startbox("System", "col")}}
-            <b>Uptime: </b>
-            <p id="uptime_counter">LOADING...</p>
-        {{macros.endbox()}}
+            {{macros.startbox("Data Browser", "col")}}
+                <b>Data: </b>
+                <p>Click <a href={{ url_for('admin.data_table') }}>here</a> to see all logged data</p>
+            {{macros.endbox()}}
+        </div>
+        <div class="row">
+            {{macros.startbox("Configuration", "col")}}
+                <p>
+                    Note: It may take up to 30 seconds for all server threads to sync their configuration after a change.
+                </p>
+                <form method="POST" action="configchange" class="form">
+                    {{ config_form.hidden_tag() }}
+                    {{ wtf.form_field(config_form.registration_open) }}
+                    {{ wtf.form_field(config_form.home_description, rows=5, cols=20) }}
+                    {{ wtf.form_field(config_form.submit) }}
+                </form>
+            {{macros.endbox()}}
+        </div>
 
-        {{macros.startbox("Data Browser", "col")}}
-            <b>Data: </b>
-            <p>Click <a href={{ url_for('admin.data_table') }}>here</a> to see all logged data</p>
-        {{macros.endbox()}}
+        <div class="row">
+            {{macros.startbox("System", "col")}}
+                <b>Uptime: </b>
+                <p id="uptime_counter">LOADING...</p>
+            {{macros.endbox()}}
+
+            {{macros.startbox("Box #10", "col")}}
+                <pre>
+    Hello Mama and Dad, I had to call collect
+    'Cause I ain't got a cent to my name
+    Well I'm sleepin' in the hotel doorway
+    And tonight they say it's gonna rain
+    And if you'd only send me some money
+    I'll be back on my feet again
+    Send it in care of the Sunday Mission
+    Box number ten.
+                </pre>
+                <b>RIP</b> Jim Croce & Maury Muehleisen
+            {{macros.endbox()}}
+        </div>
+
     </div>
 {% endblock %}
 

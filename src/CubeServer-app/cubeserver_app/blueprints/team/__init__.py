@@ -15,7 +15,7 @@ bp = Blueprint('team', __name__, url_prefix='/team', template_folder='templates'
 @bp.route('/register', methods=['GET', 'POST'])
 def register():
     """Renders the team registration page"""
-    if current_app.config['REGISTRATION_OPEN']:
+    if current_app.config['CONFIGURABLE'].registration_open:
         form = registration_form.RegistrationForm()
 
         if form.validate_on_submit():

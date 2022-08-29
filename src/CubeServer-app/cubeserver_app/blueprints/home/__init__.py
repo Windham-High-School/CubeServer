@@ -7,6 +7,7 @@ from is_safe_url import is_safe_url
 from cubeserver_common.config import DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_PASSWORD
 from cubeserver_common.models.team import Team, TeamStatus
 from cubeserver_common.models.user import User, UserLevel
+from cubeserver_common.models.config.conf import Conf
 from cubeserver_app.tables.team import LeaderboardTeamTable
 from cubeserver_app.blueprints.home.activation_form import UserActivationForm
 from cubeserver_app.blueprints.home.login_form import LoginForm

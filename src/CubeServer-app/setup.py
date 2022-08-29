@@ -40,6 +40,7 @@ setup(name='CubeServer-app',
             'Flask-Table>=0.5.0',
             'Flask-Login>=0.6.1',
             'is-safe-url',
-            'CubeServer-common'
+            'CubeServer-common',
+            'Flask-APScheduler>=1.12.4,<2.0'
       ]
      )
