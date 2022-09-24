@@ -9,7 +9,7 @@ Software to manage, store, score, and publish data received by Wifi-equipped mic
 
 ## Goals:
 - Sets up the pi as an access point
-- Receives/responds to TCP packets from clients
+- Receives/responds to RESTful requests from clients
 - Stores data in a database
 - A leaderboard and admin web app
 
@@ -32,10 +32,7 @@ docker-compose up
 The rules and workings of the "game" may be customized and/or modified as described in [CUSTOMIZATION.md](./CUSTOMIZATION.md).
 
 ## Todos:
-* Finish implementing goals
-  * Backend/receiving datapoints
 * Security concerns:
-  * Reimplement webapp password storage to use Bcrypt instead of just an HMAC hash; Each password should have its own salt for better security
   * Limit failed login attempts per user per time interval
     - via a database field OR (better option seems to be) using a local dictionary
 * Clean up docstrings to use Sphynx markup for parameter/return definitions
