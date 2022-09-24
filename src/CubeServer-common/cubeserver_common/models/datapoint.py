@@ -48,8 +48,6 @@ class DataClass(Enum):
 class DataPoint(PyMongoModel):
     """Models a datapoint"""
 
-    collection = PyMongoModel.mongo.db.datapoints
-
     def __init__(self, team_identifier: Optional[ObjectId] = None,
                  category: Optional[DataClass] = DataClass.COMMENT,
                  value: Optional[Any] = None,

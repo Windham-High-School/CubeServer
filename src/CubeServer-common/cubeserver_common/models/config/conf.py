@@ -12,9 +12,6 @@ class Conf(PyMongoModel):
     There will be a separate Rules object for JV and Varsity teams
     """
 
-    collection = PyMongoModel.mongo.db.get_collection('conf')
-
-
     def __init__(
         self,
         registration_open: bool = False,

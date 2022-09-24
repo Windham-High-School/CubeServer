@@ -80,8 +80,6 @@ class TeamHealth(Encodable):
 class Team(PyMongoModel):
     """Models a team"""
 
-    collection = PyMongoModel.mongo.db.get_collection('teams')
-
     @classmethod
     def _gen_secret(cls) -> str:
         """Generates a crypto-safe secret of the length defined by

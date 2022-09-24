@@ -81,7 +81,7 @@ class PyMongoModel(Encodable):
     mongo: Optional[MongoClient] = None
 
     @classmethod
-    def update_mongo_client(cls, mongo_client: MongoClient):
+    def update_mongo_client(cls, mongo_client: Optional[MongoClient]):
         """Sets the MongoClient reference in PyMongoModel, which is then
         used by any models that extend this class."""
         cls.mongo = mongo_client
@@ -94,15 +94,23 @@ class PyMongoModel(Encodable):
         return TypeRegistry([EncodableCodec(cls)])
 
     @property
-    @abstractmethod
-    def collection(self) -> Collection:
+    @classmethod
+    def collection(cls) -> Collection:
         """Define the Mongodb collection in your class.
         Use the PyMongoModel.model_type_registry as the type registry."""
+
+    @classmethod
+    def set_collection_name(cls, collection_name: str):
+        """Define the Mongodb collection in your class.
+        Use the PyMongoModel.model_type_registry as the type registry."""
+        try:
+            cls.collection = PyMongoModel.mongo.db.get_collection(collection_name)
+        except AttributeError:
+            pass
 
     def __init_subclass__(cls):
         """Note that subclasses must implement a constructor or a __new__()
         which initializes all attributes with the proper values."""
-
 
         if PyMongoModel.mongo is None:
             raise AttributeError("Dude, you forgot to initialize PyMongoModel"
@@ -122,6 +130,8 @@ class PyMongoModel(Encodable):
         # Registered fields and their corresponding TypeCodecs:
         # (None is an acceptable codec for directly bson-compatible types)
         cls._fields: Mapping[str, Optional[TypeCodec]] = {}
+
+        cls.set_collection_name(cls.__name__.lower())
 
         super().__init_subclass__()
 
