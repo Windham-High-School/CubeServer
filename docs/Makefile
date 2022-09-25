@@ -29,4 +29,4 @@ build:
 #	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(0)
 	@$(SPHINXBUILD) "$(SOURCEDIR)/../" "$(BUILDDIR)" $(SPHINXOPTS)
 
-%: clean apidoc build
+%: clean build
