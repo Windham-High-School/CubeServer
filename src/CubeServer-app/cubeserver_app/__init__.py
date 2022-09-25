@@ -43,16 +43,18 @@ else:
     from cubeserver_common.models.user import clear_bad_attempts
     from cubeserver_common.models.config.conf import Conf
 
-    def update_conf(app):
-        """Updates the conf periodically"""
+    def _update_conf(app):
+        """An update job scheduled to run every 30 seconds
+        This retrieves the latest configuration to ensure that any changes
+        are synced between server threads."""
         app.config['CONFIGURABLE'] = Conf.retrieve_instance()
 
     scheduler = APScheduler()
-    scheduler.add_job(func=update_conf, args=[app], trigger='interval', id='configsync', seconds=30)
+    scheduler.add_job(func=_update_conf, args=[app], trigger='interval', id='configsync', seconds=30)
     scheduler.add_job(func=clear_bad_attempts, trigger='interval', id='clearbadattempts', seconds=30)
     scheduler.start()
 
-    update_conf(app)
+    _update_conf(app)
 
     # Load SECRET_KEY:
     # Double-check that the secret_file is actually there...

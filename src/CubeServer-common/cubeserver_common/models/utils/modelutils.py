@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Any, List, Mapping, Optional, Tuple, Type, cast
 from pydoc import locate
+import warnings
 from bson import ObjectId
 from bson import _BUILT_IN_TYPES as BSON_TYPES
 from bson.codec_options import TypeCodec, TypeRegistry
@@ -113,8 +114,10 @@ class PyMongoModel(Encodable):
         which initializes all attributes with the proper values."""
 
         if PyMongoModel.mongo is None:
-            raise AttributeError("Dude, you forgot to initialize PyMongoModel"
-                                "with the MongoClient!")
+            warnings.warn("Buddy, you forgot to initialize PyMongoModel"
+                                "with the MongoClient!\n"
+                                "You can ignore this if it is a part of the"
+                                "Sphinx-api build process.")
 
         cls._ignored: List[str] = [
             "_id",
