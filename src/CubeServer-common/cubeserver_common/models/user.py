@@ -40,8 +40,6 @@ class UserActivation(Enum):
 class User(PyMongoModel, UserMixin):
     """Models a user"""
 
-    collection = PyMongoModel.mongo.db.users
-
     def __init__(self, name: str = "", level: UserLevel = UserLevel.SUSPENDED,
         email: Optional[str] = None, pwd: bytes = b""):
         """Creates a User object.

@@ -1,5 +1,6 @@
 """An API for logging data into the database.
 """
+from os import environ
 
 from flask import Flask
 from flask_restful import Api
@@ -10,15 +11,22 @@ from ._version import *
 
 # Create app:
 app = Flask(__name__)
-app.config['SECRET_KEY'] = check_secrets()
 app.config['CONSTANTS'] = config
 
-api = Api(app)
 
-configure_db(app)
+if all(key in environ for key in [
+    'MONGODB_USERNAME',
+    'MONGODB_PASSWORD',
+    'MONGODB_HOSTNAME',
+    'MONGODB_DATABASE'
+]): # If we aren't in the docker container or cannot see the db credentials...\
+    app.config['SECRET_KEY'] = check_secrets()
+    api = Api(app)
 
-# Attach resources:
+    configure_db(app)
 
-from cubeserver_api.resources import Data, Status  # Import after init'ing the db
-api.add_resource(Data, '/data')
-api.add_resource(Status, '/status')
+    # Attach resources:
+
+    from cubeserver_api.resources import Data, Status  # Import after init'ing the db
+    api.add_resource(Data, '/data')
+    api.add_resource(Status, '/status')

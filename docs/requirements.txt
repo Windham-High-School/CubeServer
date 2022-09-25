@@ -1,0 +1,4 @@
+sphinx==5.0.0
+readthedocs-sphinx-search==0.1.2
+nbsphinx==0.8.1
+./src/CubeServer-common/

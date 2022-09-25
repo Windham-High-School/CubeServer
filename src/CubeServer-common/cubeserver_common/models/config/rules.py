@@ -13,9 +13,6 @@ class Rules(PyMongoModel):
     There will be a separate Rules object for JV and Varsity teams
     """
 
-    collection = PyMongoModel.mongo.db.get_collection('rules')
-
-
     def __init__(
         self,
         max_strikes: int = 10,
