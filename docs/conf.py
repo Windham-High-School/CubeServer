@@ -1,5 +1,8 @@
 # Configuration file for the Sphinx documentation builder.
 
+import sphinx_rtd_theme
+
+
 # -- Project information
 
 project = 'CubeServer'
@@ -17,6 +20,8 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
+    'nbsphinx',
+    'sphinx_rtd_theme'
 ]
 
 intersphinx_mapping = {
