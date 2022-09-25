@@ -7,7 +7,6 @@ Table of Contents
 ^^^^^^^^^^^^^^^^^
 .. toctree::
 
-   index.rst
    source/cubeserver_common
    source/cubeserver_api
    source/cubeserver_app
