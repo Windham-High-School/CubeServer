@@ -6,9 +6,9 @@
 from sphinx.ext.apidoc import main
 
 # -- APIDOC
-main(['../src/CubeServer-app/cubeserver_app/', '-o', './source/'])
-main(['../src/CubeServer-api/cubeserver_api/', '-o', './source/'])
-main(['../src/CubeServer-common/cubeserver_common/', '-o', './source/'])
+main(['../src/CubeServer-app/cubeserver_app/', '-o', './codedocs/cubeserver_app'])
+main(['../src/CubeServer-api/cubeserver_api/', '-o', './codedocs/cubeserver_api'])
+main(['../src/CubeServer-common/cubeserver_common/', '-o', './codedocs/cubeserver_common'])
 
 # -- Project information
 
