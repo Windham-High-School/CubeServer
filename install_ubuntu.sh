@@ -8,12 +8,18 @@ SOFTWARE_NAME="CubeServer"
 INTERACTIVE_BACKTITLE="${SOFTWARE_NAME} Installation Script by Joseph R. Freeston"
 
 
+# Check root:
+if [[ ${UID} -gt 0 ]] ; then
+    echo "You must run this script as root."
+    exit
+fi
+
 # Update:
-sudo apt-get update
+apt-get update
 
 # Check if interactive shell:
 INTERACTIVE=0
-[ -t 0 ] && INTERACTIVE=1 && sudo apt-get install dialog
+[ -t 0 ] && INTERACTIVE=1 && apt-get install dialog
 
 
 pipe_output () {
@@ -26,14 +32,14 @@ message () {
 
 prepare () {    # Install Docker and Docker-Compose
     message "Installing Dependencies" "Installing docker and docker-compose..."
-    sudo apt-get -y install curl gnupg ca-certificates lsb-release
-    sudo mkdir -p /etc/apt/keyrings
-    echo "Downloading keyring..." && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu   $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    sudo apt-get update | pipe_output "Updating Package Lists"
-    sudo apt-get -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose | pipe_output "Installing Docker"
+    apt-get -y install curl gnupg ca-certificates lsb-release
+    mkdir -p /etc/apt/keyrings
+    echo "Downloading keyring..." && curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu   $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    apt-get update | pipe_output "Updating Package Lists"
+    apt-get -y install docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose | pipe_output "Installing Docker"
     message "Preparing docker..."
-    sudo gpasswd -a $USER docker
+    gpasswd -a $USER docker
 }
 
 build () {
@@ -65,5 +71,9 @@ ExecStop=$(which docker-compose) -f docker-compose.yml down
 [Install]
 WantedBy=multi-user.target
 EOF
-    sudo systemctl enable cubeserver.service"
+    systemctl enable cubeserver.service
 }
+
+prepare
+build
+install
