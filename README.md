@@ -23,7 +23,23 @@ Note that these goals are not yet fully implemented.
 - Upon approval by an Admin, these teams will be added to the leaderboard
 
 ## Building/running:
-Use Docker-Compose to build and run:
+
+### The Easy Way-
+Use the Ubuntu install script:
+```bash
+git clone https://github.com/snorklerjoe/CubeServer
+cd CubeServer
+sudo ./install_ubuntu.sh
+```
+This will install a Systemd service for the server and everything will be automatic and work... Unless it doesn't.
+
+--------------------------------------------------------------------------
+### The Hard Way-
+Install Docker dependency-
+```bash
+sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose
+```
+Then use Docker-Compose to build and run:
 ```bash
 docker-compose build
 docker-compose up
