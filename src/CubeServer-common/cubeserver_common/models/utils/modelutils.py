@@ -75,7 +75,10 @@ class Encodable(_Encoder):
     def decode(cls, value: dict) -> _Encoder:
         """Decodes a dictionary into an Encodable object"""
 
-class PyMongoModel(Encodable):
+class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
+                                #  AutoEncodable superclass that implements
+                                #  encode() and decode() for non-document
+                                #  objects.
     """A class for easy object-mapping to bson.
     Extend this class for any classes that describe a type of document."""
 
