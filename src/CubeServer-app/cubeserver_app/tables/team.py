@@ -24,7 +24,6 @@ class AdminTeamTable(Table):
     status          = DropDownEnumCol('Status', TeamStatus)
     members_str     = Col('Members')  # TODO: Perhaps employ a nested table to list members of a group
     score           = Col('Score')
-    strikes         = Col('Strikes')
     secret          = Col('Secret')
     id              = OptionsCol('Options')
 
@@ -50,7 +49,6 @@ class LeaderboardTeamTable(Table):
     members_names_str = Col('Members')
     weight_class    = EnumCol('Division')
     score           = Col('Score')
-    strikes         = Col('Strikes')
     status          = EnumCol('Status')
 
     def __init__(self, items: List[Team], **kwargs):
