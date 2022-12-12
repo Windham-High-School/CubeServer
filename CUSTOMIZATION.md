@@ -12,4 +12,12 @@ To customize the game rules and elements beyond the options available in the adm
 
 - [team.py](./src/CubeServer-common/cubeserver_common/models/team.py)
 
-    This file defines the model classes for storing team data, laying out the structure for what applies to individual teams
+    This file defines the model classes for storing team data, laying out the structure for what applies to individual teams.
+
+- [rules.py](./src/CubeServer-common/cubeserver_common/models/config/rules.py)
+
+    This file defines the model class for storing the game ruleset, and handles the actual scoring of points.
+
+- [scoring](./src/CubeServer-common/cubeserver_common/models/scoring/)
+
+    This package contains miscellaneous scoring utility classes, such as for calculating multipliers.

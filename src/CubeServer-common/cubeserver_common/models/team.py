@@ -23,6 +23,8 @@ class TeamLevel(Enum):
         """Forms a string representation of a TeamLevel value"""
         return self.value
 
+# Import after TeamLevel 
+from cubeserver_common.models.multiplier import Multiplier, DEFAULT_MULTIPLIER
 
 @unique
 class TeamStatus(Enum):
@@ -45,35 +47,61 @@ class TeamStatus(Enum):
 
 class TeamHealth(Encodable):
     """Encapsulates the elements of the game that relate to a
-    team's health and rank
-    i.e. score and strike counts, etc."""
+    team's "health" and rank
+    
+    Elements of "health" include...
+        * score - The score of the team as last calculated
+        * last_score - The score of the team before the most recently
+            added points
+        * strikes - Generally unused; exists for compatibility
+        * multiplier - Per-team value to scale every added point value
+    """
 
-    def __init__(self, score: int = 0, strikes: int = 0):
+    def __init__(self, score: int = 0, strikes: int = 0, multiplier: float = 1.0):
         self.score = score
+        self.last_score = 0
         self.strikes = strikes
+        self.multiplier = multiplier
         super().__init__()
 
     def __eq__(self, other):
         if isinstance(other, TeamHealth):
-            return self.score == other.score and self.strikes == other.strikes
+            return self.encode() == other.encode()
         return False
 
     def reward(self, points = 1):
         """Rewards a given number of points (default is 1)"""
+        if points < 0:  # Separate reward/penalize methods for expandability
+            raise ValueError("Use penalize for removing points.")
+        self.last_score = self.score
         self.score += points
+
+    def penalize(self, points = 1):
+        """Removes a given number of points (default is 1)"""
+        if points < 0:  # "
+            raise ValueError("Use reward for adding points.")
+        self.last_score = self.score
+        self.score -= points
 
     def strike(self):
         """Doles out a strike!"""
         self.strikes += 1
 
-    def encode(self) -> dict:
-        return {"score": self.score, "strikes": self.strikes}
+    def encode(self) -> dict:  # TODO: Replaced by AutoEncodable when written
+        return {
+            "score": self.score,
+            "strikes": self.strikes,
+            "lastScore": self.last_score,
+            "multiplier": self.multiplier
+        }
 
     @classmethod
     def decode(cls, value: dict):
         health = cls()
         health.score = value["score"]
         health.strikes = value["strikes"]
+        health.last_score = value["lastScore"]
+        health.multiplier = value["multiplier"]
         return health
 
 
@@ -90,7 +118,8 @@ class Team(PyMongoModel):
     def __init__(self, name: str = "",
                  weight_class: Optional[TeamLevel] = TeamLevel.PSYCHO_KILLER,
                  health: TeamHealth = TeamHealth(),
-                 status: TeamStatus = TeamStatus.UNAPPROVED):
+                 status: TeamStatus = TeamStatus.UNAPPROVED,
+                 multiplier: Multiplier = DEFAULT_MULTIPLIER):
         super().__init__()
         self.name = name
         self.weight_class = weight_class
@@ -98,6 +127,7 @@ class Team(PyMongoModel):
         self.status = status
         self.health = health
         self.secret = Team._gen_secret()
+        self.multiplier = multiplier
 
     def add_member(self, member: User):
         """Adds a member (a User object) to the team"""

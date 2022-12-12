@@ -189,10 +189,13 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
         The value does not need to be specified ONLY IF a custom_codec is
         provided.
         This method returns immediately if a field with the given name is
-        already registered."""
+        already registered.
+        The force parameter allows you to force the registration of a field
+        despite checks failing or the type appearing to be bson-compatible"""
         if attr_name in self._fields:
             return
         codec = custom_codec
+        # TODO: Check recursively for bson compat- there can be dicts of enums for ex
         if codec is None and \
            value is not None and \
            type(value) not in BSON_TYPES and \
@@ -211,7 +214,9 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
             self.register_codec(codec)
         if codec is None and type(value) in self._codecs:
             codec = self._codecs[type(value)]
-        self._fields[attr_name] = codec
+        if value is not None:  # Also set the value while we're at it:
+            self._setattr_shady(attr_name, value)
+        self._fields[attr_name] = codec  # Register the field!
 
     def encode(self) -> dict:
         """Encodes this into a dictionary for BSON to be happy"""

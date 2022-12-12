@@ -1,4 +1,4 @@
-"""Handles any point multipliers that may apply
+"""Handles any point multipliers that may apply to a team
 """
 
 from abc import ABC
@@ -6,10 +6,16 @@ from enum import unique, Enum
 from typing import Any
 
 from cubeserver_common.models.utils.modelutils import Encodable
+from cubeserver_common.models.utils.dummycodec import DummyCodec
+from cubeserver_common.models.utils.enumcodec import EnumCodec
 from cubeserver_common.models.team import TeamLevel
 
 class IndivMultiplier(Encodable, ABC):
     """Describes an individual multiplier factor"""
+
+    def __init_subclass__(cls, *, amt_codec=DummyCodec(float)) -> None:
+        cls.amt_codec = amt_codec
+        return super().__init_subclass__()
 
     def __init__(self, value:float=1.0, amt:Any=0):
         super().__init__()
@@ -17,14 +23,23 @@ class IndivMultiplier(Encodable, ABC):
         self.amt = amt
 
     def encode(self) -> dict:
-        return {"value": self.value, "amt": self.amt}
+        return {
+            "value": self.value,
+            "amt": self.amt_codec.transform_python(self.amt)
+        }
 
     @classmethod
     def decode(cls, value: dict):
-        i_m = cls()
+        i_m = cls.__new__(cls)
         i_m.value = value['value']
-        i_m.amt = value['amt']
+        i_m.amt = cls.amt_codec.transform_bson(value['amt'])
         return i_m
+
+    def __str__(self) -> str:
+        if type(self.value) == float:
+            return "{:.2f}".format(self.value)
+        return str(self.value)
+
 
 class CostMultiplier(IndivMultiplier):
     """Describes the multiplier associated with excess monetary spending"""
@@ -66,7 +81,7 @@ class VolumeUnit(Enum):
     XL = 7
 
 
-class VolumeMultiplier(IndivMultiplier):
+class VolumeMultiplier(IndivMultiplier, amt_codec=EnumCodec(VolumeUnit, int)):
     """Describes the multiplier associated with different size profiles"""
 
     def __init__(self, level: TeamLevel, bounding_box: VolumeUnit):
@@ -88,28 +103,44 @@ class VolumeMultiplier(IndivMultiplier):
             bounding_box
         )
 
-class Multiplier(Encodable, list[IndivMultiplier]):
+class Multiplier(Encodable):
     """Describes the total multiplier of a team"""
 
     def __init__(
         self,
-        multipliers: list[IndivMultiplier]
+        cost_mult: CostMultiplier,
+        mass_mult: MassMultiplier,
+        vol_mult: VolumeMultiplier
     ):
         super().__init__()
-        self.extend(multipliers)
+        self.cost_mult = cost_mult
+        self.mass_mult = mass_mult
+        self.vol_mult = vol_mult
 
     @property
     def amount(self):
         """Calculates the product multiplier"""
-        product = 1.00
-        for mult in self:
-            product *= mult.value
+        product = self.cost_mult.value * self.mass_mult.value * self.vol_mult.value
         return product
 
     def encode(self) -> dict:
-        return {"indivs": self}
+        return {
+            "cost": self.cost_mult.encode(),
+            "mass": self.mass_mult.encode(),
+            "vol":  self.vol_mult.encode()
+        }
 
     @classmethod
     def decode(cls, value: dict):
-        mult = cls(value['indivs'])
+        mult = cls(
+            CostMultiplier.decode(value['cost']),
+            MassMultiplier.decode(value['mass']),
+            VolumeMultiplier.decode(value['vol'])
+        )
         return mult
+
+DEFAULT_MULTIPLIER = Multiplier(
+            CostMultiplier(TeamLevel.JUNIOR_VARSITY, 0.0),
+            MassMultiplier(TeamLevel.JUNIOR_VARSITY, 0.0),
+            VolumeMultiplier(TeamLevel.JUNIOR_VARSITY, VolumeUnit.M)
+        )

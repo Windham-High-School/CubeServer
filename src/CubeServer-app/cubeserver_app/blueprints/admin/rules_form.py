@@ -5,15 +5,13 @@ from wtforms import StringField, SubmitField, BooleanField
 from wtforms.validators import DataRequired
 from wtforms.widgets import TextArea
 
-from cubeserver_common.models.config.conf import Conf
 
-class ConfigurationForm(FlaskForm):
-    """Defines the form used to register a new user
-    from the admin panel"""
 
-    registration_open = BooleanField("Team registration open?")
-    home_description = StringField(
-        "Home page description (use standard HTML):",
+class RulesForm(FlaskForm):
+    """Defines the form used to edit the game rules"""
+
+    json_str = StringField(
+        "Game Rules (raw JSON Representation; USE PROPER SYNTAX and CAUTION)",
         validators=[DataRequired()],
         widget=TextArea())
     submit = SubmitField('Save')

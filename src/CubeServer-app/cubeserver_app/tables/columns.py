@@ -2,7 +2,7 @@
 
 from enum import Enum
 from typing import List, Mapping, Optional, Tuple
-from flask import render_template_string
+from flask import render_template_string, url_for
 from flask_table import Col, html
 from flask_wtf import FlaskForm
 from wtforms import SelectField, HiddenField, SubmitField
@@ -53,6 +53,15 @@ class EnumCol(Col):
         if content:
             return content.value
         return ""
+
+class TeamNameCol(Col):
+    """A column for team names"""
+    def td_format(self, content):
+        return f"<b><a href='{url_for('home.team_info', team_name=content)}'>{content}</a></b>"
+class AdminTeamNameCol(Col):
+    """A column for team names"""
+    def td_format(self, content):
+        return f"<b><a href='{url_for('admin.team_info', team_name=content)}'>{content}</a></b>"
 
 
 # TODO: Add CSRF protection to these forms
