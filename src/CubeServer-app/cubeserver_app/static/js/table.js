@@ -6,49 +6,59 @@
 // Render nice-looking tables with DataTables:
 $(document).ready( function () {
     $('.datatable:not(.leaderboardtable):not(.datapoints-table)').DataTable( {
-        colReorder: {
-            enable: false
-        },
+        buttons: [
+            'colvis', 'copy', 'csv', 'pdf', 'print'
+        ],
+        dom: 'Bfrtip',
+        responsive: true,
         lengthMenu: [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "All"] ],
         scrollY: true,
         scrollCollapse: true,
         scrollX: true,
         autoWidth : true,
-        fixedColumns:   {
-            "leftColumns": 1
-        },
+        //fixedColumns:   {
+        //    "leftColumns": 1
+        //},
+        //fixedHeader: true,
         keepConditions: true
     } );
 
     $('.leaderboardtable').DataTable( {
         order: [[3, 'desc'], [4, 'asc']],
-        colReorder: {
-            enable: false
-        },
+        dom: 'Bfrtip',
+        buttons: [
+            'colvis', 'copy', 'csv', 'pdf', 'print'
+        ],
         lengthMenu: [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "All"] ],
+        colReorder: true,
+        responsive: true,
         scrollY: true,
         scrollCollapse: true,
         scrollX: true,
         autoWidth : true,
-        fixedColumns:   {
-            "leftColumns": 1
-        },
+        //fixedColumns:   {
+        //    "leftColumns": 1
+        //},
+        //fixedHeader: true,
         keepConditions: true
     } );
 
     $('.datapoints-table').DataTable( {
+        dom: 'Bfrtip',
         order: [[0, 'desc']],
-        colReorder: {
-            enable: false
-        },
+        buttons: [
+            'colvis', 'copy', 'csv', 'pdf', 'print'
+        ],
+        responsive: true,
         lengthMenu: [ [5, 10, 25, 50, 100, -1], [5, 10, 25, 50, 100, "All"] ],
         scrollY: true,
         scrollCollapse: true,
         scrollX: true,
         autoWidth : true,
-        fixedColumns:   {
-            "leftColumns": 1
-        },
+        //fixedColumns:   {
+        //    "leftColumns": 1
+        //},
+        //fixedHeader: true,
         keepConditions: true
     } );
 

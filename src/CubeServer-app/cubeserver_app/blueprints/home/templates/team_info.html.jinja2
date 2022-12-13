@@ -1,0 +1,25 @@
+{% extends "base.html.jinja2" %}
+{% block title %}{{team.name}}{% endblock %}
+
+{% block header %}
+    <h3>{{team.name}}-</h3>
+    <p class="px-2 alert alert-primary">{{team.members_str}}</p>
+    <p class="px-2 alert alert-primary">{{team.status.value}} <b>{{team.weight_class.value}}</b></p>
+
+    <h2>Score: {{team.score}}</h2>
+
+    <p class="alert alert-info">Multiplier: {{team.multiplier.cost_mult}} X {{team.multiplier.mass_mult}} X {{team.multiplier.vol_mult}}
+    <hr>
+    <b>{{team.multiplier.amount}}</b>
+    </p>
+
+    <hr>
+    <h4>Score Tally:</h4>
+    {{table}}
+{% endblock %}
+
+{% block content %}
+    <div class="alert alert-info">
+        <p>lorem ipsum</p>
+    </div>
+{% endblock %}

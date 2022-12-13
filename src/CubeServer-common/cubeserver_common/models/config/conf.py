@@ -24,5 +24,5 @@ class Conf(PyMongoModel):
     # The initial instance is created in cubeserver_common/__init__.py
     @staticmethod
     def retrieve_instance() -> PyMongoModel:
-        """Retrieves the current ruleset"""
+        """Retrieves the current config"""
         return Conf.find_one()

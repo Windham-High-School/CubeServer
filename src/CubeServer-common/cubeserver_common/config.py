@@ -17,6 +17,7 @@ from hashlib import algorithms_available
 
 
 # Default Credentials:
+
 DEFAULT_ADMIN_USERNAME: str = "admin"
 """This is the default first user"""
 
@@ -26,6 +27,7 @@ This can be changed after the first login."""
 
 
 # User interface stuff:
+
 CREDITS: str = "Joseph R. Freeston, Ryan Burbo"
 """The development credits to be shown in the about page
     (Add your own name here if you contributed!!!) """
@@ -35,24 +37,37 @@ DEFAULT_THEME: str = "quartz"
 
 
 
+# Scoring Scheme:
+# For more config, check out the cubeserver_common.scoring package
+#   and cubeserver_common.models.config.rules
+
+
+
+# Emails:
+
+FROM_NAME: str = "The Project CubeServer"
+"""The name with which most emails will be sent"""
+
+FROM_ADDR: str = "noreply@whsproject.club"
+"""The address from which most emails will be sent"""
+
+
+
 # Contest names:
 
-SHORT_TITLE: str = "CubeServer"
+SHORT_TITLE: str = "The Project"
 """A short name that describes this software more than the prize"""
 
-LONG_TITLE: str = "The JagSat Prize"
+LONG_TITLE: str = "The Project"
 """A longer name that describes the prize. This should still be succinct."""
 
-DEFAULT_HOME_DESCRIPTION: str = "Thunder. Time. Tech.\nTeams compete with data to win."
+DEFAULT_HOME_DESCRIPTION: str = "Thunder. Time. Tech.<br>\nTeams compete with data to win."
 """A brief description of this whole thing which will appear on the home page
 This can be changed by an admin user at any point during the competition!"""
 
 
 
 # Teams:
-
-TEAM_MIN_MEMBERS: int = 2
-"""Minimum number of members to make a team"""
 
 TEAM_MAX_CHARS: int = 30
 """Maximum number of characters in a team name"""

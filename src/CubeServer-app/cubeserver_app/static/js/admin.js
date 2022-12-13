@@ -12,7 +12,7 @@ This action is PERMANANT and CANNOT BE UNDONE!`;
     var secondConfirmationMessage = `FINAL CHANCE-- There's no going back after this!\n
 Are you ABSOLUTELY CERTAIN?`;
     if (confirm(confirmationMessage) && confirm(secondConfirmationMessage)) {
-        $.ajax({
+        $.ajax({  // TODO: Generate these URLs better so stuff is less likely to break:
             url: `table_endpoint/${item}/${id}/*`,
             type: 'DELETE',
             success: function(result) {
