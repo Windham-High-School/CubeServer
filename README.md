@@ -45,6 +45,11 @@ docker-compose build
 docker-compose up
 ```
 
+To permanantly reset the installation to the defaults and erase ALL data, run the following:
+```bash
+docker-compose down && docker volume rm cubeserver_mongodb-data cubeserver_api-ssl-cert cubeserver_flask-secret
+```
+
 ## Customization:
 The rules and workings of the "game" may be customized and/or modified as described in [CUSTOMIZATION.md](./CUSTOMIZATION.md).
 

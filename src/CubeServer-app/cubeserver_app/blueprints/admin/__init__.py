@@ -1,22 +1,33 @@
 """Flask blueprint managing the administration side of the application"""
 
+# TODO: Restructure blueprint files- This whole thing is an absolute mess!
+
 from datetime import timedelta
 from math import floor
 from bson import ObjectId
 from flask import abort, Blueprint, render_template, request, url_for, current_app
 from flask_login import current_user, login_required
 from uptime import uptime
+import traceback
+import base64
+
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.datapoint import DataPoint
 from cubeserver_common.models.utils import EnumCodec
 from cubeserver_common.models.team import Team
 from cubeserver_common.models.user import User, UserLevel
+from cubeserver_common.models.multiplier import Multiplier, MassMultiplier, VolumeMultiplier, CostMultiplier, VolumeUnit
+from cubeserver_common.mail import Message
+from cubeserver_common.models.reference import ReferencePoint
 from cubeserver_app.tables.team import AdminTeamTable
 from cubeserver_app.tables.users import AdminUserTable
 from cubeserver_app.tables.datapoints import AdminDataTable
 
 from .user_form import InvitationForm
 from .config_form import ConfigurationForm
+from .rules_form import RulesForm
+from .multiplier_form import MultiplierForm, SIZE_NAME_MAPPING
+from .email_form import EmailForm
 
 bp = Blueprint(
     'admin',
@@ -40,6 +51,8 @@ def admin_home():
     db_conf = Conf.retrieve_instance()
     conf_form.registration_open.data = db_conf.registration_open
     conf_form.home_description.data = db_conf.home_description
+    conf_form.smtp_credentials.data = f"{db_conf.smtp_user}:{db_conf.smtp_pass}"
+    conf_form.smtp_server.data = db_conf.smtp_server
 
     # Render the template:
     return render_template(
@@ -128,6 +141,11 @@ def conf_change():
         db_conf = Conf.retrieve_instance()
         db_conf.registration_open = form.registration_open.data
         db_conf.home_description = form.home_description.data
+        db_conf.smtp_server = form.smtp_server.data
+        credentials = form.smtp_credentials.data.strip().split(':')
+        if len(credentials) > 1:
+            db_conf.smtp_user = credentials[0]
+            db_conf.smtp_pass = credentials[1]
         db_conf.save()
         current_app.config['CONFIGURABLE'] = db_conf
         return render_template('redirect_back.html.jinja2')
@@ -153,4 +171,138 @@ def data_table():
     return render_template(
         'data_table.html.jinja2',
         table = table.__html__()
+    )
+
+@bp.route('/refdata')
+@login_required
+def reference_data_table():
+    """Shows all of the reference data in a big table"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    table = AdminDataTable(ReferencePoint.find())
+    # Render the template:
+    return render_template(
+        'data_table.html.jinja2',
+        table = table.__html__()
+    )
+
+@bp.route('/settings')
+@login_required
+def game_settings():
+    """Allows the admin user to edit game parameters
+    that have to do with scoring and stuff"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    form = RulesForm()
+    form.json_str.data = Rules.retrieve_instance().to_json()
+    # Render the template:
+    return render_template(
+        'game_settings.html.jinja2',
+        config_form = form
+    )
+
+@bp.route('/settingschange', methods=['POST'])
+@login_required
+def settings_change():
+    """Modifies the game settings"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    form = RulesForm()
+    if form.validate_on_submit():
+#        db_conf = Rules.retrieve_instance()
+        try:
+            db_conf = Rules.from_json(form.json_str.data)
+            db_conf.save()
+        except:  # TODO: Is this poor practice?
+            tb = traceback.format_exc()
+            print(tb)
+            return render_template('errorpages/500.html.jinja2', message=tb)
+        return render_template('redirect_back.html.jinja2')
+    return abort(500)
+
+@bp.route('/team/<team_name>')
+@login_required
+def team_info(team_name: str = ""):
+    """A page showing team info & score tally"""
+    # Look-up the team:
+    team = Team.find_by_name(team_name)
+    if team is None:
+        return abort(400)
+    # Generate data table:
+    data_table = AdminDataTable(DataPoint.find())
+    # Multiplier editing form:
+    form = MultiplierForm()
+    form.team_id.data = str(team._id)
+    form.size.data = team.multiplier.vol_mult.amt
+    form.cost.data = team.multiplier.cost_mult.amt
+    form.mass.data = team.multiplier.mass_mult.amt
+    # Render the template
+    return render_template(
+        'team_edit.html.jinja2',
+        team=team,
+        table=data_table.__html__(),
+        mult_form=form,
+        emails=base64.urlsafe_b64encode(
+            ', '.join(team.emails).encode()
+        )
+    )
+
+@bp.route('/multiplier', methods=['POST'])
+@login_required
+def multiplier_change():
+    """Modifies a team's multiplier"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    form = MultiplierForm()
+    if form.validate_on_submit():
+#        db_conf = Rules.retrieve_instance()
+        try:
+            team = Team.find_by_id(form.team_id.data)
+            team.multiplier = Multiplier(
+                CostMultiplier(team.weight_class, form.cost.data),
+                MassMultiplier(team.weight_class, form.mass.data),
+                VolumeMultiplier(team.weight_class,
+                    VolumeUnit(SIZE_NAME_MAPPING[form.size.data])
+                )
+            )
+            team.save()
+        except:  # TODO: Is this poor practice?
+            tb = traceback.format_exc()
+            print(tb)
+            return render_template('errorpages/500.html.jinja2', message=tb)
+        return render_template('redirect_back.html.jinja2')
+    return abort(500)
+
+
+@bp.route('/mail', methods=['GET', 'POST'],
+    defaults={'recipients': base64.urlsafe_b64encode(b'')})
+@bp.route('/mail/<recipients>', methods=['GET', 'POST'])
+@login_required
+def email(recipients):
+    """Sends an email.
+    Optionally:
+    Autofill the form with a base64-encoded comma-separated list of recipients
+    """
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    form = EmailForm()
+    if form.validate_on_submit():
+        msg = Message(
+            form.name.data,
+            form.addr.data,
+            form.to.data.replace(' ', '').split(','),
+            form.subject.data,
+            form.message.data
+        )
+        msg.send()
+        return render_template('redirect_back.html.jinja2')
+    form.to.data = base64.urlsafe_b64decode(recipients).decode()
+    return render_template(
+        'sendmail.html.jinja2',
+        mail_form = form
     )

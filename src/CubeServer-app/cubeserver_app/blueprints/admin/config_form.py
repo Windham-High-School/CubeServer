@@ -16,4 +16,6 @@ class ConfigurationForm(FlaskForm):
         "Home page description:",
         validators=[DataRequired()],
         widget=TextArea())
-    submit = SubmitField('Update')
+    smtp_server = StringField("SMTP Server Address", validators=[DataRequired()])
+    smtp_credentials = StringField("SMTP Credentials as user:pass")
+    submit = SubmitField('Save')

@@ -117,6 +117,11 @@ class Team(PyMongoModel):
         return [User.find_by_id(member_id) for member_id in self._members]
 
     @property
+    def emails(self) -> List[str]:
+        """Returns this team's email list"""
+        return [user.email for user in self.members]
+
+    @property
     def members_str(self) -> str:
         """Returns a human-readable string listing representations
         of the members"""

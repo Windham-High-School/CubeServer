@@ -3,9 +3,14 @@
 
 {% block header %}
     <h4>Register a Team!</h4>
+    <p>
+        Please make sure this information is correct <i>before</i> submitting-
+        This information <i>cannot</i> be changed without contacting an admin user.
+    </p>
 {% endblock %}
 
 {% block content %}
+    {# TODO: Make this form render prettier: #}
     {{ wtf.quick_form(form, button_map={'submit_button': 'primary'}) }}
 
     {% if form.team_name.errors %}

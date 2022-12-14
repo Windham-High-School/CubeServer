@@ -29,6 +29,8 @@ services:
       - API_ADDR=${API_ADDR}
       - API_ALT_ADDR=${API_ALT_ADDR}
       - API_PORT=${API_PORT}
+      # Flask stuff:
+      - SERVER_NAME=${DOMAIN}
     ports: # Bind the port for the web server
       - "${WEBAPP_PORT}:80"
     depends_on:
@@ -58,6 +60,8 @@ services:
       - MONGODB_USERNAME=flask
       - MONGODB_HOSTNAME=mongodb
       - MONGODB_PASSWORD=${MONGODB_PWD}
+      # Flask stuff:
+      - SERVER_NAME=${DOMAIN}
     ports: # Bind the port for the web server
       - "${API_PORT}:443"
     depends_on:
