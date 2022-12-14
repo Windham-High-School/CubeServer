@@ -14,6 +14,7 @@ import base64
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.datapoint import DataPoint
 from cubeserver_common.models.utils import EnumCodec
+from cubeserver_common.models.config.rules import Rules
 from cubeserver_common.models.team import Team
 from cubeserver_common.models.user import User, UserLevel
 from cubeserver_common.models.multiplier import Multiplier, MassMultiplier, VolumeMultiplier, CostMultiplier, VolumeUnit

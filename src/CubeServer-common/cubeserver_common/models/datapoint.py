@@ -16,20 +16,22 @@ __all__ = ['DataPoint', 'DataClass']
 class DataClass(Enum):
     """Enumerates the different data categories"""
     TEMPERATURE = "temperature"
-    HUMIDITY = "humidity"
     PRESSURE = "pressure"
-    LIGHT_INTENSITY = "light intensity"
     COMMENT = "comment"
+    SIGNAL_LIGHT = "signal"
+#    HUMIDITY = "humidity"
+#    LIGHT_INTENSITY = "light intensity"
 
     @property
     def datatype(self) -> type:
         """Returns the Python type for this category of data"""
         return {
             DataClass.TEMPERATURE: float,
-            DataClass.HUMIDITY: float,
+#            DataClass.HUMIDITY: float,
             DataClass.PRESSURE: float,
-            DataClass.LIGHT_INTENSITY: float,
-            DataClass.COMMENT: str
+#            DataClass.LIGHT_INTENSITY: float,
+            DataClass.COMMENT: str,
+            DataClass.SIGNAL_LIGHT: bool
         }[self]
 
     @property
@@ -38,12 +40,28 @@ class DataClass(Enum):
         with this class of data"""
         return {  # These values align with those in the API wrapper libs:
             DataClass.TEMPERATURE: "\N{DEGREE SIGN}F",
-            DataClass.HUMIDITY: "%",
+#            DataClass.HUMIDITY: "%",
             DataClass.PRESSURE: "inHg",
-            DataClass.LIGHT_INTENSITY: "lux",
-            DataClass.COMMENT: ""
+#            DataClass.LIGHT_INTENSITY: "lux",
+            DataClass.COMMENT: "",
+            DataClass.SIGNAL_LIGHT: ""
         }[self]
+    
+    @property
+    @classmethod
+    def measurable(cls):
+        """Returns all measurable types of data (not COMMENT, etc)"""
+        m = []
+        for dataclass in cls:
+            if dataclass != cls.COMMENT:
+                m.append(dataclass)
+        return m
 
+    @property
+    @classmethod
+    def manual(cls):
+        """Returns all types of data that are determined manually"""
+        return [cls.SIGNAL_LIGHT]
 
 class DataPoint(PyMongoModel):
     """Models a datapoint"""
@@ -51,7 +69,8 @@ class DataPoint(PyMongoModel):
     def __init__(self, team_identifier: Optional[ObjectId] = None,
                  category: Optional[DataClass] = DataClass.COMMENT,
                  value: Optional[Any] = None,
-                 date: Optional[datetime] = None):
+                 date: Optional[datetime] = datetime.now(),
+                 is_reference: bool = False):
         """Creates a DataPoint object from a category and value
         Specify a team_identifier (the id of the team that posted these data)
         """
@@ -64,6 +83,9 @@ class DataPoint(PyMongoModel):
         self.moment = date
         if self.moment is None:
             self.moment = datetime.now()
+        self.is_reference = is_reference
+        self.rawscore = 0.0
+        self.multiplier = 1.0
 
     @property
     def value_with_unit(self):
@@ -85,3 +107,7 @@ class DataPoint(PyMongoModel):
     @property
     def team_str(self):
         return Team.find_by_id(self.team_reference).name
+
+    @property
+    def score(self):
+        return self.rawscore * self.multiplier

@@ -13,7 +13,7 @@ class ConfigurationForm(FlaskForm):
 
     registration_open = BooleanField("Team registration open?")
     home_description = StringField(
-        "Home page description:",
+        "Home page description (use standard HTML):",
         validators=[DataRequired()],
         widget=TextArea())
     smtp_server = StringField("SMTP Server Address", validators=[DataRequired()])

@@ -17,10 +17,12 @@ class EnumCodec(TypeCodec):
     *This assumes the Enum only contains primitive/built-in/bson-compatible
     types*"""
 
-    def __init__(self, enum_class: Type[Enum], value_class: type):
+    def __init__(self, enum_class: Type[Enum], value_class: type = ...):
         """Specify the enum class to encode/decode
         and the type of the Enum's values.
         The value class MUST be DIRECTLY bson-compatible!"""
+        if value_class is ...:  # If we need to figure that out...
+            value_class = type(next(iter(enum_class)).value)
         assert value_class in BSON_TYPES, \
             "Enum values must be DIRECTLY bson-compatible."
         assert all(isinstance(val.value, value_class) for val in enum_class), \

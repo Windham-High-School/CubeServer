@@ -7,10 +7,12 @@ from is_safe_url import is_safe_url
 from cubeserver_common.config import DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_PASSWORD
 from cubeserver_common.models.team import Team, TeamStatus
 from cubeserver_common.models.user import User, UserLevel
+from cubeserver_common.models.datapoint import DataPoint
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_app.tables.team import LeaderboardTeamTable
 from cubeserver_app.blueprints.home.activation_form import UserActivationForm
 from cubeserver_app.blueprints.home.login_form import LoginForm
+from cubeserver_app.tables.datapoints import LeaderboardDataTable
 
 bp = Blueprint('home', __name__, url_prefix='/', template_folder='templates')
 
@@ -34,6 +36,20 @@ def leaderboard():
     return render_template(
         'leaderboard.html.jinja2',
         teams_table = teams_table.__html__()
+    )
+
+@bp.route('/team/<team_name>')
+def team_info(team_name: str = ""):
+    """A page showing team info & score tally"""
+    # Look-up the team:
+    team = Team.find_by_name(team_name)
+    if team is None:
+        return abort(400)
+    data_table = LeaderboardDataTable(DataPoint.find())
+    return render_template(
+        'team_info.html.jinja2',
+        team=team,
+        table=data_table
     )
 
 @bp.route('/activate', methods=['GET', 'POST'])

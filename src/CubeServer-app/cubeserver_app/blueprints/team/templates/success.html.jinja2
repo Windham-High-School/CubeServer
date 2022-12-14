@@ -8,16 +8,16 @@
 {% block content %}
     <div>
         <h3>Success!</h3>
-        <p class="alert alert-warning">
-            You must choose one of the following options before closing your browser or your microcontroller will be locked from posting data!
-        </p>
-
-        <a href={{ url_for('config.index') }}><h4>See easiest programming options</h4></a>
+        
+        <a href={{ url_for('config.index') }}><h4>Clickety Click Right Here to Get Started!</h4></a>
         <hr>
         <h2>Good Luck!</h2>
+        <br><br><br><br><br><br>
         <hr>
-        <h3>No, I'm an advanced user and want to do stuff my self:</h3>
-        <div class="alert alert-info">
+        <div class="alert alert-info" style="display: none;">
+        <!-- Good on you if you look at the HTML.
+        Here's some crap from a distant past that I didn't want to throw away so I hid it here: -->
+        <h4>Advanced Information (for advanced programmers):</h4>
             <h4>Your secret identifier is</h4>
             <h1 class="alert alert-warning">{{secret}}</h1>
             <p>Use this in your code</p>
@@ -51,8 +51,9 @@
 {% block scripts %}
 {{ super() }}
 <script>
-    window.addEventListener('beforeunload', (event) => {
-      event.returnValue = `Select an option or your team will be locked!`;
-    });
+// Don't need this anymore:
+//    window.addEventListener('beforeunload', (event) => {
+//      event.returnValue = `Select an option or your team will be locked!`;
+//    });
 </script>
 {% endblock %}

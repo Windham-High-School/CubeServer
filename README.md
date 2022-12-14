@@ -8,6 +8,12 @@
 
 Software to manage, store, score, and publish data received by Wifi-equipped microcontrollers for managing a school contest
 
+## Versioning:
+This project uses Semantic Versioning in the format major.minor.patch
+Versions 0.0.0 until 1.0.0 are development releases.
+Version 1.0.0 will be the first production release.
+A new major or minor version may indicate database incompatibility unless otherwise noted, however patch versions should maintain database compatibility.
+
 ## Goals:
 - Sets up the pi as an access point
 - Receives/responds to RESTful requests from clients

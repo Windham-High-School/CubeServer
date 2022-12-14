@@ -39,6 +39,8 @@ class Data(Resource):
             data_str = loads(request.form['data'])
         print(data_str)
         data_class = DataClass(data_str['type'])
+        if data_class in DataClass.manual:
+            return request.form, 400  # If this should be manually-determined..
         data_value = data_class.datatype(data_str['value'])
         # Create the DataPoint object:
         point = DataPoint(

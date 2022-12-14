@@ -25,17 +25,17 @@ def register():
                and (profanity.contains_profanity(form.team_name.data) \
                or profanity.contains_profanity(form.member1.data) \
                or profanity.contains_profanity(form.member2.data) \
-               or profanity.contains_profanity(form.member3.data) \
-               or profanity.contains_profanity(form.member4.data)):
+               or profanity.contains_profanity(form.member3.data)):
                 return redirect('/team/not-nice')
             # Create a Team object:
             try:
                 level = TeamLevel(form.classification.data)
             except ValueError as exception:
                 return server_error(exception, message="An invalid classification value was given.")
-            members = [form.member1, form.member2, form.member3, form.member4]
+            members = [form.member1, form.member2, form.member3]
+            emails = [form.email1, form.email2, form.email3]
             team = Team(form.team_name.data, level)
-            for member in members:
+            for member, email in zip(members, emails):
                 if member is not None and len(member.data) > 0:
                     user = User(member.data, UserLevel.PARTICIPANT, email.data)
                     user.save()
