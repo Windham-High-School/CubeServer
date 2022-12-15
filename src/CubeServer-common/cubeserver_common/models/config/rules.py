@@ -168,11 +168,19 @@ class Rules(PyMongoModel):
         """This is executed whenever a team sends in some data
         If this returns true, it sends an OK response to the client"""
 
-        # If they didn't miss the window, give 'em some points:
-        window = self.times[team.weight_class][datapoint.category]
-        if window.follows(datapoint.moment):
-            # Get some reference data:
-            self._score(team, datapoint)
+        try:
+            # If they didn't miss the window, give 'em some points:
+            window = self.times[team.weight_class][datapoint.category]
+            print(f"Window: {window}")
+            if window.follows(datapoint.moment):
+                # Get some reference data:
+                self._score(team, datapoint)
+                print("Window met.")
+            else:
+                print("Window missed.")
+        except KeyError:  # If this type of datapoint doesn't get scored:
+            print("Not a scored data category for this weight class.")
+            datapoint.rawscore = 0
         
         # Score the datapoint:
         team.health.reward(datapoint.score)

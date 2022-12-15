@@ -47,8 +47,8 @@ class DataClass(Enum):
             DataClass.SIGNAL_LIGHT: ""
         }[self]
     
-    @property
     @classmethod
+    @property
     def measurable(cls):
         """Returns all measurable types of data (not COMMENT, etc)"""
         m = []
@@ -57,8 +57,8 @@ class DataClass(Enum):
                 m.append(dataclass)
         return m
 
-    @property
     @classmethod
+    @property
     def manual(cls):
         """Returns all types of data that are determined manually"""
         return [cls.SIGNAL_LIGHT]
@@ -97,7 +97,7 @@ class DataPoint(PyMongoModel):
 
     @classmethod
     def find_by_team(cls, team):
-        """Returns a list of datapoints by a team id"""
+        """Returns a list of datapoints by a team"""
         return cls.find({'team_reference': ObjectId(team.id)})
 
     @classmethod

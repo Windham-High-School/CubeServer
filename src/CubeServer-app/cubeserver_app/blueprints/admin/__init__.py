@@ -233,7 +233,7 @@ def team_info(team_name: str = ""):
     if team is None:
         return abort(400)
     # Generate data table:
-    data_table = AdminDataTable(DataPoint.find())
+    data_table = AdminDataTable(DataPoint.find_by_team(team))
     # Multiplier editing form:
     form = MultiplierForm()
     form.team_id.data = str(team._id)

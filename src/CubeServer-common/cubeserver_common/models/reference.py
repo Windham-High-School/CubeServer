@@ -80,7 +80,7 @@ class ReferenceStation:
         )
         ref_pt.save()
         return ref_pt
-    
+
     @classmethod
     def get_window_point(cls, window: int) -> ReferencePoint:
         """Returns the most recent reference point in the db if it falls within the time window of now in seconds"""

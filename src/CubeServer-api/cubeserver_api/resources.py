@@ -50,7 +50,6 @@ class Data(Resource):
         )
         print(point)
         print("Posting data...")
-        print(Rules.find())
         if Rules.retrieve_instance().post_data(team, point):
             return request.form, 201
         return request.form, 400  # TODO: Support better response codes?

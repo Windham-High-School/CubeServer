@@ -20,6 +20,8 @@ class AdminDataTable(Table):
     team_str          = Col('Team')
     category          = EnumCol('Category')
     value_with_unit   = Col('Value')
+    rawscore          = Col('Point Value')
+    score             = Col('Score')
     id                = OptionsCol('Options', model_type="DataPoint")
 
     def __init__(self, items: List[DataPoint], **kwargs):
@@ -43,6 +45,8 @@ class LeaderboardDataTable(Table):
     moment            = Col('Datetime')
     category          = EnumCol('Category')
     value_with_unit   = Col('Value')
+    rawscore          = Col('Point Value')
+    score             = Col('Score')
 
     def __init__(self, items: List[DataPoint], **kwargs):
         """Initializes the table"""

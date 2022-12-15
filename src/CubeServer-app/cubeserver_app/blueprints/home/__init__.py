@@ -45,11 +45,11 @@ def team_info(team_name: str = ""):
     team = Team.find_by_name(team_name)
     if team is None:
         return abort(400)
-    data_table = LeaderboardDataTable(DataPoint.find())
+    data_table = LeaderboardDataTable(DataPoint.find_by_team(team))
     return render_template(
         'team_info.html.jinja2',
         team=team,
-        table=data_table
+        table=data_table.__html__()
     )
 
 @bp.route('/activate', methods=['GET', 'POST'])
