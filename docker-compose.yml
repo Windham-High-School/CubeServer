@@ -116,17 +116,17 @@ services:
       - NET_ADMIN
     network_mode: host
   # IP Camera:
-  cam:
-    container_name: ${PROJECT_NAME}-kerberos
-    image: kerberos/kerberos:latest
-    restart: unless-stopped
-    ports:
-      - 8889:8889
-      - 81:80
-    devices:
-      - ${VIDEO_DEV}
-    networks:
-      - frontend
+#  cam:
+#    container_name: ${PROJECT_NAME}-kerberos
+#    image: kerberos/kerberos:latest
+#    restart: unless-stopped
+#    ports:
+#      - 8889:8889
+#      - 81:80
+#    devices:
+#      - ${VIDEO_DEV}
+#    networks:
+#      - frontend
 
 networks:
   frontend:
