@@ -35,6 +35,13 @@ CREDITS: str = "Joseph R. Freeston, Ryan Burbo"
 DEFAULT_THEME: str = "quartz"
 """The *default* theme to use (users can change this individually)"""
 
+DEFAULT_HOME_DESCRIPTION: str = "Thunder. Time. Tech.<br>\nTeams compete with data to win."
+"""A brief description of this whole thing which will appear on the home page
+This can be changed by an admin user at any point during the competition!"""
+
+DEFAULT_REG_CONFIRMATION: str = "Thank you for registering your team!<br>\nGood Luck!"
+"""The screen that is shown when a team's registration is complete"""
+
 
 
 # Scoring Scheme:
@@ -60,10 +67,6 @@ SHORT_TITLE: str = "The Project"
 
 LONG_TITLE: str = "The Project"
 """A longer name that describes the prize. This should still be succinct."""
-
-DEFAULT_HOME_DESCRIPTION: str = "Thunder. Time. Tech.<br>\nTeams compete with data to win."
-"""A brief description of this whole thing which will appear on the home page
-This can be changed by an admin user at any point during the competition!"""
 
 
 

@@ -9,7 +9,7 @@ $(document).ready( function () {
         buttons: [
             'colvis', 'copy', 'csv', 'pdf', 'print'
         ],
-        dom: 'Bfrtip',
+        dom: 'Bfrtilp',
         responsive: true,
         lengthMenu: [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "All"] ],
         scrollY: true,
@@ -20,12 +20,13 @@ $(document).ready( function () {
         //    "leftColumns": 1
         //},
         //fixedHeader: true,
-        keepConditions: true
+        keepConditions: true,
+        stateSave: true
     } );
 
     $('.leaderboardtable').DataTable( {
         order: [[3, 'desc'], [4, 'asc']],
-        dom: 'Bfrtip',
+        dom: 'Bfrtilp',
         buttons: [
             'colvis', 'copy', 'csv', 'pdf', 'print'
         ],
@@ -40,11 +41,12 @@ $(document).ready( function () {
         //    "leftColumns": 1
         //},
         //fixedHeader: true,
-        keepConditions: true
+        keepConditions: true,
+        stateSave: true
     } );
 
     $('.datapoints-table').DataTable( {
-        dom: 'Bfrtip',
+        dom: 'Bfrtilp',
         order: [[0, 'desc']],
         buttons: [
             'colvis', 'copy', 'csv', 'pdf', 'print'
@@ -59,7 +61,8 @@ $(document).ready( function () {
         //    "leftColumns": 1
         //},
         //fixedHeader: true,
-        keepConditions: true
+        keepConditions: true,
+        stateSave: true
     } );
 
 });

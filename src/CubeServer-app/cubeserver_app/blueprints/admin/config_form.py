@@ -12,8 +12,13 @@ class ConfigurationForm(FlaskForm):
     from the admin panel"""
 
     registration_open = BooleanField("Team registration open?")
+    email_domain = StringField("Forced Email Domain")
     home_description = StringField(
         "Home page description (use standard HTML):",
+        validators=[DataRequired()],
+        widget=TextArea())
+    reg_confirmation = StringField(
+        "Registration confirmation screen (HTML):",
         validators=[DataRequired()],
         widget=TextArea())
     smtp_server = StringField("SMTP Server Address", validators=[DataRequired()])

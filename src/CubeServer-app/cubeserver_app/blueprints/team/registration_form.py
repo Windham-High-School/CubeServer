@@ -8,7 +8,9 @@ from wtforms.validators import DataRequired, Length
 
 from cubeserver_common import config
 from cubeserver_common.models.team import TeamLevel
+from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.user import User
+from cubeserver_common.models.team import Team
 
 class RegistrationForm(FlaskForm):
     """Defines the form used to register a team"""
@@ -31,12 +33,39 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Register!')
 
     @staticmethod
+    def validate_name(_, field):
+        """Validates the team name to ensure it isn't taken"""
+        if Team.find_by_name(field.data) is not None:
+            raise ValidationError(
+                "This team name already exists in the database..."
+                "Please choose a different one.")
+
+    @staticmethod
     def validate_member1(_, field):
-        """Validates the username to ensure that it exists in the database"""
+        """Validates the username to ensure that it isn't in the database"""
         if User.find_by_username(field.data) is not None:
             raise ValidationError(
                 "This user already exists in the database..."
                 "Contact an administrator for a solution.")
-    
+
+    @staticmethod
+    def validate_email1(_, field):
+        """Validates the email"""
+        # Make sure it isn't taken already:
+        if User.find_by_email(field.data) is not None:
+            raise ValidationError(
+                "This email already exists in the database..."
+                "Contact an administrator for a solution."
+            )
+        # Make sure it has the right domain (if required by admin)
+        if not field.data.endswith(Conf.retrieve_instance().email_domain):
+            raise ValidationError(
+                "All emails provided must be from "
+                f"{Conf.retrieve_instance().email_domain}"
+            )
+
     validate_member2 = validate_member1
     validate_member3 = validate_member1
+
+    validate_email2 = validate_email1
+    validate_email3 = validate_email1

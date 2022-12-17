@@ -7,6 +7,7 @@ from better_profanity import profanity
 from cubeserver_common import config
 from cubeserver_common.mail import Message
 from cubeserver_common.models.team import Team, TeamLevel
+from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.user import User, UserLevel
 from cubeserver_app.errorviews import server_error
 from . import registration_form
@@ -82,7 +83,8 @@ def success():
         return redirect('/')
     return render_template(
         'success.html.jinja2',
-        secret = session['team_secret']
+        secret = session['team_secret'],
+        message = Conf.retrieve_instance().reg_confirmation
     )
 
 @bp.route('/not-nice')

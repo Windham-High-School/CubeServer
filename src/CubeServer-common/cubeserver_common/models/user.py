@@ -53,6 +53,8 @@ class User(PyMongoModel, UserMixin):
 
         self.name = name
         self.email = email
+        # If an email is provided, they will need to verify it:
+        self.verified = self.email is None
         self.pwd = pwd
         self.level = level
         self.activated = UserActivation.DEACTIVATED
@@ -106,7 +108,21 @@ class User(PyMongoModel, UserMixin):
         return result
         #return compare_digest(self._hashpwd(pwd), self.pwd)
 
+
+    def send_verification_email(self):
+        """Sends an email to verify this users' address"""
+
+
+    def verify(self):
+        """Verifies this user's email"""
+        self.verified = True
+
     @classmethod
     def find_by_username(cls, name):
         """Returns the first known user with that username"""
         return cast(User, super().find_one({"name": name}))
+
+    @classmethod
+    def find_by_email(cls, email):
+        """Returns the first known user with that email"""
+        return cast(User, super().find_one({"email": email}))

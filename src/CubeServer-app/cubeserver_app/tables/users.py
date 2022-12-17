@@ -21,6 +21,7 @@ class AdminUserTable(Table):
     level           = DropDownEnumCol('User Level', UserLevel, model_type='User')
     email           = Col('Email')
     activated       = DropDownEnumCol('Active?', UserActivation, model_type='User')
+    verified        = Col('Email verified?')
 
     id              = OptionsCol('Options', model_type='User')
 

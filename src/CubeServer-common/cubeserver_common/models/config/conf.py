@@ -4,7 +4,7 @@ See app.models.config.rules for information regarding the rules of the game"""
 
 from typing import Optional
 
-from cubeserver_common.config import DEFAULT_HOME_DESCRIPTION
+from cubeserver_common.config import DEFAULT_HOME_DESCRIPTION, DEFAULT_REG_CONFIRMATION
 from cubeserver_common.models import PyMongoModel
 
 
@@ -18,6 +18,8 @@ class Conf(PyMongoModel):
         self,
         registration_open: bool = False,
         home_description: str = DEFAULT_HOME_DESCRIPTION,
+        reg_confirmation: str = DEFAULT_REG_CONFIRMATION,
+        email_domain: str = "",  # to require emails to be of a certain domain
         smtp_server: str = "localhost",
         smtp_user: Optional[str] = None,
         smtp_pass: Optional[str] = None
@@ -25,6 +27,8 @@ class Conf(PyMongoModel):
         super().__init__()
         self.registration_open = registration_open
         self.home_description = home_description
+        self.reg_confirmation = reg_confirmation
+        self.email_domain = email_domain
         self.smtp_server = smtp_server
         self.smtp_user = smtp_user
         self.smtp_pass = smtp_pass
