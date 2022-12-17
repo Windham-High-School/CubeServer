@@ -177,3 +177,8 @@ class Team(PyMongoModel):
     def find_by_name(cls, name):
         """Returns the first known team with that name"""
         return super().find_one({"name": name})
+
+    @classmethod
+    def find_by_division(cls, division: TeamLevel):
+        """Returns teams with a given division"""
+        return super().find({"weight_class": division.value})

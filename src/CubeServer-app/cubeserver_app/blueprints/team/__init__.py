@@ -59,6 +59,8 @@ def register():
                     "Once approved, you will also be able to submit data to the server-\n"
                     "To get started with programming your microcontroller, see here:\n"
                     f"{url_for('.success', team_secret=team.secret, team_name=team.name, _external=True)}"
+                    "DO NOT SHARE THIS EMAIL OR LINK WITH ANYONE!\n"
+                    "Doing so would allow them to impersonate your team's cube!\n"
                     "\n\nYou should save this email for reference.\n\n"
                     "Good Luck!"
                 )

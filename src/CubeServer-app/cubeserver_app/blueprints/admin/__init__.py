@@ -15,7 +15,7 @@ from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.datapoint import DataPoint
 from cubeserver_common.models.utils import EnumCodec
 from cubeserver_common.models.config.rules import Rules
-from cubeserver_common.models.team import Team
+from cubeserver_common.models.team import Team, TeamLevel
 from cubeserver_common.models.user import User, UserLevel
 from cubeserver_common.models.multiplier import Multiplier, MassMultiplier, VolumeMultiplier, CostMultiplier, VolumeUnit
 from cubeserver_common.mail import Message
@@ -60,7 +60,21 @@ def admin_home():
         'console.html.jinja2',
         teams_table = teams_table.__html__(),
         user_form = InvitationForm(),
-        config_form = conf_form
+        config_form = conf_form,
+        email_groups = {
+            TeamLevel.JUNIOR_VARSITY.value: base64.urlsafe_b64encode(',  '.join([
+                ', '.join(team.emails) for team in
+                    Team.find_by_division(TeamLevel.JUNIOR_VARSITY)
+            ]).encode()),
+            TeamLevel.VARSITY.value: base64.urlsafe_b64encode(',  '.join([
+                ', '.join(team.emails) for team in
+                    Team.find_by_division(TeamLevel.VARSITY)
+            ]).encode()),
+            'All Teams': base64.urlsafe_b64encode(',  '.join([
+                ', '.join(team.emails) for team in
+                    Team.find()
+            ]).encode())
+        }.items()
     )
 
 @bp.route('/users')
