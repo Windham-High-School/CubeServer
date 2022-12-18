@@ -4,9 +4,10 @@
 
 from datetime import timedelta
 from math import floor
-from bson import ObjectId
+from bson.objectid import ObjectId
 from flask import abort, Blueprint, render_template, request, url_for, current_app
 from flask_login import current_user, login_required
+from typing import cast
 from uptime import uptime
 import traceback
 import base64
@@ -20,6 +21,8 @@ from cubeserver_common.models.user import User, UserLevel
 from cubeserver_common.models.multiplier import Multiplier, MassMultiplier, VolumeMultiplier, CostMultiplier, VolumeUnit
 from cubeserver_common.mail import Message
 from cubeserver_common.models.reference import ReferencePoint
+from cubeserver_common.config import FROM_NAME, FROM_ADDR
+
 from cubeserver_app.tables.team import AdminTeamTable
 from cubeserver_app.tables.users import AdminUserTable
 from cubeserver_app.tables.datapoints import AdminDataTable
@@ -109,13 +112,25 @@ def table_endpoint(table, identifier, field):
         "User":User,
         "DataPoint":DataPoint
     }[table]
+    model_obj = model_class.find_by_id(ObjectId(identifier))
+    if model_class is Team:  # Notify the team of changes:
+        desc_str = "deleted" if request.method == 'DELETE' else f"set to have a {field} as {request.form.get('item')}"
+        Message(
+            FROM_NAME,
+            FROM_ADDR,
+            cast(Team, model_obj).emails,
+            "Admin Change to Your Team",
+            (
+               f"Your team was {desc_str}.\n"
+               "For more info, check your status on the leaderboard: "
+               f"{url_for('home.leaderboard', _external=True)}"
+            )
+        ).send()
     if request.method == 'POST':
-        model_obj = model_class.find_by_id(ObjectId(identifier))
         model_obj.set_attr_from_string(field, request.form.get('item'))
         model_obj.save()
         return render_template('redirect_back.html.jinja2')
     elif request.method == 'DELETE':
-        model_obj = model_class.find_by_id(ObjectId(identifier))
         model_obj.remove()
         return "OK"  # Maybe a JSON response would actually be useful?
                      # Note that as of now the response text is ignored anyway
