@@ -1,7 +1,7 @@
 """Flask blueprint to handle team-related actions"""
 
 from flask import Blueprint, session, redirect, render_template, url_for
-from flask import current_app, request
+from flask import current_app, request, abort, flash
 from better_profanity import profanity
 
 from cubeserver_common import config
@@ -40,12 +40,53 @@ def register():
                 if member is not None and len(member.data) > 0:
                     user = User(member.data, UserLevel.PARTICIPANT, email.data)
                     user.save()
+                    send_verification_email(user, team)
                     team.add_member(user)
             team.save()
             session['team_secret'] = team.secret
             session['team_name'] = team.name
+            flash("Submitted!")
 
-            Message(
+            return redirect('/team/success')
+        return render_template('register.html.jinja2', form=form)
+    return render_template('regclosed.html.jinja2')
+
+@bp.route('/confirm_email/<team_name>/<name>/<token>/<team_secret>')
+def verify(team_name, name, token, team_secret):
+    """Allows users to confirm email and intent to join a team"""
+    team: Team = Team.find_by_name(team_name)
+    if team.all_verified:
+        return redirect(url_for('.success'))
+    user = User.find_by_username(name)
+    if user is not None and user.verify(token):
+        user.save()
+        flash("Email successfully verified!")
+        session['team_secret'] = team_secret
+        session['team_name'] = team_name
+        if team.all_verified:
+            send_success_email(team)
+            flash("All users have verified their emails.")
+        return redirect(url_for('.success'))
+    return abort(403)
+
+def send_verification_email(user, team):
+    """Emails a user asking them to verify their intent to join a team"""
+    Message(
+        config.FROM_NAME,
+        config.FROM_ADDR,
+        [user.email],
+        "Please verify your email",
+        (
+            f"Hello {user.name},\n"
+            f"You have been registered for {config.LONG_TITLE} team {team.name}!\n"
+            f"Please confirm that this was you by clicking the link below:\n"
+            f"{url_for('.verify', team_secret=team.secret, team_name=team.name, name=user.name, token=user.verification_token, _external=True)}"
+        )
+    ).send()
+
+def send_success_email(team):
+    """Sends an email once ALL registered emails have been verified"""
+    Message(
                 config.FROM_NAME, config.FROM_ADDR,
                 team.emails,
                 # TODO: Make email text configurable:
@@ -59,17 +100,13 @@ def register():
                     "Your team will appear on the leaderboard as soon as you are approved by an admin.\n"
                     "Once approved, you will also be able to submit data to the server-\n"
                     "To get started with programming your microcontroller, see here:\n"
-                    f"{url_for('.success', team_secret=team.secret, team_name=team.name, _external=True)}"
+                    f"{url_for('.success', team_secret=team.secret, team_name=team.name, _external=True)}\n"
                     "DO NOT SHARE THIS EMAIL OR LINK WITH ANYONE!\n"
                     "Doing so would allow them to impersonate your team's cube!\n"
                     "\n\nYou should save this email for reference.\n\n"
                     "Good Luck!"
                 )
             ).send()
-
-            return redirect('/team/success')
-        return render_template('register.html.jinja2', form=form)
-    return render_template('regclosed.html.jinja2')
 
 @bp.route('/success')
 def success():
@@ -81,8 +118,10 @@ def success():
 
     if 'team_secret' not in session:
         return redirect('/')
+
     return render_template(
         'success.html.jinja2',
+        verified = Team.find_by_name(session['team_name']).all_verified,
         secret = session['team_secret'],
         message = Conf.retrieve_instance().reg_confirmation
     )

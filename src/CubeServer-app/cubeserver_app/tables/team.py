@@ -26,6 +26,7 @@ class AdminTeamTable(Table):
     score           = Col('Score')
     secret          = Col('Secret')
     id              = OptionsCol('Options')
+    all_verified    = Col('Emails Verified?')
 
     def __init__(self, items: List[Team], **kwargs):
         """Initializes the table"""

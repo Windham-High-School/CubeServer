@@ -3,11 +3,14 @@
 from enum import Enum, unique
 from typing import Optional, cast
 from secrets import token_urlsafe
-from hmac import HMAC, compare_digest
+from base64 import urlsafe_b64decode, urlsafe_b64encode
 from bcrypt import hashpw, gensalt, checkpw
 from flask_login import UserMixin
+from secrets import token_urlsafe
 
 from cubeserver_common.models.utils import PyMongoModel
+from cubeserver_common.mail import Message
+from cubeserver_common.models.config.conf import Conf
 from cubeserver_common import config
 from cubeserver_common import gensecret
 
@@ -55,6 +58,7 @@ class User(PyMongoModel, UserMixin):
         self.email = email
         # If an email is provided, they will need to verify it:
         self.verified = self.email is None
+        self._verification_token_raw = token_urlsafe(16)
         self.pwd = pwd
         self.level = level
         self.activated = UserActivation.DEACTIVATED
@@ -109,13 +113,25 @@ class User(PyMongoModel, UserMixin):
         #return compare_digest(self._hashpwd(pwd), self.pwd)
 
 
-    def send_verification_email(self):
-        """Sends an email to verify this users' address"""
+    @property
+    def verification_token(self) -> str:
+        """A bcrypt token for email verification"""
+        # Why use bcrypt for a one-time token?
+        #return urlsafe_b64encode(
+        #    User._hashpwd(self._verification_token_raw)
+        #)
+        return self._verification_token_raw
 
-
-    def verify(self):
-        """Verifies this user's email"""
-        self.verified = True
+    def verify(self, token: str) -> bool:
+        """Verifies this user's email, returning True on success"""
+        # Why use bcrypt for a one-time token?
+        #if checkpw(
+        #    urlsafe_b64decode(token),
+        #    self._verification_token_raw.encode('utf-8')
+        #):
+        if token == self._verification_token_raw:
+            self.verified = True
+        return self.verified
 
     @classmethod
     def find_by_username(cls, name):

@@ -1,7 +1,7 @@
 """Models teams of participants"""
 
 from enum import Enum, unique
-from typing import List, Optional
+from typing import List, Optional, Any
 from math import ceil
 import secrets
 
@@ -10,6 +10,14 @@ from cubeserver_common.models.user import User
 from cubeserver_common import config
 
 __all__ = ['TeamLevel', 'TeamStatus', 'TeamHealth', 'Team']
+
+def _filter_nonetype_from_list(l: list[Any]) -> list:
+    return list(
+        filter(
+            lambda item:item is not None,
+            l
+        )
+    )
 
 @unique
 class TeamLevel(Enum):
@@ -144,12 +152,16 @@ class Team(PyMongoModel):
     @property
     def members(self) -> List[User]:
         """Returns the User objects"""
-        return [User.find_by_id(member_id) for member_id in self._members]
+        return _filter_nonetype_from_list(
+            [User.find_by_id(member_id) for member_id in self._members]
+        )
 
     @property
     def emails(self) -> List[str]:
         """Returns this team's email list"""
-        return [user.email for user in self.members]
+        return _filter_nonetype_from_list(
+            [user.email for user in self.members]
+        )
 
     @property
     def members_str(self) -> str:
@@ -172,6 +184,12 @@ class Team(PyMongoModel):
     def score(self) -> int:
         """Returns the number of points from the TeamHealth object"""
         return self.health.score
+
+    @property
+    def all_verified(self) -> bool:
+        """Returns True if every user from this team has verified
+        their email and consent to join this team"""
+        return all([user.verified for user in self.members])
 
     @classmethod
     def find_by_name(cls, name):
