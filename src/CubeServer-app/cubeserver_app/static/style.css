@@ -53,6 +53,10 @@ footer {
     color: var(--bs-dark);
 }
 
+input.btn {
+    background-color: var(--bs-danger);
+}
+
 .jumbotron, .container-fluid {
     width: 95%;
 }
