@@ -59,6 +59,7 @@ def admin_home():
     conf_form.smtp_server.data = db_conf.smtp_server
     conf_form.email_domain.data = db_conf.email_domain
     conf_form.reg_confirmation.data = db_conf.reg_confirmation
+    conf_form.notify_teams.data = db_conf.notify_teams
 
     # Render the template:
     return render_template(
@@ -113,8 +114,8 @@ def table_endpoint(table, identifier, field):
         "DataPoint":DataPoint
     }[table]
     model_obj = model_class.find_by_id(ObjectId(identifier))
-    if model_class is Team:  # Notify the team of changes:
-        desc_str = "deleted" if request.method == 'DELETE' else f"set to have a {field} as {request.form.get('item')}"
+    if model_class == Team and Conf.retrieve_instance().notify_teams:  # Notify the team of changes:
+        desc_str = "deleted" if request.method == 'DELETE' else f"given a {field} as {request.form.get('item')}"
         Message(
             FROM_NAME,
             FROM_ADDR,
@@ -127,7 +128,10 @@ def table_endpoint(table, identifier, field):
             )
         ).send()
     if request.method == 'POST':
-        model_obj.set_attr_from_string(field, request.form.get('item'))
+        if field == "score_increment" and model_class == Team:
+            cast(Team, model_obj).health.change(float(request.form.get('item')))
+        else:
+            model_obj.set_attr_from_string(field, request.form.get('item'))
         model_obj.save()
         return render_template('redirect_back.html.jinja2')
     elif request.method == 'DELETE':
@@ -176,6 +180,7 @@ def conf_change():
         db_conf.smtp_server = form.smtp_server.data
         db_conf.reg_confirmation = form.reg_confirmation.data
         db_conf.email_domain = form.email_domain.data
+        db_conf.notify_teams = form.notify_teams.data
         credentials = form.smtp_credentials.data.strip().split(':')
         if len(credentials) > 1:
             db_conf.smtp_user = credentials[0]

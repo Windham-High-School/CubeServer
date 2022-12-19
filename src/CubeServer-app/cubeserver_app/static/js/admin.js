@@ -4,6 +4,12 @@
  */
 
 
+// For restoring scroll position:
+document.addEventListener("DOMContentLoaded", function(event) { 
+    var scrollpos = localStorage.getItem('scrollpos');
+    if (scrollpos) window.scrollTo(0, scrollpos);
+});
+
 // API Functions
 function deleteItem(item, id) {
     // TODO: Replace confirm() and alert() with a nice-looking Bootstrap modal
@@ -17,14 +23,41 @@ Are you ABSOLUTELY CERTAIN?`;
             type: 'DELETE',
             success: function(result) {
                 alert("Object deleted.");
+                localStorage.setItem('scrollpos', window.scrollY);
                 location.reload();
             },
             fail: function(result) {
                 alert("Uh... There was an issue...\nIt probably didn't work");
+                localStorage.setItem('scrollpos', window.scrollY);
                 location.reload();
             }
         });
     } else {
         alert("Action Canceled.");
     }
+}
+
+function adjustScore(item, id) {
+    // TODO: Replace confirm() and alert() with a nice-looking Bootstrap modal
+    var promptMessage = "Enter the value to offset this score by.\n(A negative number indicates a penalty)\n";
+    var amt = prompt(promptMessage, "0");
+    if (isNaN(amt) || isNaN(parseFloat(amt))) {
+        alert("You did not enter a number.\nCanceling.");
+        return;
+    }
+    $.ajax({  // TODO: Generate these URLs better so stuff is less likely to break:
+        url: `table_endpoint/${item}/${id}/score_increment`,
+        type: 'POST',
+        data: {'item': amt},
+        success: function(result) {
+            alert("Done.");
+            localStorage.setItem('scrollpos', window.scrollY);
+            location.reload();
+        },
+        fail: function(result) {
+            alert("Uh... There was an issue...\nIt probably didn't work");
+            localStorage.setItem('scrollpos', window.scrollY);
+            location.reload();
+        }
+    });
 }

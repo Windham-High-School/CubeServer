@@ -47,6 +47,7 @@ class LeaderboardTeamTable(Table):
 
     name            = TeamNameCol('Team Name')
     score           = Col('Score')
+    score_delta     = Col('Score Delta')
 
     #_id             = Col('Identifier')
     members_names_str = Col('Members')

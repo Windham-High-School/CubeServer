@@ -77,19 +77,24 @@ class TeamHealth(Encodable):
             return self.encode() == other.encode()
         return False
 
-    def reward(self, points = 1):
-        """Rewards a given number of points (default is 1)"""
-        if points < 0:  # Separate reward/penalize methods for expandability
-            raise ValueError("Use penalize for removing points.")
-        self.last_score = self.score
-        self.score += points
+#    def reward(self, points = 1):
+#        """Rewards a given number of points (default is 1)"""
+#        if points < 0:  # Separate reward/penalize methods for expandability
+#            raise ValueError("Use penalize for removing points.")
+#        self.last_score = self.score
+#        self.score += points
+#
+#    def penalize(self, points = 1):
+#        """Removes a given number of points (default is 1)"""
+#        if points < 0:  # "
+#            raise ValueError("Use reward for adding points.")
+#        self.last_score = self.score
+#        self.score -= points
 
-    def penalize(self, points = 1):
-        """Removes a given number of points (default is 1)"""
-        if points < 0:  # "
-            raise ValueError("Use reward for adding points.")
+    def change(self, amt):
+        """Changes the score by a given amount"""
         self.last_score = self.score
-        self.score -= points
+        self.score += amt
 
     def strike(self):
         """Doles out a strike!"""
@@ -181,9 +186,14 @@ class Team(PyMongoModel):
         return self.health.strikes
 
     @property
-    def score(self) -> int:
+    def score(self) -> float:
         """Returns the number of points from the TeamHealth object"""
         return self.health.score
+
+    @property
+    def score_delta(self) -> float:
+        """Returns the point gain"""
+        return self.score-self.health.last_score
 
     @property
     def all_verified(self) -> bool:

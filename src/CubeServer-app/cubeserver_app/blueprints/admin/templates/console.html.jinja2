@@ -6,13 +6,17 @@
 {% endblock %}
 
 {% block content %}
-    <a href={{ url_for('admin.email') }} class="btn">Send Custom Email</a>
-    {% for group, mailing_list in email_groups %}
-        <a href={{ url_for('admin.email', recipients=mailing_list) }} class="btn">Email {{ group }}</a>
-    {% endfor %}
+    <div class="btn-group" role="group">
+        <a href={{ url_for('admin.email') }} class="btn">Send Custom Email</a>
+        {% for group, mailing_list in email_groups %}
+            <a href={{ url_for('admin.email', recipients=mailing_list) }} class="btn">Email {{ group }}</a>
+        {% endfor %}
+    </div>
     <br><br>
-    <a href={{ url_for('admin.data_table') }} class="btn bg-info">See All Logged Data</a>
-    <a href={{ url_for('admin.reference_data_table') }} class="btn bg-info">Browse Reference Data</a>
+    <div class="btn-group" role="group">
+        <a href={{ url_for('admin.data_table') }} class="btn bg-info">See All Logged Data</a>
+        <a href={{ url_for('admin.reference_data_table') }} class="btn bg-info">Browse Reference Data</a>
+    </div>
     <br><br><br>
     <h3>Teams:</h3>
     <div>
@@ -52,6 +56,7 @@
                     {{ config_form.hidden_tag() }}
                     <h4>General Settings:</h4>
                     {{ wtf.form_field(config_form.registration_open) }}
+                    {{ wtf.form_field(config_form.notify_teams) }}
                     {{ wtf.form_field(config_form.email_domain) }}
                     {{ wtf.form_field(config_form.home_description, rows=5, cols=20) }}
                     {{ wtf.form_field(config_form.reg_confirmation, rows=5, cols=20) }}

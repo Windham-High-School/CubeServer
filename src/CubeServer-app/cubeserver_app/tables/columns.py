@@ -138,6 +138,11 @@ class OptionsCol(Col):
             "<button title=\"delete\" "
             f"onclick=\"deleteItem('{model_type}', '{{{{id}}}}')\" "
             "class=\"btn btn-danger\">&#10060;</button>\n"
+            +(
+                "<button title=\"Adjust Score\" "
+                f"onclick=\"adjustScore('{model_type}', '{{{{id}}}}')\" "
+                "class=\"btn btn-info\">&#x2696;</button>\n"
+            ) if model_type == "Team" else "" +
             "</div>\n"
         )
 

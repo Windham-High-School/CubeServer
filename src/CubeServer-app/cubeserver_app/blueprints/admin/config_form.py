@@ -12,6 +12,7 @@ class ConfigurationForm(FlaskForm):
     from the admin panel"""
 
     registration_open = BooleanField("Team registration open?")
+    notify_teams = BooleanField("Notify teams of changes to their status/score/etc?")
     email_domain = StringField("Forced Email Domain")
     home_description = StringField(
         "Home page description (use standard HTML):",

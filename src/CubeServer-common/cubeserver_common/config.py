@@ -28,11 +28,11 @@ This can be changed after the first login."""
 
 # User interface stuff:
 
-CREDITS: str = "Joseph R. Freeston, Ryan Burbo"
+CREDITS: str = "Code by Joseph R. Freeston"
 """The development credits to be shown in the about page
     (Add your own name here if you contributed!!!) """
 
-DEFAULT_THEME: str = "quartz"
+DEFAULT_THEME: str = "dark"
 """The *default* theme to use (users can change this individually)"""
 
 DEFAULT_HOME_DESCRIPTION: str = "Thunder. Time. Tech.<br>\nTeams compete with data to win."
