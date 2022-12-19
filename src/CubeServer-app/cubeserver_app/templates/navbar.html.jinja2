@@ -3,7 +3,7 @@
 {% block navbar %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container-fluid">
-            <a class="navbar-brand px-3" href="#">{{ config['CONSTANTS'].SHORT_TITLE }}</a>
+            <a class="navbar-brand px-3" href="/">{{ config['CONSTANTS'].SHORT_TITLE }}</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarColor01" aria-controls="navbarColor01" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -24,6 +24,7 @@
                 </li>
                 {% endif %}
             </ul>
+            <hr>
             <ul class="navbar-nav me-auto">
                 {% if session['username'] %}
                 <li class="nav-item">
@@ -41,11 +42,11 @@
                 </li>
                 {% endif %}
                 <li class="nav-item">
-                    <a class="nav-link active text-secondary" target="_blank" href="https://github.com/snorklerjoe/CubeServer/">Source Code
+                    <a class="nav-link {{'active' if request.endpoint != 'about.about' else 'disabled selected'}}" href="/about">About
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link {{'active' if request.endpoint != 'about.about' else 'disabled selected'}}" href="/about">About
+                    <a class="nav-link active text-secondary" target="_blank" href="https://github.com/snorklerjoe/CubeServer/">Source Code
                     </a>
                 </li>
             </ul>
@@ -62,6 +63,7 @@
                     {{ config['CONSTANTS'].DEFAULT_THEME }}
                 {% endif %}
             </button>
+            <hr><hr>
         </div>
     </div>
 </nav>
