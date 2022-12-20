@@ -56,6 +56,11 @@ footer {
     text-align: center;
 }
 
+header h1,h2,h3,h4 {
+    color: var(--light);
+    text-shadow: 0 0 10px var(--light);
+}
+
 .content {
     min-height: 30%;
     height: fit-content;
