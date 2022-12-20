@@ -37,7 +37,7 @@ class Message:
             if config.smtp_user is not None and config.smtp_user.strip() != '':
                 s.login(config.smtp_user, config.smtp_pass)
             s.sendmail(self.from_addr, self.to_addrs, self.message.as_string())
-        except smtplib.SMTPHeloError:
+        except smtplib.SMTPException:
             print("we had a little oopsie with the SMTP server...")
             success = False
         finally:

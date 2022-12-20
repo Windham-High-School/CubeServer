@@ -5,7 +5,7 @@ from typing import Any, Optional
 from datetime import datetime
 
 from pymongo import DESCENDING
-from bson import ObjectId
+from bson.objectid import ObjectId
 from cubeserver_common.models.utils import PyMongoModel
 from cubeserver_common.models.team import Team
 

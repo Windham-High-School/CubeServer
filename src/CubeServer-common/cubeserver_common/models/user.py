@@ -56,6 +56,8 @@ class User(PyMongoModel, UserMixin):
 
         self.name = name
         self.email = email
+        if email is None:
+            self.email = ''
         # If an email is provided, they will need to verify it:
         self.verified = self.email is None
         self._verification_token_raw = token_urlsafe(16)
@@ -141,4 +143,6 @@ class User(PyMongoModel, UserMixin):
     @classmethod
     def find_by_email(cls, email):
         """Returns the first known user with that email"""
+        if len(email) < 1:
+            return None
         return cast(User, super().find_one({"email": email}))

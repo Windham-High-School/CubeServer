@@ -5,7 +5,7 @@
 from datetime import timedelta
 from math import floor
 from bson.objectid import ObjectId
-from flask import abort, Blueprint, render_template, request, url_for, current_app
+from flask import abort, Blueprint, render_template, request, url_for, current_app, flash
 from flask_login import current_user, login_required
 from typing import cast
 from uptime import uptime
@@ -13,7 +13,7 @@ import traceback
 import base64
 
 from cubeserver_common.models.config.conf import Conf
-from cubeserver_common.models.datapoint import DataPoint
+from cubeserver_common.models.datapoint import DataPoint, DataClass
 from cubeserver_common.models.utils import EnumCodec
 from cubeserver_common.models.config.rules import Rules
 from cubeserver_common.models.team import Team, TeamLevel
@@ -99,6 +99,28 @@ def edit_users():
     )
 
 # The team modification API endpoint:
+
+@bp.route('/manually_score/<teamid>/<dataclass_str>', methods=['POST'])
+@login_required
+def manual_scoring(teamid, dataclass_str):
+    """Endpoint for the manual scoring api
+    -- Action for forms within the table of users/teams"""
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    team = Team.find_by_id(ObjectId(teamid))
+    if team is None:
+        return abort(500, message="Bro, you're trying to submit data for a team that doesn't exist, man!")
+    dataclass = DataClass(dataclass_str)
+    data_point = DataPoint(
+        ObjectId(teamid),
+        dataclass,
+        dataclass.datatype(request.form.get('item'))
+    )
+    if Rules.retrieve_instance().post_data(team, data_point):
+        return "OK"
+    return abort(500, message="Something went wrong.")
+
+
 # TODO (low priority): Implement a RESTful API instead of the hokey one I made
 @bp.route('/table_endpoint/<table>/<identifier>/<field>', methods=['POST', 'DELETE'])
 @login_required
@@ -338,7 +360,10 @@ def email(recipients):
             form.subject.data,
             form.message.data
         )
-        msg.send()
+        if msg.send():
+            flash("Email Sent!")
+        else:
+            flash("Sending failed.", category="error")
         return render_template('redirect_back.html.jinja2')
     form.to.data = base64.urlsafe_b64decode(recipients).decode()
     return render_template(

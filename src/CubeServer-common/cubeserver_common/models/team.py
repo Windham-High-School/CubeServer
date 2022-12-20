@@ -210,3 +210,8 @@ class Team(PyMongoModel):
     def find_by_division(cls, division: TeamLevel):
         """Returns teams with a given division"""
         return super().find({"weight_class": division.value})
+
+    @property
+    def id_2(self):  # TODO: Fix this (and AdminTeamsTable.id_2)
+        """Just to allow multiple columns in the adminteamstable to rely upon the id..."""
+        return self._id

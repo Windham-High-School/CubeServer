@@ -61,3 +61,27 @@ function adjustScore(item, id) {
         }
     });
 }
+
+// Adds a datapoint of the specified class to the team with the given id:
+function add_datapoint(id, dataClass, isBoolean) {
+    var promptMessageNonBoolean = "Enter the value of this datapoint:";
+    var promptMessageBoolean    = "Is this datapoint True?"
+    var value;
+    if(isBoolean) value = confirm(promptMessageBoolean);
+    else value = prompt(promptMessageNonBoolean);
+    $.ajax({  // TODO: Generate these URLs better so stuff is less likely to break:
+        url: `manually_score/${id}/${dataClass}`,
+        type: 'POST',
+        data: {'item': value},
+        success: function(result) {
+            alert("Done.");
+            localStorage.setItem('scrollpos', window.scrollY);
+            location.reload();
+        },
+        fail: function(result) {
+            alert("Uh... There was an issue...\nIt probably didn't work");
+            localStorage.setItem('scrollpos', window.scrollY);
+            location.reload();
+        }
+    });
+}

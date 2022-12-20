@@ -4,7 +4,7 @@ from typing import List
 from flask_table import Table, Col
 
 from cubeserver_common.models.team import Team, TeamLevel, TeamStatus
-from cubeserver_app.tables.columns import DropDownEnumCol, EnumCol, OptionsCol, TeamNameCol, AdminTeamNameCol
+from cubeserver_app.tables.columns import DropDownEnumCol, EnumCol, OptionsCol, TeamNameCol, AdminTeamNameCol, ManualScoring
 
 __all__ = ['AdminTeamTable', 'LeaderboardTeamTable']
 
@@ -26,6 +26,7 @@ class AdminTeamTable(Table):
     score           = Col('Score')
     secret          = Col('Secret')
     id              = OptionsCol('Options')
+    #id_2            = ManualScoring('Manual Scoring')
     all_verified    = Col('Emails Verified?')
 
     def __init__(self, items: List[Team], **kwargs):

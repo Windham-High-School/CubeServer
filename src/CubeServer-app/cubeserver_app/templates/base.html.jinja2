@@ -33,7 +33,9 @@
     <body>
         {% include 'navbar.html.jinja2' %}
 
-        {{util.flashed_messages()}}
+        {% if HOLD_FLASHED_MESSAGES is not defined %}
+            {{util.flashed_messages()}}
+        {% endif %}
 
         {% block body %}
         <section class="container jumbotron content bg-dark" role="main">

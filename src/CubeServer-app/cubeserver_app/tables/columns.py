@@ -7,7 +7,9 @@ from flask_table import Col, html
 from flask_wtf import FlaskForm
 from wtforms import SelectField, HiddenField, SubmitField
 
-__all__ = ['EnumCol', 'DropDownEnumCol']
+from cubeserver_common.models.datapoint import DataClass
+
+__all__ = ['EnumCol', 'DropDownEnumCol', 'OptionsCol', 'ManualScoring']
 
 def _render_form(
     form: FlaskForm,
@@ -145,6 +147,34 @@ class OptionsCol(Col):
             ) if model_type == "Team" else "" +
             "</div>\n"
         )
+
+    def custom_td_format(
+        self,
+        doc_id: str
+    ):
+        """A custom version of td_format, renamed to avoid
+        PyLint from getting upset from the different parameter list
+        This creates a form for each cell."""
+        return render_template_string(self.html_template, id=doc_id)
+
+    def td_contents(self, item, attr_list) -> str:
+        return (
+            self.custom_td_format(
+                str(item.id)
+            )
+        )
+class ManualScoring(Col):
+    """A Column for manually scoring"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.html_template = '\n'.join([(
+            "<div>\n"
+            "<button title=\"delete\" "
+            f"onclick=\"add_datapoint('{{{{id}}}}', '{dataclass.value}', {dataclass.datatype == bool})\" "
+            f"class=\"btn btn-info\">{dataclass.value}</button>\n"
+            "</div>\n"
+        ) for dataclass in DataClass.manual])
 
     def custom_td_format(
         self,
