@@ -136,14 +136,16 @@ class OptionsCol(Col):
     def __init__(self, *args, model_type: str="Team", **kwargs):
         super().__init__(*args, **kwargs)
         self.html_template = (
-            "<div>\n"
-            "<button title=\"delete\" "
-            f"onclick=\"deleteItem('{model_type}', '{{{{id}}}}')\" "
-            "class=\"btn btn-danger\">&#10060;</button>\n"
-            +(
-                "<button title=\"Adjust Score\" "
-                f"onclick=\"adjustScore('{model_type}', '{{{{id}}}}')\" "
-                "class=\"btn btn-info\">&#x2696;</button>\n"
+            (
+                "<div>\n"
+                "<button title=\"delete\" "
+                f"onclick=\"deleteItem('{model_type}', '{{{{id}}}}')\" "
+                "class=\"btn btn-danger\">&#10060;</button>\n"
+                +(
+                    "<button title=\"Adjust Score\" "
+                    f"onclick=\"adjustScore('{model_type}', '{{{{id}}}}')\" "
+                    "class=\"btn btn-info\">&#x2696;</button>\n"
+                )
             ) if model_type == "Team" else "" +
             "</div>\n"
         )
