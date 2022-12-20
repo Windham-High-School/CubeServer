@@ -172,8 +172,8 @@ class ManualScoring(Col):
         super().__init__(*args, **kwargs)
         self.html_template = '\n'.join([(
             "<div>\n"
-            "<button title=\"delete\" "
-            f"onclick=\"add_datapoint('{{{{id}}}}', '{dataclass.value}', {dataclass.datatype == bool})\" "
+            "<button title=\"add datapoint\" "
+            f"onclick=\"add_datapoint('{{{{id}}}}', '{dataclass.value}', {str(dataclass.datatype == bool).lower()})\" "
             f"class=\"btn btn-info\">{dataclass.value}</button>\n"
             "</div>\n"
         ) for dataclass in DataClass.manual])

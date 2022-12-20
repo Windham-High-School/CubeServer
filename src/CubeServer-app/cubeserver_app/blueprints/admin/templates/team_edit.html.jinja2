@@ -30,3 +30,8 @@
     <h4>Score Tally:</h4>
     {{table}}
 {% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script src="{{ url_for('static', filename='/js/admin.js') }}"></script>
+{% endblock %}

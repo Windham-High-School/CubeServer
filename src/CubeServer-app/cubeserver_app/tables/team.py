@@ -26,7 +26,7 @@ class AdminTeamTable(Table):
     score           = Col('Score')
     secret          = Col('Secret')
     id              = OptionsCol('Options')
-    #id_2            = ManualScoring('Manual Scoring')
+    id_2            = ManualScoring('Manual Scoring')
     all_verified    = Col('Emails Verified?')
 
     def __init__(self, items: List[Team], **kwargs):

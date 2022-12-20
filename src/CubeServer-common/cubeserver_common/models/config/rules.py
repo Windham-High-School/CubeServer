@@ -183,7 +183,7 @@ class Rules(PyMongoModel):
             datapoint.rawscore = 0
         
         # Score the datapoint:
-        team.health.reward(datapoint.score)
+        team.health.change(datapoint.score)
         team.save()
         # Now log the data:
         datapoint.save()

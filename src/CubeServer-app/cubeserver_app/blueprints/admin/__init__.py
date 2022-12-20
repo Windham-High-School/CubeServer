@@ -111,10 +111,14 @@ def manual_scoring(teamid, dataclass_str):
     if team is None:
         return abort(500, message="Bro, you're trying to submit data for a team that doesn't exist, man!")
     dataclass = DataClass(dataclass_str)
+    if dataclass.datatype == bool:
+        value = request.form.get('item') == "true"
+    else:
+        value = dataclass.datatype(request.form.get('item'))
     data_point = DataPoint(
         ObjectId(teamid),
         dataclass,
-        dataclass.datatype(request.form.get('item'))
+        value
     )
     if Rules.retrieve_instance().post_data(team, data_point):
         return "OK"
