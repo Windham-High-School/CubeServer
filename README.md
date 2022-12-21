@@ -6,27 +6,22 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/0c7fad7ea7ff1a8380e0/maintainability)](https://codeclimate.com/github/snorklerjoe/CubeServer/maintainability)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Software to manage, store, score, and publish data received by Wifi-equipped microcontrollers for managing a school contest
+Software to manage, store, score, and publish data received by Wifi-equipped microcontrollers for managing a school contest called The Project.
+A live instance of this may or may not be available at https://whsproject.club/.
+
+## Terminology:
+  CubeServer
+    - The name of the software backing "The Project"
+    This includes the web application and leaderboard, the admin panel,
+    the team API, and any other software contained within this repository.
+  Cube
+    - An individual team's station that will be mounted atop the roof of the school
 
 ## Versioning:
 This project uses Semantic Versioning in the format major.minor.patch
 Versions 0.0.0 until 1.0.0 are development releases.
 Version 1.0.0 will be the first production release.
 A new major or minor version may indicate database incompatibility unless otherwise noted, however patch versions should maintain database compatibility.
-
-## Goals:
-- Sets up the pi as an access point
-- Receives/responds to RESTful requests from clients
-- Stores data in a database
-- A leaderboard and admin web app
-
-Note that these goals are not yet fully implemented.
-
-## Overview of user-side processes:
-- Once allowed by the Admin panel, team sign-ups will happen via the website
-  - Teams will enter a team name, the names of the team's participants, and whether they are entering for the varsity or junior varsity level.
-  - Teams will receive a "secret identifier" by the server upon sign-up. This will be entered as a constant in their code and will be used behind-the-scenes to reduce the possibility of impersonating or sabotaging another group.
-- Upon approval by an Admin, these teams will be added to the leaderboard
 
 ## Building/running:
 
@@ -55,6 +50,18 @@ To permanantly reset the installation to the defaults and erase ALL data, run th
 ```bash
 docker-compose down && docker volume rm cubeserver_mongodb-data cubeserver_api-ssl-cert cubeserver_flask-secret
 ```
+
+## Topology & Docker Containers
+CubeServer is built upon the containerization platform Docker. As described in docker-compose.yml, CubeServer is essentially comprised of the following parts as Docker containers:
+- CubeServer-app
+    The web app, served by GUnicorn and Flask.
+- CubeServer-api
+    The API for Cubes, also served by GUnicorn and Flask
+- CubeServer-mongodb
+    A standalone MongoDB server, central to the other containers
+- CubeServer-accesspoint
+    The container from which the WiFi access point and routing is taken care of to allow Cubes to connect to the API.
+Files used for building each of these containers (other than CubeServer-mongodb, which is prebuilt) may be found in Docker/.
 
 ## Customization:
 The rules and workings of the "game" may be customized and/or modified as described in [CUSTOMIZATION.md](./CUSTOMIZATION.md).
