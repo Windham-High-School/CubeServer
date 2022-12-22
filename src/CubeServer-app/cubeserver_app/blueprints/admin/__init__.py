@@ -154,7 +154,7 @@ def table_endpoint(table, identifier, field):
                f"{url_for('home.leaderboard', _external=True)}"
             ) + 
             ((
-                f"Comment: {request.form.get('comment')}"
+                f"\n\nComment: {request.form.get('comment')}"
             ) if request.form.get('comment') is not None else "") 
         ).send()
     if request.method == 'POST':
