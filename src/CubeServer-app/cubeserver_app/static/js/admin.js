@@ -4,10 +4,13 @@
  */
 
 
-// For restoring scroll position:
+// TODO: Rewrite to have less repetition:
+
+// For restoring scroll position after changes:
 document.addEventListener("DOMContentLoaded", function(event) { 
     var scrollpos = localStorage.getItem('scrollpos');
     if (scrollpos) window.scrollTo(0, scrollpos);
+    localStorage.removeItem('scrollpos');
 });
 
 // API Functions
@@ -15,6 +18,7 @@ function deleteItem(item, id) {
     // TODO: Replace confirm() and alert() with a nice-looking Bootstrap modal
     var confirmationMessage = `Are you certain you wish to DELETE object #${id} FOREVER?\n
 This action is PERMANANT and CANNOT BE UNDONE!`;
+//var comment = prompt("Please comment on this change.");  // TODO: Add comment in case of deleted objects also
     var secondConfirmationMessage = `FINAL CHANCE-- There's no going back after this!\n
 Are you ABSOLUTELY CERTAIN?`;
     if (confirm(confirmationMessage) && confirm(secondConfirmationMessage)) {
@@ -41,6 +45,7 @@ function adjustScore(item, id) {
     // TODO: Replace confirm() and alert() with a nice-looking Bootstrap modal
     var promptMessage = "Enter the value to offset this score by.\n(A negative number indicates a penalty)\n";
     var amt = prompt(promptMessage, "0");
+    var comment = prompt("Please comment on this change.");
     if (isNaN(amt) || isNaN(parseFloat(amt))) {
         alert("You did not enter a number.\nCanceling.");
         return;
@@ -48,7 +53,7 @@ function adjustScore(item, id) {
     $.ajax({  // TODO: Generate these URLs better so stuff is less likely to break:
         url: `table_endpoint/${item}/${id}/score_increment`,
         type: 'POST',
-        data: {'item': amt},
+        data: {'item': amt, 'comment': comment},
         success: function(result) {
             alert("Done.");
             localStorage.setItem('scrollpos', window.scrollY);

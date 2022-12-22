@@ -1,6 +1,7 @@
 """Flask blueprint managing the administration side of the application"""
 
 # TODO: Restructure blueprint files- This whole thing is an absolute mess!
+# Arnold Schwarzenegger looked at this code and called it "one ugly motha*****".
 
 from datetime import timedelta
 from math import floor
@@ -151,7 +152,10 @@ def table_endpoint(table, identifier, field):
                f"Your team was {desc_str}.\n"
                "For more info, check your status on the leaderboard: "
                f"{url_for('home.leaderboard', _external=True)}"
-            )
+            ) + 
+            ((
+                f"Comment: {request.form.get('comment')}"
+            ) if request.form.get('comment') is not None) 
         ).send()
     if request.method == 'POST':
         if field == "score_increment" and model_class == Team:
