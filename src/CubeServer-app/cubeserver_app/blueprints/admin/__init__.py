@@ -155,7 +155,7 @@ def table_endpoint(table, identifier, field):
             ) + 
             ((
                 f"Comment: {request.form.get('comment')}"
-            ) if request.form.get('comment') is not None) 
+            ) if request.form.get('comment') is not None else "") 
         ).send()
     if request.method == 'POST':
         if field == "score_increment" and model_class == Team:
