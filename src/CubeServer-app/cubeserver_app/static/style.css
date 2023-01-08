@@ -85,8 +85,9 @@ pre {
     color: var(--light);
 }
 
-input.btn {
-    background-color: var(--danger);
+input, select, textarea {
+    background-color: var(--secondary) !important;
+    color: var(--light) !important;
 }
 
 input, select, textarea {
