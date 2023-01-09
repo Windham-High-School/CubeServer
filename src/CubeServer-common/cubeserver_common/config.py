@@ -62,7 +62,7 @@ FROM_ADDR: str = "noreply@whsproject.club"
 
 # Contest names:
 
-SHORT_TITLE: str = "The Project"
+SHORT_TITLE: str = "CubeServer"
 """A short name that describes this software more than the prize"""
 
 LONG_TITLE: str = "The Project"
