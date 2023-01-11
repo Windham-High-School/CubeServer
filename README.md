@@ -79,7 +79,4 @@ Files used for building each of these containers (other than CubeServer-mongodb,
 The rules and workings of the "game" may be customized and/or modified as described in [CUSTOMIZATION.md](./CUSTOMIZATION.md).
 
 ## Todos:
-* Security concerns:
-  * Limit failed login attempts per user per time interval
-    - via a database field OR (better option seems to be) using a local dictionary
-* Clean up docstrings to use Sphynx markup for parameter/return definitions
+  See the [Issues](https://github.com/snorklerjoe/CubeServer/issues)

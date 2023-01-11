@@ -51,7 +51,7 @@ echo -e "${RED}Please consider database compatibility${RESTORE}, etc. and know w
 
 read -r response
 if [[ ${response,,} =~ ^(yes|y)$ ]]; then
-    ./backup_volumes.sh "UPDATE_${PREV_VER}-${1}"
+    ./backup_volumes.sh "UPDATE_${PREV_VER}_to_${1}"
     update_release $1
 fi
 abort
