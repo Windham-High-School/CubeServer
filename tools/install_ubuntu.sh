@@ -3,6 +3,12 @@
 # Created 10-10-22 by Joseph R. Freeston
 #
 
+# TODO: More Testing
+parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
+cd "$parent_path"
+cd ..
+source inc/colors.sh
+
 # Constants
 SOFTWARE_NAME="CubeServer"
 INTERACTIVE_BACKTITLE="${SOFTWARE_NAME} Installation Script by Joseph R. Freeston"
@@ -62,11 +68,11 @@ User=root
 Group=docker
 WorkingDirectory=$(pwd)
 # Shutdown container (if running) when unit is started
-ExecStartPre=$(which docker-compose) -f docker-compose.yml down
+ExecStartPre=$(which docker) compose -f docker-compose.yml down
 # Start container when unit is started
-ExecStart=$(which docker-compose) -f docker-compose.yml up
+ExecStart=$(which docker) compose -f docker-compose.yml up
 # Stop container when unit is stopped
-ExecStop=$(which docker-compose) -f docker-compose.yml down
+ExecStop=$(which docker) compose -f docker-compose.yml down
 
 [Install]
 WantedBy=multi-user.target
