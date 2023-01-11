@@ -23,6 +23,18 @@ Versions 0.0.0 until 1.0.0 are development releases.
 Version 1.0.0 will be the first production release.
 A new major or minor version may indicate database incompatibility unless otherwise noted, however patch versions should maintain database compatibility.
 
+| Version | Notes |
+| ------- | ----- |
+| v0.1.0-alpha | basic web interface & structure demo |
+| v0.1.1-alpha | early API implementation |
+| v0.1.2-alpha | early API improvements |
+| v0.2.0-alpha | preconfigured library packages |
+| v0.3.0-alpha | preconfigured library improvements |
+| v0.4.0-beta  | partially functional; basics working |
+| v0.5.0-beta  | **First Deployable Release** |
+| _v1.0.0-beta_  | [Fully-functional Beta Release Milestone](https://github.com/snorklerjoe/CubeServer/milestone/2) |
+| _v1.0.0_  | [Fully-functional Production Release Milestone](https://github.com/snorklerjoe/CubeServer/milestone/3) |
+
 ## Building/running:
 
 ### The Easy Way-
@@ -30,7 +42,7 @@ Use the Ubuntu install script:
 ```bash
 git clone https://github.com/snorklerjoe/CubeServer
 cd CubeServer
-sudo ./install_ubuntu.sh
+sudo ./tools/install_ubuntu.sh
 ```
 This will install a Systemd service for the server and everything will be automatic and work... Unless it doesn't.
 

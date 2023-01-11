@@ -23,4 +23,4 @@ vol_cp "cubeserver_api-ssl-cert" "cubeserver_api-ssl-cert-${bak_id}"
 echo -e "${BLUE}  Flask Secret ${RESTORE}"
 vol_cp "cubeserver_flask-secret" "cubeserver_flask-secret-${bak_id}"
 
-echo -e "\n${GREEN}Finished making backups.${RESTORE}"
+echo -e "\n${LGREEN}Finished making backups.${RESTORE}"

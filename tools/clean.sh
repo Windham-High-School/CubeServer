@@ -22,4 +22,4 @@ source inc/update_license.sh
 echo -e "    Updating version strings"
 source inc/update_version.sh
 
-echo -e "\n${GREEN}Finished cleaning.${RESTORE}"
+echo -e "\n${LGREEN}Finished cleaning.${RESTORE}"
