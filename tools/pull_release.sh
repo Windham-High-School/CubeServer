@@ -22,7 +22,7 @@ function update_release {
 
     echo -e "${BLUE}  Syncing new changes... ${RED}"
     cd ..
-    git pull --ff-only || abort
+    git pull origin $1 --ff-only || abort
 
     echo -e "${BLUE}  Checkout Release... ${RED}"
     git config advice.detachedHead false

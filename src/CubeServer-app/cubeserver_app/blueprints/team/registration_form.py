@@ -58,7 +58,7 @@ class RegistrationForm(FlaskForm):
                 "Contact an administrator for a solution."
             )
         # Make sure it has the right domain (if required by admin)
-        if not field.data.endswith(Conf.retrieve_instance().email_domain):
+        if field.data and not field.data.endswith(Conf.retrieve_instance().email_domain):
             raise ValidationError(
                 "All emails provided must be from "
                 f"{Conf.retrieve_instance().email_domain}"
