@@ -23,8 +23,8 @@ def _filter_nonetype_from_list(l: list[Any]) -> list:
 class TeamLevel(Enum):
     """Enumerates the "weight classes" that a team can participate in"""
 
-    JUNIOR_VARSITY = "Junior Varsity"
-    VARSITY = "Varsity"
+    JUNIOR_VARSITY = "Nanometer"
+    VARSITY = "Lumen"
     PSYCHO_KILLER = "Talking Head"   # Qu'est-ce que c'est, better run run run run...
 
     def __repr__(self):
