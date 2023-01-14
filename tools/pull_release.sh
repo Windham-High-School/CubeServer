@@ -22,11 +22,19 @@ function update_release {
 
     echo -e "${BLUE}  Syncing new changes... ${RED}"
     cd ..
+    echo -e "    Clearing stash... "
+    git stash clear
+    echo -e "    Stashing changes... "
+    git stash
+    echo -e "    Pulling release... "
     git pull origin $1 --ff-only || abort
 
     echo -e "${BLUE}  Checkout Release... ${RED}"
     git config advice.detachedHead false
     git checkout "$1"
+
+    echo -e "    Popping stashed changes... "
+    git stash pop
 
     echo -e "${BLUE}  Building... ${RESTORE}"
     docker compose build --parallel || abort
