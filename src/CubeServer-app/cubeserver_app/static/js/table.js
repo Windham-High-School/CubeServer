@@ -24,11 +24,12 @@ $(document).ready( function () {
         stateSave: true
     } );
 
+    // Leaderboard:
     $('.leaderboardtable').DataTable( {
         order: [[3, 'desc'], [4, 'asc']],
         dom: 'Bfrtilp',
         buttons: [
-            'colvis', 'copy', 'csv', 'pdf', 'print'
+            'colvis', 'csv', 'print'
         ],
         lengthMenu: [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "All"] ],
         colReorder: true,
@@ -41,8 +42,8 @@ $(document).ready( function () {
         //    "leftColumns": 1
         //},
         //fixedHeader: true,
-        keepConditions: true,
-        stateSave: true
+        keepConditions: true//,
+//        stateSave: true
     } );
 
     $('.datapoints-table').DataTable( {
