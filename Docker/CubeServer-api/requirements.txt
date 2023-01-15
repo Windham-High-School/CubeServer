@@ -2,3 +2,4 @@ Gunicorn>=20.1.0,<21.0     # WSGI server
 Flask>=2.1.2,<3.0
 Flask-RESTful>=0.3.9,<1.0
 Flask-HTTPAuth>=4.7.0,<5.0
+jsonpickle>=3.0.1,<4.0

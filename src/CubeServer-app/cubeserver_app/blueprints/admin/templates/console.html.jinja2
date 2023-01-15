@@ -45,6 +45,20 @@
                 </form>
             {{macros.endbox()}}
 
+            {{macros.startbox("Beacon", "col")}}
+                <p>
+                    Send a message now:
+                </p>
+                <form method="POST" action="beaconnow" class="form">
+                    {{ beacon_form.hidden_tag() }}
+                    {{ wtf.form_errors(beacon_form, hiddens="only") }}
+
+                    {{ wtf.form_field(beacon_form.message) }}
+                    {{ wtf.form_field(beacon_form.msg_format) }}
+                    {{ wtf.form_field(beacon_form.submit) }}
+                </form>
+            {{macros.endbox()}}
+
         </div>
         <div class="row">
             {{macros.startbox("Global Configuration", "col")}}

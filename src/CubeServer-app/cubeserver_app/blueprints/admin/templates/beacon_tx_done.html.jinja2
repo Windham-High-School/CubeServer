@@ -1,0 +1,21 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Beacon Tx{% endblock %}
+
+{% block header %}
+    <h4>Transmitted Message!</h4>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <p>Success... We think.</p>
+        <br>
+        <p>
+            It probably worked. If it didn't, that'd really be too bad.
+        </p>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script src="{{ url_for('static', filename='/js/admin.js') }}"></script>
+{% endblock %}

@@ -6,12 +6,13 @@
 from datetime import timedelta
 from math import floor
 from bson.objectid import ObjectId
-from flask import abort, Blueprint, render_template, request, url_for, current_app, flash
+from flask import abort, Blueprint, render_template, request, url_for, current_app, flash, session
 from flask_login import current_user, login_required
 from typing import cast
 from uptime import uptime
 import traceback
 import base64
+import jsonpickle
 
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.datapoint import DataPoint, DataClass
@@ -21,6 +22,7 @@ from cubeserver_common.models.team import Team, TeamLevel
 from cubeserver_common.models.user import User, UserLevel
 from cubeserver_common.models.multiplier import Multiplier, MassMultiplier, VolumeMultiplier, CostMultiplier, VolumeUnit
 from cubeserver_common.mail import Message
+from cubeserver_common.beacon import BeaconMessage, Beacon, BeaconMessageEncoding
 from cubeserver_common.models.reference import ReferencePoint
 from cubeserver_common.config import FROM_NAME, FROM_ADDR
 
@@ -33,6 +35,7 @@ from .config_form import ConfigurationForm
 from .rules_form import RulesForm
 from .multiplier_form import MultiplierForm, SIZE_NAME_MAPPING
 from .email_form import EmailForm
+from .beacon_form import ImmediateBeaconForm
 
 bp = Blueprint(
     'admin',
@@ -68,6 +71,7 @@ def admin_home():
         teams_table = teams_table.__html__(),
         user_form = InvitationForm(),
         config_form = conf_form,
+        beacon_form = ImmediateBeaconForm(),
         email_groups = {
             TeamLevel.JUNIOR_VARSITY.value: base64.urlsafe_b64encode(',  '.join([
                 ', '.join(team.emails) for team in
@@ -377,4 +381,46 @@ def email(recipients):
     return render_template(
         'sendmail.html.jinja2',
         mail_form = form
+    )
+
+
+@bp.route('/beaconnow', methods=['POST'])
+@login_required
+def beacon_tx():
+    """Preps an immediate message from the beacon for transmission"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    form = ImmediateBeaconForm()
+    if form.validate_on_submit():
+        try:
+            msg = BeaconMessage(
+                str(form.message.data),
+                BeaconMessageEncoding(form.msg_format.data)
+            )
+            session["beacon-tx"] = jsonpickle.encode(msg)
+        except:  # TODO: Is this poor practice?
+            tb = traceback.format_exc()
+            print(tb)
+            return render_template('errorpages/500.html.jinja2', message=tb)
+        return render_template(
+            'beacon_txing.html.jinja2',
+            message_bytes_as_str=str(msg.message_bytes)
+        )
+    return abort(500)
+
+
+@bp.route('/beacontx', methods=['POST'])
+@login_required
+def beacon_txing():
+    """Actually transmits the prepared message and waits..."""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+
+    msg = jsonpickle.decode(session.pop('beacon-tx'))
+    msg.transmit()
+
+    return render_template(
+        'beacon_tx_done.html.jinja2'
     )

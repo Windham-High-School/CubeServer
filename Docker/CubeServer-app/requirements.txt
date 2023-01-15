@@ -9,3 +9,4 @@ uptime>=3.0.0              # For server stats
 Flask-Table>=0.5.0         # For rendering tables
 Flask-Login>=0.6.1         # For making authentication a little easier
 is-safe-url                # Unpackaged DJango url origin checker
+jsonpickle>=3.0.1,<4.0
