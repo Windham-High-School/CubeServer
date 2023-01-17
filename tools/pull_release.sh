@@ -41,7 +41,7 @@ function update_release {
     echo -e "${GREEN}  Done Building! ${RESTORE}"
 
     echo -e "${BLUE}  Recreating images... ${RESTORE}"
-    docker compose up --force-recreate
+    docker compose up --force-recreate -d
 
     echo -e "\n${LGREEN}Finished update.${RESTORE}"
     exit
