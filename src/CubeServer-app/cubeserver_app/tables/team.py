@@ -4,7 +4,7 @@ from typing import List
 from flask_table import Table, Col
 
 from cubeserver_common.models.team import Team, TeamLevel, TeamStatus
-from cubeserver_app.tables.columns import DropDownEnumCol, EnumCol, OptionsCol, TeamNameCol, AdminTeamNameCol, ManualScoring
+from cubeserver_app.tables.columns import DropDownEnumCol, EnumCol, OptionsCol, TeamNameCol, AdminTeamNameCol, ManualScoring, ScoreDeltaCol
 
 __all__ = ['AdminTeamTable', 'LeaderboardTeamTable']
 
@@ -48,7 +48,7 @@ class LeaderboardTeamTable(Table):
 
     name            = TeamNameCol('Team Name')
     score           = Col('Score')
-    score_delta     = Col('Score Delta')
+    score_delta     = ScoreDeltaCol('Score Delta')
 
     #_id             = Col('Identifier')
     members_names_str = Col('Members')

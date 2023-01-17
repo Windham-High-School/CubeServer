@@ -100,7 +100,10 @@ class HTMLCol(Col):
         Returns:
             Mapping[str, str]
         """
-        return {}
+        return {
+            'data-search': str(content),
+            'data-order': str(content)
+        }
 
     def __init__(self, name, *args, **kwargs):
         """Specify the column name"""
@@ -253,4 +256,23 @@ class ManualScoring(HTMLCol):
                 ) for dataclass in DataClass.manual])
             ),
             id=identifier
+        )
+
+class ScoreDeltaCol(HTMLCol):
+    """A Column that has class text-success if content is positive, otherwise text-danger"""
+    
+    def generate_html(self, content: Any, identifier: str, attr_list: List[str]) -> str:
+        number = int(content)
+        text_class = "text-warning"
+        if number > 0:
+            text_class = "text-success"
+        elif number < 0:
+            text_class = "text-danger"
+        prefix = '+' if number >= 0 else '-'
+        return (
+            '\n'.join([
+                f"<span class=\"{text_class}\">",
+                f"{prefix} {abs(content)}",
+                "</span>"
+            ])
         )
