@@ -1,11 +1,12 @@
 """Defines custom column types for flask-table"""
 
 from enum import Enum
-from typing import List, Mapping, Optional, Tuple
+from typing import List, Mapping, Optional, Tuple, Any
 from flask import render_template_string, url_for
 from flask_table import Col, html
 from flask_wtf import FlaskForm
 from wtforms import SelectField, HiddenField, SubmitField
+from abc import ABCMeta, abstractmethod
 
 from cubeserver_common.models.datapoint import DataClass
 
@@ -66,7 +67,76 @@ class AdminTeamNameCol(Col):
         return f"<b><a href='{url_for('admin.team_info', team_name=content)}'>{content}</a></b>"
 
 
-# TODO: Add CSRF protection to these forms
+class HTMLCol(Col):
+    """A Column with custom HTML"""
+
+    @abstractmethod
+    def generate_html(
+        self,
+        content: Any,
+        identifier: str,
+        attr_list: List[str]
+    ) -> str:
+        """An abstract method for generating a cell's HTML
+
+        Args:
+            content (Any): The Python object represented by the cell
+            identifier (str): If item.id exists, the string value of item.id for use in pymongo document-modifying forms
+            attr_list (List[str]): attr_list from Col.__init__
+
+        Returns:
+            str: HTML for this cell
+        """
+
+    def generate_attrs(
+        self,
+        content: Any
+    ) -> Mapping[str, str]:
+        """Generate any attributes to the td element
+
+        Args:
+            content (Any): the python object from which the cell contents are derived
+
+        Returns:
+            Mapping[str, str]
+        """
+        return {}
+
+    def __init__(self, name, *args, **kwargs):
+        """Specify the column name"""
+        super().__init__(name, *args, **kwargs)
+        self.constructor_kwargs = kwargs
+
+    def custom_td_format(
+        self,
+        content: Any,
+        identifier: str,
+        attr_list: List[str]
+    ):
+        """A custom version of td_format, renamed to avoid
+        PyLint from getting upset from the different parameter list
+        This creates a form for each cell."""
+        return self.generate_html(content, identifier, attr_list)
+
+    def td_contents(self, item, attr_list):
+        return (
+            self.custom_td_format(
+                self.from_attr_list(item, attr_list=attr_list),
+                str(item.id) if item.id else None,
+                attr_list
+            )
+        )
+
+    def td(self, item, attr):
+        content = self.td_contents(item, self.get_attr_list(attr))
+        item: Any = self.from_attr_list(item, attr_list=attr)
+        td_attrs = self.generate_attrs(item)
+        return html.element(
+            'td',
+            content=content,
+            escape_content=False,
+            attrs=td_attrs | self.td_html_attrs)
+
 class DropDownEnumCol(Col):
     """A Column with a drop-down box to select an option from an Enum"""
 
@@ -127,69 +197,60 @@ class DropDownEnumCol(Col):
             escape_content=False,
             attrs=td_attrs | self.td_html_attrs)
 
-
 # TODO: Add more options? Perhaps the ability to make custom BSON modifications
-class OptionsCol(Col):
+class OptionsCol(HTMLCol):
     """A Column with a menu of options
     Requires the inclusion of static/js/admin.js to communcate with the api"""
 
     def __init__(self, *args, model_type: str="Team", **kwargs):
         super().__init__(*args, **kwargs)
-        self.html_template = (
-            (
-                "<div>\n"
-                "<button title=\"delete\" "
-                f"onclick=\"deleteItem('{model_type}', '{{{{id}}}}')\" "
-                "class=\"btn btn-danger\">&#10060;</button>\n"
-                +((
-                    "<button title=\"Adjust Score\" "
-                    f"onclick=\"adjustScore('{model_type}', '{{{{id}}}}')\" "
-                    "class=\"btn btn-info\">&#x2696;</button>\n"
-                ) if model_type == "Team" else "")
-            ) +
-            "</div>\n"
-        )
+        self.model_type = model_type
 
-    def custom_td_format(
+    def generate_html(
         self,
-        doc_id: str
-    ):
-        """A custom version of td_format, renamed to avoid
-        PyLint from getting upset from the different parameter list
-        This creates a form for each cell."""
-        return render_template_string(self.html_template, id=doc_id)
-
-    def td_contents(self, item, attr_list) -> str:
-        return (
-            self.custom_td_format(
-                str(item.id)
-            )
+        content: Any,
+        identifier: str,
+        attr_list: List[str]
+    ) -> str:
+        return render_template_string(
+            (
+                (
+                    "<div>\n"
+                    "<button title=\"delete\" "
+                    f"onclick=\"deleteItem('{self.model_type}', '{{{{id}}}}')\" "
+                    "class=\"btn btn-danger\">&#10060;</button>\n"
+                    +((
+                        "<button title=\"Adjust Score\" "
+                        f"onclick=\"adjustScore('{self.model_type}', '{{{{id}}}}')\" "
+                        "class=\"btn btn-info\">&#x2696;</button>\n"
+                    ) if self.model_type == "Team" else "")
+                ) +
+                "</div>\n"
+            ),
+            id=identifier
         )
-class ManualScoring(Col):
+
+class ManualScoring(HTMLCol):
     """A Column for manually scoring"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.html_template = '\n'.join([(
-            "<div>\n"
-            "<button title=\"add datapoint\" "
-            f"onclick=\"add_datapoint('{{{{id}}}}', '{dataclass.value}', {str(dataclass.datatype == bool).lower()})\" "
-            f"class=\"btn btn-info\">{dataclass.value}</button>\n"
-            "</div>\n"
-        ) for dataclass in DataClass.manual])
 
-    def custom_td_format(
+    def generate_html(
         self,
-        doc_id: str
-    ):
-        """A custom version of td_format, renamed to avoid
-        PyLint from getting upset from the different parameter list
-        This creates a form for each cell."""
-        return render_template_string(self.html_template, id=doc_id)
-
-    def td_contents(self, item, attr_list) -> str:
-        return (
-            self.custom_td_format(
-                str(item.id)
-            )
+        content: Any,
+        identifier: str,
+        attr_list: List[str]
+    ) -> str:
+        return render_template_string(
+            (
+                '\n'.join([(
+                    "<div>\n"
+                    "<button title=\"add datapoint\" "
+                    f"onclick=\"add_datapoint('{{{{id}}}}', '{dataclass.value}', {str(dataclass.datatype == bool).lower()})\" "
+                    f"class=\"btn btn-info\">{dataclass.value}</button>\n"
+                    "</div>\n"
+                ) for dataclass in DataClass.manual])
+            ),
+            id=identifier
         )
