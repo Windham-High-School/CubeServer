@@ -6,6 +6,14 @@
 {% endblock %}
 
 {% block content %}
+
+    <div class="btn-group">
+        <a class="btn buttons-collection {{"bg-info btn-secondary" if selected_division == None}}" href={{ url_for('home.leaderboard', sel_div="all") }}>Show All</a>
+        {% for weight_class in divisions %}
+            <a class="btn buttons-collection {{"bg-info btn-secondary" if weight_class == selected_division}}" href={{ url_for('home.leaderboard', sel_div=weight_class.value) }}>{{ weight_class.value }}</a>
+        {% endfor %}
+    </div>
+
     <p>
         <a onclick="prompt('Share the following link:', window.location);" href="#">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share" viewBox="0 0 16 16">

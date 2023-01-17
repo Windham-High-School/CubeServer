@@ -5,7 +5,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from is_safe_url import is_safe_url
 
 from cubeserver_common.config import DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_PASSWORD
-from cubeserver_common.models.team import Team, TeamStatus
+from cubeserver_common.models.team import Team, TeamStatus, TeamLevel
 from cubeserver_common.models.user import User, UserLevel
 from cubeserver_common.models.datapoint import DataPoint
 from cubeserver_common.models.config.conf import Conf
@@ -24,18 +24,30 @@ def home():
         return redirect(url_for('admin.admin_home'))
     return render_template('home.html.jinja2')
 
-@bp.route('/stats')
-def leaderboard():
+@bp.route('/stats', defaults={'sel_div': "all"})
+@bp.route('/stats/<sel_div>')
+def leaderboard(sel_div: str = ""):
     """Renders the leaderboard/stats"""
+    # Figure out which division is selected:
+    selected_division = None
+    if sel_div in [l.value for l in TeamLevel]:
+        selected_division = TeamLevel(sel_div)
     # Fetch teams from database and populate a table:
     team_objects = [Team.decode(team) for team in Team.collection.find(
-        {"status": {"$nin":[TeamStatus.UNAPPROVED.value]}}
+        {"status": {"$nin":[TeamStatus.UNAPPROVED.value]}} \
+            if selected_division is None else \
+                {
+                    "status": {"$nin":[TeamStatus.UNAPPROVED.value]},
+                    "weight_class": selected_division.value
+                }
     )]
     teams_table = LeaderboardTeamTable(team_objects)
     # Render the template:
     return render_template(
         'leaderboard.html.jinja2',
-        teams_table = teams_table.__html__()
+        teams_table = teams_table.__html__(),
+        divisions = [TeamLevel.JUNIOR_VARSITY, TeamLevel.VARSITY],
+        selected_division = selected_division
     )
 
 @bp.route('/team/<team_name>')
