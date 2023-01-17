@@ -40,8 +40,8 @@ function update_release {
     docker compose build --parallel || abort
     echo -e "${GREEN}  Done Building! ${RESTORE}"
 
-    echo -e "${BLUE}  Restarting server instances... ${RESTORE}"
-    docker compose restart
+    echo -e "${BLUE}  Recreating images... ${RESTORE}"
+    docker compose up --force-recreate
 
     echo -e "\n${LGREEN}Finished update.${RESTORE}"
     exit
