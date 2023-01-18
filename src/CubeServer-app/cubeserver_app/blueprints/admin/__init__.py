@@ -410,7 +410,7 @@ def beacon_tx():
     return abort(500)
 
 
-@bp.route('/beacontx', methods=['POST'])
+@bp.route('/beacontx')
 @login_required
 def beacon_txing():
     """Actually transmits the prepared message and waits..."""
