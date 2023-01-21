@@ -83,7 +83,7 @@ PROFANITY_MESSAGE: str = "Not Funny. \n" \
                          "Profanity is not allowed by the administrator."
 """The message to use if profanity is detected in the user's input"""
 
-TEAM_SECRET_LENGTH: int = 5
+TEAM_SECRET_LENGTH: int = 16
 """Number of characters in the team's secret ID"""
 
 
