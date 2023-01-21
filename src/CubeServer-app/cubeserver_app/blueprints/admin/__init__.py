@@ -146,7 +146,7 @@ def table_endpoint(table, identifier, field):
     }[table]
     model_obj = model_class.find_by_id(ObjectId(identifier))
     if model_class == Team and Conf.retrieve_instance().notify_teams:  # Notify the team of changes:
-        desc_str = "deleted" if request.method == 'DELETE' else f"given a {field} as {request.form.get('item')}"
+        desc_str = "deleted" if request.method == 'DELETE' else f"given a {field} of {request.form.get('item')}"
         Message(
             FROM_NAME,
             FROM_ADDR,
