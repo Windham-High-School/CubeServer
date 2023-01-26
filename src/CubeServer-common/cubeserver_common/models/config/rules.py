@@ -106,7 +106,7 @@ class Rules(PyMongoModel):
                 )
             }
         },
-        # % error:
+        # absolute error, not % error:
         accuracy_tolerance: Mapping[TeamLevel, Mapping[DataClass, float]] = {
             TeamLevel.JUNIOR_VARSITY: {
                 DataClass.PRESSURE: 0.2,
