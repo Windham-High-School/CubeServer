@@ -1,5 +1,6 @@
 version: '3'
 services:
+
   # Main application container:
   app:
     container_name: ${PROJECT_NAME}-app
@@ -39,6 +40,7 @@ services:
     networks:
       - frontend
       - backend
+
   # API server container:
   api:
     container_name: ${PROJECT_NAME}-api
@@ -70,6 +72,36 @@ services:
     networks:
       - api
       - backend
+
+  # Beacon server container:
+  beaconserver:
+    container_name: ${PROJECT_NAME}-beaconserver
+    restart: unless-stopped
+    volumes:
+      - beacon-ssl-cert:/etc/ssl/beacon_cert/
+    build:
+      context: .
+      dockerfile: Docker/CubeServer-beaconserver/Dockerfile
+      args:
+        CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}/"
+#        CERT_SUBJ: "${API_ADDR}"
+        CERT_SUBJALTNAME: "${API_ALT_ADDR}"
+        CERT_EXP_DAYS: ${API_CERT_EXP_DAYS}
+    environment:
+      # MongoDB credentials:
+      - MONGODB_DATABASE=flaskdb
+      - MONGODB_USERNAME=flask
+      - MONGODB_HOSTNAME=mongodb
+      - MONGODB_PASSWORD=${MONGODB_PWD}
+    ports: # Bind the port for the web server
+      - "${BEACON_PORT}:8888"
+    depends_on:
+      - mongodb
+      - accesspoint
+    networks:
+      - api
+      - backend
+
   # Database container:
   mongodb:
     container_name: ${PROJECT_NAME}-mongodb
@@ -86,6 +118,7 @@ services:
       MONDODB_LOG_DIR: /dev/null
     networks:
       - backend
+
   # WiFi Access Point
   accesspoint:
     container_name: ${PROJECT_NAME}-accesspoint
@@ -115,6 +148,7 @@ services:
     cap_add:
       - NET_ADMIN
     network_mode: host
+
   # IP Camera:
 #  cam:
 #    container_name: ${PROJECT_NAME}-kerberos
@@ -144,4 +178,6 @@ volumes:
   flask-secret:
     driver: local
   api-ssl-cert:
+    driver: local
+  beacon-ssl-cert:
     driver: local

@@ -15,7 +15,7 @@ with open("/api_cert/sha1_fingerprint.txt", "r", encoding="utf-8") as fh:
     sha_fingerprint = fh.read()
 with open("/api_cert/sha256_fingerprint.txt", "r", encoding="utf-8") as fh:
     sha_fingerprint_256 = fh.read()
-with open("/api_cert/cert.pem", "r", encoding="utf-8") as fh:
+with open("/api_cert/api.pem", "r", encoding="utf-8") as fh:
     pem_cert = fh.read()
 
 

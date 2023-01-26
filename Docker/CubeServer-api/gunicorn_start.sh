@@ -1,13 +1,21 @@
 #!/usr/bin/env bash
 
+# version <= 0.5.3 COMPATIBILITY:
+if [ -f "/etc/ssl/api_cert/cert.pem" ]; then
+echo "Moving [cert.pem -> api.pem, key.key -> api.key] for compatibility with newer versions!"
+echo "These file names are now DEPRECATED for future reference."
+mv /etc/ssl/api_cert/cert.pem /etc/ssl/api_cert/api.pem
+mv /etc/ssl/api_cert/key.key  /etc/ssl/api_cert/api.key
+fi
+
 # Ensure that the SSL certificate exists-
-if [ ! -f "/etc/ssl/build_api_cert/cert.pem" ]; then
+if [ ! -f "/etc/ssl/build_api_cert/api.pem" ]; then
 echo "For some reason, an SSL certificate wasn't generated at build-time..."
 echo "This is a fatal issue."
 exit 1
 fi
 
-if [ ! -f "/etc/ssl/api_cert/cert.pem" ]; then
+if [ ! -f "/etc/ssl/api_cert/api.pem" ]; then
 echo "Copying generated SSL cert from build-time into persistent storage."
 echo "If this breaks server host key verification, there is a backup folder!"
 mkdir -p /ect/ssl/api_cert_backup

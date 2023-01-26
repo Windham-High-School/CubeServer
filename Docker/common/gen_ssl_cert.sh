@@ -1,10 +1,15 @@
 #!/usr/bin/env bash
+#           gen_ssl_cert.sh
+# Copyright 2022-2023 Joseph R. Freeston
+#
 # Generates a new self-signed SSL certificate w/ OpenSSL
-# Usage: bash gen_ssl_cert.sh [subj] [altName] [days'TillExpiration]
+# (creates "$4.pem" and "$4.key" in the cwd)
+# Usage: bash gen_ssl_cert.sh [subj] [altName] [days'TillExpiration] [outputName]
+#
 
-if [ "$#" -ne 3 ]; then
+if [ "$#" -ne 4 ]; then
     echo "Illegal number of parameters."
-    echo "USAGE: bash gen_ssl_cert.sh [subj] [altName] [days'TillExpiration]"
+    echo "USAGE: bash gen_ssl_cert.sh [subj] [altName] [days'TillExpiration] [outputName]"
     exit 1
 fi
 
@@ -13,17 +18,17 @@ mkdir -p /etc/ssl/build_api_cert/
 echo "Subject: $1"
 echo "alt subj: $2"
 echo "EXPIRES IN $3 DAYS"
-if [ ! -f "/etc/ssl/build_api_cert/cert.pem" ]; then
+if [ ! -f "/etc/ssl/build_api_cert/$4.pem" ]; then
     cd /etc/ssl/build_api_cert/
     echo
     echo "Generating a new certificate..."
     echo "Generating a new self-signed SSL certificate..."
     openssl req -new -newkey rsa:4096 -days $3 -nodes -x509 \
         -subj "$1" -addext "subjectAltName=IP:$2" \
-        -keyout key.key -out cert.pem
+        -keyout "$4.key" -out "$4.pem"
     echo
     echo "Checking the certificate..."
-    openssl verify -CAfile cert.pem cert.pem
+    openssl verify -CAfile "$4.pem" "$4.pem"
     if [ $? != 0 ]; then
         echo "There's something wrong with the certificate."
         exit 1

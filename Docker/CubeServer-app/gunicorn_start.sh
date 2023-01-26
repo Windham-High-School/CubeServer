@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-while [ ! -f "/api_cert/cert.pem" ]; do
+# Wait for CubeServer-api to be in a good spot first:
+while [ ! -f "/api_cert/api.pem" ]; do
 echo "Waiting for API certs to be copied into persistent storage..."
 sleep 1
 done

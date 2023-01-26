@@ -7,8 +7,8 @@ loglevel = "info"
 workers = cpu_count()
 
 # HTTPS:
-keyfile = "/etc/ssl/api_cert/key.key"
-certfile = "/etc/ssl/api_cert/cert.pem"
+keyfile = "/etc/ssl/api_cert/api.key"
+certfile = "/etc/ssl/api_cert/api.pem"
 ssl_version = "TLS"
 
 # Bind:

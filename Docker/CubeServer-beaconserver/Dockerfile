@@ -10,17 +10,15 @@ WORKDIR /app
 # Helper files:
 COPY Docker/common/gen_ssl_cert.sh /
 RUN chmod +x /gen_ssl_cert.sh
-RUN /gen_ssl_cert.sh ${CERT_SUBJ} ${CERT_SUBJALTNAME} ${CERT_EXP_DAYS} api
-
-COPY Docker/CubeServer-api/gunicorn.conf.py /
+RUN /gen_ssl_cert.sh ${CERT_SUBJ} ${CERT_SUBJALTNAME} ${CERT_EXP_DAYS} beacon
 
 # Entrypoint:
-COPY Docker/CubeServer-api/gunicorn_start.sh /
-RUN chmod +x /gunicorn_start.sh
-ENTRYPOINT /gunicorn_start.sh
+COPY Docker/CubeServer-beaconserver/entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT /entrypoint.sh
 
 # Requirements:
-COPY Docker/CubeServer-api/requirements.txt /tmp/
+COPY Docker/CubeServer-beaconserver/requirements.txt /tmp/
 RUN pip3 install -r /tmp/requirements.txt
 
 # Common dependency:
@@ -29,5 +27,5 @@ RUN pip3 install /tmp/common
 RUN rm -r /tmp/common
 
 # API package itself:
-COPY ./src/CubeServer-api/ /app/
+COPY ./src/CubeServer-beaconserver/ /app/
 RUN pip3 install /app
