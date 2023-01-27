@@ -19,6 +19,7 @@ class DataClass(Enum):
     PRESSURE = "pressure"
     COMMENT = "comment"
     SIGNAL_LIGHT = "signal"
+    BATTERY_REMAINING = "remaining battery"
 #    HUMIDITY = "humidity"
 #    LIGHT_INTENSITY = "light intensity"
 
@@ -31,7 +32,8 @@ class DataClass(Enum):
             DataClass.PRESSURE: float,
 #            DataClass.LIGHT_INTENSITY: float,
             DataClass.COMMENT: str,
-            DataClass.SIGNAL_LIGHT: bool
+            DataClass.SIGNAL_LIGHT: bool,
+            DataClass.BATTERY_REMAINING: int
         }[self]
 
     @property
@@ -44,7 +46,8 @@ class DataClass(Enum):
             DataClass.PRESSURE: "inHg",
 #            DataClass.LIGHT_INTENSITY: "lux",
             DataClass.COMMENT: "",
-            DataClass.SIGNAL_LIGHT: ""
+            DataClass.SIGNAL_LIGHT: "",
+            DataClass.BATTERY_REMAINING: "%"
         }[self]
     
     @classmethod
