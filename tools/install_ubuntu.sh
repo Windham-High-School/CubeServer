@@ -49,6 +49,7 @@ prepare () {    # Install Docker and Docker-Compose
 }
 
 build () {
+    ./configure
     docker-compose build --no-cache | pipe_output "Building With Docker-Compose"
 }
 

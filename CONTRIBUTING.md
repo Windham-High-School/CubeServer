@@ -7,3 +7,8 @@ Contributing to CubeServer should imply **no commitment**, other than to communi
 ## Current Scope
 
 Currently, we are working to deploy CubeServer for a competition at [WHS](https://github.com/Windham-High-School). Because this project's scope is localized, contributions from outside the organization are not currently expected. The majority of general communications will occur through the [cubeserver-dev GitHub team](https://github.com/orgs/Windham-High-School/teams/cubeserver-dev).
+
+
+## Commit/PR Guidelines
+
+Please run `./clean` before each commit and/or pull request. If the repository is not tidy, your pull request may not be approved immediately.

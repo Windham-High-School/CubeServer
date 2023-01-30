@@ -54,6 +54,7 @@ sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin doc
 ```
 Then use Docker-Compose to build and run:
 ```bash
+./configure
 docker-compose build
 docker-compose up
 ```
