@@ -36,6 +36,9 @@ function update_release {
     echo -e "    Popping stashed changes... "
     git stash pop
 
+    echo -e "${BLUE}  Configuring build... ${RESTORE}"
+    ./configure
+
     echo -e "${BLUE}  Building... ${RESTORE}"
     docker compose build --parallel || abort
     echo -e "${GREEN}  Done Building! ${RESTORE}"
