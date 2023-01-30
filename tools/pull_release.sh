@@ -10,6 +10,15 @@ if [ -z $1 ]; then
     exit 1
 fi
 
+case $(ps -o comm= -p "$PPID") in
+    sshd|*/sshd)
+        echo -e "${RED}This is being run in an SSH session directly."
+        echo -e "This is dangerous, as the build could terminate prematurely-"
+        echo -e "Please run this in a screen session instead:"
+        echo -e "${CYAN}screen -L bash pull_release.sh${RESTORE}"
+    ;;
+esac
+
 PREV_VER=$(cat ../version.txt)
 
 function abort {
@@ -35,6 +44,9 @@ function update_release {
 
     echo -e "    Popping stashed changes... "
     git stash pop
+
+    echo -e "${BLUE}  Configuring build... ${RESTORE}"
+    ./configure
 
     echo -e "${BLUE}  Building... ${RESTORE}"
     docker compose build --parallel || abort
