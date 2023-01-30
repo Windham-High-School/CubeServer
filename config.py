@@ -70,6 +70,13 @@ LONG_TITLE: str = "The Project"
 
 
 
+# Beacon:
+
+
+DEFAULT_BEACON_TX_HEADER: bytes = b"<>"
+
+
+
 # Teams:
 
 TEAM_MAX_CHARS: int = 30

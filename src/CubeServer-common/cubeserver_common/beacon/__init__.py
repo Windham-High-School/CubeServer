@@ -1,5 +1,4 @@
-"""
-    A package for interfacing to the IR beacon
+"""A package for interfacing to the IR beacon
 """
 
 from .beaconmessage import BeaconMessage, BeaconMessageEncoding
