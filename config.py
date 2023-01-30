@@ -88,10 +88,10 @@ TEAM_SECRET_LENGTH: int = 16
 
 
 
-# Boxes:
+# Cubes:
 
 COMMENT_FILTER_PROFANITY: bool = True
-"""Whether to filter profanity from comments posted by the boxes"""
+"""Whether to filter profanity from comments posted by the cubes"""
 
 
 
