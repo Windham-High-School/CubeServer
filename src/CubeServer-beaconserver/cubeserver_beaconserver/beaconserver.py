@@ -8,7 +8,31 @@ import ssl
 import hashlib
 
 class SSLSocketServer:
-    def __init__(self, host, port, certfile, keyfile, ca_certs, client_cert_reqs):
+    def __init__(
+        self,
+        host = "localhost",
+        port = 8888,
+        certfile = "/etc/ssl/api_cert/server.pem",
+        keyfile = "/etc/ssl/api_cert/server.key",
+        ca_certs = "/etc/ssl/api_cert/beacon.pem",
+        client_cert_reqs = ssl.CERT_REQUIRED
+    ):
+        """
+        Initialize the SSLSocketServer with the specified parameters.
+
+        :param host: The IP address of the server to bind to.
+        :type host: str
+        :param port: The port number to bind the server to.
+        :type port: int
+        :param certfile: The path to the certificate file used by the server for SSL.
+        :type certfile: str
+        :param keyfile: The path to the key file used by the server for SSL.
+        :type keyfile: str
+        :param ca_certs: The path to a file containing a set of concatenated CA certificates in PEM format.
+        :type ca_certs: str
+        :param client_cert_reqs: The certificate requirements for client authentication. Can be either ssl.CERT_NONE, ssl.CERT_OPTIONAL or ssl.CERT_REQUIRED.
+        :type client_cert_reqs: int (one of ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED)
+        """
         self.host = host
         self.port = port
         self.certfile = certfile
@@ -41,5 +65,5 @@ class SSLSocketServer:
                 client_ssl_socket.close()
                 continue
 
-            client_ssl_socket.send(b"Welcome to the SSL-encrypted server!")
+            client_ssl_socket.send(b"Connection Established!")
             client_ssl_socket.close()
