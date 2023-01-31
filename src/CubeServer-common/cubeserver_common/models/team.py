@@ -224,7 +224,7 @@ class Team(PyMongoModel):
         """Send an email from their cube to them"""
         if self.emails_sent >= Conf.retrieve_instance().team_email_quota:
             return False
-        #self.emails_sent += 1  # MUST remain within the quota:
+        self.emails_sent += 1  # MUST remain within the quota:
         self.save()
         return Message(
             config.FROM_NAME,
