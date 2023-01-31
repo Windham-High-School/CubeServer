@@ -4,7 +4,7 @@ See app.models.config.rules for information regarding the rules of the game"""
 
 from typing import Optional
 
-from cubeserver_common.config import DEFAULT_HOME_DESCRIPTION, DEFAULT_REG_CONFIRMATION
+from cubeserver_common.config import DEFAULT_HOME_DESCRIPTION, DEFAULT_REG_CONFIRMATION, DEFAULT_EMAIL_QUOTA
 from cubeserver_common.models import PyMongoModel
 
 # TODO: Rewrite to use a mapping (key:value) scheme instead of individual variables. Read the defaults in from a file or something?
@@ -23,7 +23,9 @@ class Conf(PyMongoModel):
         notify_teams: bool = True, # Notify teams of changes to 
         smtp_server: str = "localhost",
         smtp_user: Optional[str] = None,
-        smtp_pass: Optional[str] = None
+        smtp_pass: Optional[str] = None,
+        team_email_quota: int = DEFAULT_EMAIL_QUOTA,
+        quota_reset_hour: int = 10
     ):
         super().__init__()
         self.notify_teams = notify_teams
@@ -34,6 +36,8 @@ class Conf(PyMongoModel):
         self.smtp_server = smtp_server
         self.smtp_user = smtp_user
         self.smtp_pass = smtp_pass
+        self.team_email_quota = team_email_quota
+        self.quota_reset_hour = quota_reset_hour
 
     # The initial instance is created in cubeserver_common/__init__.py
     @staticmethod

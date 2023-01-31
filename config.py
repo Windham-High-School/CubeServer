@@ -35,12 +35,19 @@ CREDITS: str = "Code by Joseph R. Freeston"
 DEFAULT_THEME: str = "dark"
 """The *default* theme to use (users can change this individually)"""
 
+
+
+# Defaults changable by the admin panel:
+
 DEFAULT_HOME_DESCRIPTION: str = "Thunder. Time. Tech.<br>\nTeams compete with data to win."
 """A brief description of this whole thing which will appear on the home page
 This can be changed by an admin user at any point during the competition!"""
 
 DEFAULT_REG_CONFIRMATION: str = "Thank you for registering your team!<br>\nGood Luck!"
 """The screen that is shown when a team's registration is complete"""
+
+DEFAULT_EMAIL_QUOTA: int = 2
+"""The default maximum number of daily emails that can be sent by a team"""
 
 
 

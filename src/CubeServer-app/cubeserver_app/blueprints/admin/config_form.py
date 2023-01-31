@@ -1,7 +1,7 @@
 """Outlines the form used to change basic configuration"""
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, BooleanField
+from wtforms import StringField, SubmitField, BooleanField, IntegerField
 from wtforms.validators import DataRequired
 from wtforms.widgets import TextArea
 
@@ -24,4 +24,6 @@ class ConfigurationForm(FlaskForm):
         widget=TextArea())
     smtp_server = StringField("SMTP Server Address", validators=[DataRequired()])
     smtp_credentials = StringField("SMTP Credentials as user:pass")
+    team_email_quota = IntegerField("The maximum number of daily emails a team can send from their cube")
+    quota_reset_hour = IntegerField("The hour at which it becomes a \"new day\" for the email quota")
     submit = SubmitField('Save')
