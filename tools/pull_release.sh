@@ -20,6 +20,7 @@ fi
 PREV_VER=$(cat ../version.txt)
 
 function abort {
+    git stash pop  # Prevent stashed changes from being lost in a failed update
     echo -e "${CYAN}Aborted.${RESTORE}"
     exit 1
 }
