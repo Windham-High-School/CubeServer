@@ -30,10 +30,10 @@ if all(key in environ for key in [
     from cubeserver_common.models.team import Team
     from cubeserver_common.models.config.conf import Conf
     scheduler = APScheduler()
-    scheduler.add_job(
-        Team.reset_sent_emails,
-        'cron', hour=Conf.retrieve_instance().quota_reset_hour
-    )
+    scheduler.init_app(app)
+    @scheduler.task('cron', id='email_cont_reset', hour=str(Conf.retrieve_instance().quota_reset_hour))
+    def reset_email_count():
+        Team.reset_sent_emails()
     scheduler.start()
 
     # Attach resources:
