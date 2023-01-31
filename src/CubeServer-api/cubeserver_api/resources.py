@@ -54,6 +54,27 @@ class Data(Resource):
             return request.form, 201
         return request.form, 400  # TODO: Support better response codes?
 
+class Email(Resource):
+    """A POST-only resource for datapoints"""
+
+    decorators = [auth.login_required]
+
+    def post(self):
+        team = Team.find_by_name(auth.username())
+        print(f"Email submission from: {team.name}")
+        # Get DataClass and cast the value:
+        data_str = request.get_json()
+        subject = data_str['subject']
+        message = data_str['message']
+        print(f"Subject: {subject}")
+        print(message)
+        print("Sending...")
+        if team.send_api_email(subject, message):
+            print("Success!")
+            return request.form, 201
+        print("Failure.")
+        return request.form, 400  # TODO: Support better response codes?
+
 class Status(Resource):
     """A resource with some basic info"""
 

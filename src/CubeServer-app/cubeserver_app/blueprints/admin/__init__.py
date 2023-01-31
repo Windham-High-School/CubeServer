@@ -64,6 +64,8 @@ def admin_home():
     conf_form.email_domain.data = db_conf.email_domain
     conf_form.reg_confirmation.data = db_conf.reg_confirmation
     conf_form.notify_teams.data = db_conf.notify_teams
+    conf_form.team_email_quota.data = db_conf.team_email_quota
+    conf_form.quota_reset_hour.data = db_conf.quota_reset_hour
 
     # Render the template:
     return render_template(
@@ -215,6 +217,8 @@ def conf_change():
         db_conf.reg_confirmation = form.reg_confirmation.data
         db_conf.email_domain = form.email_domain.data
         db_conf.notify_teams = form.notify_teams.data
+        db_conf.team_email_quota = form.team_email_quota.data
+        db_conf.quota_reset_hour = form.quota_reset_hour.data
         credentials = form.smtp_credentials.data.strip().split(':')
         if len(credentials) > 1:
             db_conf.smtp_user = credentials[0]

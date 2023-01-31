@@ -78,6 +78,8 @@
                     <h4>Outgoing SMTP Settings:</h4>
                     {{ wtf.form_field(config_form.smtp_server) }}
                     {{ wtf.form_field(config_form.smtp_credentials) }}
+                    {{ wtf.form_field(config_form.team_email_quota) }}
+                    {{ wtf.form_field(config_form.quota_reset_hour) }}
                     <br><br>
                     {{ wtf.form_field(config_form.submit) }}
                 </form>
