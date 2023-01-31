@@ -10,14 +10,12 @@ if [ -z $1 ]; then
     exit 1
 fi
 
-case $(ps -o comm= -p "$PPID") in
-    sshd|*/sshd)
+if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
         echo -e "${RED}This is being run in an SSH session directly."
         echo -e "This is dangerous, as the build could terminate prematurely-"
         echo -e "Please run this in a screen session instead:"
         echo -e "${CYAN}screen -L bash pull_release.sh${RESTORE}"
-    ;;
-esac
+fi
 
 PREV_VER=$(cat ../version.txt)
 
