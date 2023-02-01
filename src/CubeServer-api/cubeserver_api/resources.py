@@ -87,3 +87,16 @@ class Status(Resource):
             "unix_time": int(time()),
             "status": {"score": team.score, "strikes": team.strikes}
         }, 200
+
+class CodeUpdate(Resource):
+    """A resource for teams to update code.py on their circuitpython cubes"""
+
+    decorators = [auth.login_required]
+
+    def get(self):
+        team = Team.find_by_name(auth.username())
+        return {
+            "datetime": datetime.now().isoformat(),
+            "unix_time": int(time()),
+            "code": team.get_code_update()
+        }, 200

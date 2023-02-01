@@ -1,0 +1,18 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Update Code{% endblock %}
+
+{% block header %}
+    <h4>Update Your Code</h4>
+    <p>
+        If this code has errors, it may render your cube unable to be updated again.
+        Please be certain before uploading a file.
+    </p>
+    <p>[{{max_size}} bytes ({{max_size/1024}} KiB)]</p>
+{% endblock %}
+
+{% block content %}
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" class="btn">
+        <input type="submit" value="Upload" class="btn btn-submit btn-danger">
+    </form>
+{% endblock %}

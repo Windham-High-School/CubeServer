@@ -126,6 +126,32 @@ def success():
         message = Conf.retrieve_instance().reg_confirmation
     )
 
+@bp.route('/update')
+def update():
+    """Allows teams to update the code on their cubes"""
+    team: Team = Team.find_by_name(session['team_name'])
+    if session['team_secret'] != team.secret:
+        return abort(401)
+    
+    if request.method == "POST":
+        if 'file' not in request.files:
+            flash("No file uploaded.")
+            return redirect(request.url)
+        file = request.files['file']
+        if file.filename == '':
+            flash('No file uploaded.')
+            return redirect(request.url)
+        if file and file.filename.endswith('.py'):
+            flash('Maybe Acceptable')
+        else:
+            flash('Invalid file.')
+
+    
+    return render_template(
+        'update_upload.html.jinja2',
+        max_size=config.TEAM_MAX_UPDATE_LENGTH
+    )
+
 @bp.route('/not-nice')
 def profanity_found():
     """Renders a message in the event of profanity being input"""
