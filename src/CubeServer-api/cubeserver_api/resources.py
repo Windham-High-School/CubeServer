@@ -99,7 +99,7 @@ class CodeUpdate(Resource):
         return {
             "datetime": datetime.now().isoformat(),
             "unix_time": int(time()),
-            "encoding": "base64(bytes)",
+            "encoding": "base64",
             "new": not team.code_update_taken,
-            "code": encodebytes(team.get_code_update())
+            "code": encodebytes(team.get_code_update()).decode('utf-8')
         }, 200
