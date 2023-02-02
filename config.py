@@ -93,6 +93,9 @@ PROFANITY_MESSAGE: str = "Not Funny. \n" \
 TEAM_SECRET_LENGTH: int = 16
 """Number of characters in the team's secret ID"""
 
+TEAM_MAX_UPDATE_LENGTH: int = 32768  # 32KiB
+"""Maximum length of a team's code update"""
+
 
 
 # Boxes:

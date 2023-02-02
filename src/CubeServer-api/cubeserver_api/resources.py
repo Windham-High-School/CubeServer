@@ -8,6 +8,7 @@ from flask import request
 from flask_restful import Resource
 from flask_httpauth import HTTPBasicAuth
 from json import dumps, loads, decoder
+from base64 import encodebytes
 
 from cubeserver_common.models.config.rules import Rules
 from cubeserver_common.models.team import Team
@@ -86,4 +87,19 @@ class Status(Resource):
             "datetime": datetime.now().isoformat(),
             "unix_time": int(time()),
             "status": {"score": team.score, "strikes": team.strikes}
+        }, 200
+
+class CodeUpdate(Resource):
+    """A resource for teams to update code.py on their circuitpython cubes"""
+
+    decorators = [auth.login_required]
+
+    def get(self):
+        team = Team.find_by_name(auth.username())
+        return {
+            "datetime": datetime.now().isoformat(),
+            "unix_time": int(time()),
+            "encoding": "base64",
+            "new": not team.code_update_taken,
+            "code": encodebytes(team.get_code_update()).decode('utf-8')
         }, 200

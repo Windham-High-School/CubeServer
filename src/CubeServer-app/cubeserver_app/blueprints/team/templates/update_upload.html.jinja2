@@ -1,0 +1,25 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Update Code{% endblock %}
+
+{% block header %}
+    <h4>Update Your Code</h4>
+    <p>
+        If this code has errors, it may render your cube unable to be updated again.
+        Please be certain before uploading a file.
+    </p>
+    <p>
+        Your code will be available to be downloaded by your cube as soon as you upload it.
+        However, do not expect changes to go into effect until your cube checks for updates.
+    </p>
+    <p>
+        You can only update code.py. All other files <i>cannot</i> be updated by this system.
+    </p>
+    <p><i>Max Size {{max_size}} bytes ({{max_size/1024}} KiB)</i></p>
+{% endblock %}
+
+{% block content %}
+    <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" class="btn">
+        <input type="submit" value="Upload" class="btn btn-submit btn-danger">
+    </form>
+{% endblock %}

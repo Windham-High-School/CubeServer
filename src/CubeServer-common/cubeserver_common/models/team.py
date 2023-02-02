@@ -135,7 +135,9 @@ class Team(PyMongoModel):
                  health: TeamHealth = TeamHealth(),
                  status: TeamStatus = TeamStatus.UNAPPROVED,
                  multiplier: Multiplier = DEFAULT_MULTIPLIER,
-                 emails_sent_today: int = 0):
+                 emails_sent_today: int = 0,
+                 code_update: bytes = b'',
+                 code_update_taken: bool = False):
         super().__init__()
         self.name = name
         self.weight_class = weight_class
@@ -145,6 +147,8 @@ class Team(PyMongoModel):
         self.secret = Team._gen_secret()
         self.multiplier = multiplier
         self.emails_sent = emails_sent_today
+        self._code_update = code_update
+        self.code_update_taken = code_update_taken
 
     def add_member(self, member: User):
         """Adds a member (a User object) to the team"""
@@ -240,3 +244,15 @@ class Team(PyMongoModel):
         for team in cls.find():
             team.emails_sent = 0
             team.save()
+
+    def update_code(self, code:bytes):
+        """Uploads a string of python code to be transferred to the cube"""
+        self.code_update_taken = False
+        self._code_update = code
+        self.save()
+
+    def get_code_update(self) -> bytes:
+        """Grabs the latest code update given by the team"""
+        self.code_update_taken = True
+        self.save()
+        return self._code_update
