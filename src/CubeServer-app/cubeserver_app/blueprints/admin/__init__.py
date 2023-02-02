@@ -22,7 +22,7 @@ from cubeserver_common.models.team import Team, TeamLevel
 from cubeserver_common.models.user import User, UserLevel
 from cubeserver_common.models.multiplier import Multiplier, MassMultiplier, VolumeMultiplier, CostMultiplier, VolumeUnit
 from cubeserver_common.mail import Message
-from cubeserver_common.beacon import BeaconMessage, Beacon, BeaconMessageEncoding
+from cubeserver_common.beacon import BeaconMessage, BeaconMessageEncoding
 from cubeserver_common.models.reference import ReferencePoint
 from cubeserver_common.config import FROM_NAME, FROM_ADDR
 
@@ -66,6 +66,7 @@ def admin_home():
     conf_form.notify_teams.data = db_conf.notify_teams
     conf_form.team_email_quota.data = db_conf.team_email_quota
     conf_form.quota_reset_hour.data = db_conf.quota_reset_hour
+    conf_form.banner_message.data = db_conf.banner_message
 
     # Render the template:
     return render_template(
@@ -210,6 +211,7 @@ def conf_change():
         return abort(403)
     form = ConfigurationForm()
     if form.validate_on_submit():
+        # Update database from form:
         db_conf: Conf = Conf.retrieve_instance()
         db_conf.registration_open = form.registration_open.data
         db_conf.home_description = form.home_description.data
@@ -219,6 +221,7 @@ def conf_change():
         db_conf.notify_teams = form.notify_teams.data
         db_conf.team_email_quota = form.team_email_quota.data
         db_conf.quota_reset_hour = form.quota_reset_hour.data
+        db_conf.banner_message = form.banner_message.data
         credentials = form.smtp_credentials.data.strip().split(':')
         if len(credentials) > 1:
             db_conf.smtp_user = credentials[0]
