@@ -126,7 +126,7 @@ def success():
         message = Conf.retrieve_instance().reg_confirmation
     )
 
-@bp.route('/update')
+@bp.route('/update', methods=['GET', 'POST'])
 def update():
     """Allows teams to update the code on their cubes"""
     team: Team = Team.find_by_name(session['team_name'])
@@ -141,10 +141,21 @@ def update():
         if file.filename == '':
             flash('No file uploaded.')
             return redirect(request.url)
-        if file and file.filename.endswith('.py'):
-            flash('Maybe Acceptable')
+        if file and file.filename == "code.py":
+            file_contents = file.stream.read()
+            file.stream.close()
+            file.close()
+            if 0 < len(file_contents) <= config.TEAM_MAX_UPDATE_LENGTH:
+                team.update_code(file_contents)
+                flash("Upload Successful.", category='success')
+            else:
+                flash("Bad file size.", category='danger')
+                flash(
+                    f"File size must satisfy the range interval (0, {config.TEAM_MAX_UPDATE_LENGTH}]"
+                )
+
         else:
-            flash('Invalid file.')
+            flash('File must be `code.py`.', category='danger')
 
     
     return render_template(

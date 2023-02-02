@@ -8,6 +8,7 @@ from flask import request
 from flask_restful import Resource
 from flask_httpauth import HTTPBasicAuth
 from json import dumps, loads, decoder
+from base64 import encodebytes
 
 from cubeserver_common.models.config.rules import Rules
 from cubeserver_common.models.team import Team
@@ -98,5 +99,7 @@ class CodeUpdate(Resource):
         return {
             "datetime": datetime.now().isoformat(),
             "unix_time": int(time()),
-            "code": team.get_code_update()
+            "encoding": "base64(bytes)",
+            "new": not team.code_update_taken,
+            "code": encodebytes(team.get_code_update())
         }, 200

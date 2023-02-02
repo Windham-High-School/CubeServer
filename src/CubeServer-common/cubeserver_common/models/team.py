@@ -136,7 +136,7 @@ class Team(PyMongoModel):
                  status: TeamStatus = TeamStatus.UNAPPROVED,
                  multiplier: Multiplier = DEFAULT_MULTIPLIER,
                  emails_sent_today: int = 0,
-                 code_update: str = "",
+                 code_update: bytes = b'',
                  code_update_taken: bool = False):
         super().__init__()
         self.name = name
@@ -245,13 +245,13 @@ class Team(PyMongoModel):
             team.emails_sent = 0
             team.save()
 
-    def update_code(self, code:str):
+    def update_code(self, code:bytes):
         """Uploads a string of python code to be transferred to the cube"""
         self.code_update_taken = False
         self._code_update = code
         self.save()
 
-    def get_code_update(self) -> str:
+    def get_code_update(self) -> bytes:
         """Grabs the latest code update given by the team"""
         self.code_update_taken = True
         self.save()
