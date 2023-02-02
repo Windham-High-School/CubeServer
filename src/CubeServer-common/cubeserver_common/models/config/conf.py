@@ -25,7 +25,8 @@ class Conf(PyMongoModel):
         smtp_user: Optional[str] = None,
         smtp_pass: Optional[str] = None,
         team_email_quota: int = DEFAULT_EMAIL_QUOTA,
-        quota_reset_hour: int = 10
+        quota_reset_hour: int = 10,
+        banner_message: str = ""
     ):
         super().__init__()
         self.notify_teams = notify_teams
@@ -38,6 +39,7 @@ class Conf(PyMongoModel):
         self.smtp_pass = smtp_pass
         self.team_email_quota = team_email_quota
         self.quota_reset_hour = quota_reset_hour
+        self.banner_message = banner_message
 
     # The initial instance is created in cubeserver_common/__init__.py
     @staticmethod

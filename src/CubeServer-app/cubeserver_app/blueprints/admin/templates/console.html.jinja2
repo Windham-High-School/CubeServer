@@ -71,11 +71,12 @@
                     <h4>General Settings:</h4>
                     {{ wtf.form_field(config_form.registration_open) }}
                     {{ wtf.form_field(config_form.notify_teams) }}
-                    {{ wtf.form_field(config_form.email_domain) }}
+                    {{ wtf.form_field(config_form.banner_message) }}
                     {{ wtf.form_field(config_form.home_description, rows=5, cols=20) }}
                     {{ wtf.form_field(config_form.reg_confirmation, rows=5, cols=20) }}
                     <br>
-                    <h4>Outgoing SMTP Settings:</h4>
+                    <h4>Email Settings:</h4>
+                    {{ wtf.form_field(config_form.email_domain) }}
                     {{ wtf.form_field(config_form.smtp_server) }}
                     {{ wtf.form_field(config_form.smtp_credentials) }}
                     {{ wtf.form_field(config_form.team_email_quota) }}
