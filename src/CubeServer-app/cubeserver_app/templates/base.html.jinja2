@@ -33,6 +33,14 @@
     <body>
         {% include 'navbar.html.jinja2' %}
 
+
+        {% if config['CONFIGURABLE'].banner_message %}
+        <div class="alert alert-primary banner" role="alert">
+            {{config['CONFIGURABLE'].banner_message}}<a type="button" class="btn-close float-right" data-bs-dismiss="alert" aria-label="Close">X</a>
+        </div>
+        <hr>
+        {% endif %}
+
         {% if HOLD_FLASHED_MESSAGES is not defined %}
             {{util.flashed_messages()}}
         {% endif %}
