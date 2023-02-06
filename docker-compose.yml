@@ -4,6 +4,7 @@ services:
   # Main application container:
   app:
     container_name: ${PROJECT_NAME}-app
+    image: snorklerjoe/cubeserver-app:latest
     restart: unless-stopped
     volumes:
       - flask-secret:/secret/
@@ -44,6 +45,7 @@ services:
   # API server container:
   api:
     container_name: ${PROJECT_NAME}-api
+    image: snorklerjoe/cubeserver-api:latest
     restart: unless-stopped
     volumes:
       - flask-secret:/secret/
@@ -76,6 +78,7 @@ services:
   # Beacon server container:
   beaconserver:
     container_name: ${PROJECT_NAME}-beaconserver
+    image: snorklerjoe/cubeserver-beaconserver:latest
     restart: unless-stopped
     volumes:
       - beacon-ssl-cert:/etc/ssl/beacon_cert/
@@ -122,6 +125,7 @@ services:
   # WiFi Access Point
   accesspoint:
     container_name: ${PROJECT_NAME}-accesspoint
+    image: snorklerjoe/cubeserver-accesspoint:latest
     restart: unless-stopped
     build:
       context: .
