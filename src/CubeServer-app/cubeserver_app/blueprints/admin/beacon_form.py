@@ -6,7 +6,7 @@ from wtforms.validators import DataRequired
 from wtforms.widgets import TextArea
 
 from cubeserver_common.models.config.conf import Conf
-from cubeserver_common.beacon import BeaconMessageEncoding
+from cubeserver_common.models.beaconmessage import BeaconMessageEncoding
 
 
 class ImmediateBeaconForm(FlaskForm):

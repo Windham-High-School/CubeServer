@@ -1,5 +1,8 @@
 from apscheduler.schedulers.background import BackgroundScheduler
 
+from cubeserver_common import configure_db_noapp
+configure_db_noapp()
+
 from cubeserver_common.models.beaconmessage import BeaconMessage
 
 scheduler = BackgroundScheduler()

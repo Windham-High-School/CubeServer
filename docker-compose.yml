@@ -78,7 +78,7 @@ services:
     container_name: ${PROJECT_NAME}-beaconserver
     restart: unless-stopped
     volumes:
-      - beacon-ssl-cert:/etc/ssl/beacon_cert/
+      - api-ssl-cert:/etc/ssl/beacon_cert/
     build:
       context: .
       dockerfile: Docker/CubeServer-beaconserver/Dockerfile
@@ -101,6 +101,7 @@ services:
     networks:
       - api
       - backend
+      - frontend
 
   # Database container:
   mongodb:
@@ -179,5 +180,5 @@ volumes:
     driver: local
   api-ssl-cert:
     driver: local
-  beacon-ssl-cert:
-    driver: local
+#  beacon-ssl-cert:
+#    driver: local

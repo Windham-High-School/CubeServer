@@ -12,9 +12,9 @@ class SSLSocketServer:
         self,
         host = "localhost",
         port = 8888,
-        certfile = "/etc/ssl/api_cert/server.pem",
-        keyfile = "/etc/ssl/api_cert/server.key",
-        ca_certs = "/etc/ssl/api_cert/beacon.pem",
+        certfile = "/etc/ssl/beacon_cert/server.pem",
+        keyfile = "/etc/ssl/beacon_cert/server.key",
+        ca_certs = "/etc/ssl/beacon_cert/beacon.pem",
         client_cert_reqs = ssl.CERT_REQUIRED
     ):
         """
@@ -41,14 +41,17 @@ class SSLSocketServer:
         self.client_cert_reqs = client_cert_reqs
         self.server_socket = None
 
-    def start_server(self):
+    def run_server(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen()
         print("Listening on {host}:{port}...".format(host=self.host, port=self.port))
 
         while True:
+            print("Listening...")
             client_socket, client_address = self.server_socket.accept()
+            print(f"Accepted connection from {client_address}!")
+            print("Wrapping...")
             client_ssl_socket = ssl.wrap_socket(client_socket,
                                                 server_side=True,
                                                 certfile=self.certfile,
@@ -65,5 +68,7 @@ class SSLSocketServer:
                 client_ssl_socket.close()
                 continue
 
+            print("Sending message...")
             client_ssl_socket.send(b"Connection Established!")
+            print("Closing socket.")
             client_ssl_socket.close()

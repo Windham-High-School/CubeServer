@@ -12,11 +12,6 @@ COPY Docker/common/gen_ssl_cert.sh /
 RUN chmod +x /gen_ssl_cert.sh
 RUN /gen_ssl_cert.sh ${CERT_SUBJ} ${CERT_SUBJALTNAME} ${CERT_EXP_DAYS} beacon
 
-# Entrypoint:
-COPY Docker/CubeServer-beaconserver/entrypoint.sh /
-RUN chmod +x /entrypoint.sh
-ENTRYPOINT /entrypoint.sh
-
 # Requirements:
 COPY Docker/CubeServer-beaconserver/requirements.txt /tmp/
 RUN pip3 install -r /tmp/requirements.txt
@@ -29,3 +24,8 @@ RUN rm -r /tmp/common
 # API package itself:
 COPY ./src/CubeServer-beaconserver/ /app/
 RUN pip3 install /app
+
+# Entrypoint:
+COPY Docker/CubeServer-beaconserver/entrypoint.sh /
+RUN chmod +x /entrypoint.sh
+CMD ["/usr/bin/env", "bash", "/entrypoint.sh"]

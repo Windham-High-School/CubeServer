@@ -6,7 +6,7 @@
 from datetime import timedelta
 from math import floor
 from bson.objectid import ObjectId
-from flask import abort, Blueprint, render_template, request, url_for, current_app, flash, session
+from flask import abort, Blueprint, render_template, request, url_for, current_app, flash, session, send_file
 from flask_login import current_user, login_required
 from typing import cast
 from uptime import uptime
@@ -22,7 +22,7 @@ from cubeserver_common.models.team import Team, TeamLevel
 from cubeserver_common.models.user import User, UserLevel
 from cubeserver_common.models.multiplier import Multiplier, MassMultiplier, VolumeMultiplier, CostMultiplier, VolumeUnit
 from cubeserver_common.mail import Message
-from cubeserver_common.beacon import BeaconMessage, BeaconMessageEncoding
+from cubeserver_common.models.beaconmessage import BeaconMessage, BeaconMessageEncoding
 from cubeserver_common.models.reference import ReferencePoint
 from cubeserver_common.config import FROM_NAME, FROM_ADDR
 
@@ -431,3 +431,21 @@ def beacon_txing():
     return render_template(
         'beacon_tx_done.html.jinja2'
     )
+
+@bp.route('/beacon.pem')
+@login_required
+def beacon_pem():
+    """Downloads public key for the beacon"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    return send_file('/api_cert/beacon.pem')
+
+@bp.route('/beacon.key')
+@login_required
+def beacon_key():
+    """Downloads private key for the beacon"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    return send_file('/api_cert/beacon.key')

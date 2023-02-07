@@ -107,7 +107,7 @@ class BeaconMessage(PyMongoModel):
         return self.message_encoding.encode(self.message)
 
     @property
-    def headers(self) -> Mapping[bytes: bytes]:
+    def headers(self) -> Mapping[bytes, bytes]:
         """Returns all headers
         """
         return {
