@@ -16,6 +16,12 @@ MAX_INT_BYTES: int = 256
 """Maximum number of bytes to encode an integer to"""
 
 @unique
+class OutputDestination(Enum):
+    """IR or RED"""
+    IR  = "Infrared"
+    RED = "Visible"
+
+@unique
 class BeaconMessageEncoding(Enum):
     """Types of encodings for beacon messages
     """
@@ -76,7 +82,9 @@ class BeaconMessage(PyMongoModel):
         suffix: bytes = b'===================END===MESSAGE================',
         line_term: bytes = b'\r\n',
         additional_headers: Mapping[str, str] = {},
-        encoding: Optional[BeaconMessageEncoding] = None
+        encoding: Optional[BeaconMessageEncoding] = None,
+        destination: OutputDestination = OutputDestination.IR,
+        intensity: int = 255
     ):
         """
         Args:
@@ -97,6 +105,8 @@ class BeaconMessage(PyMongoModel):
         self.message_encoding = encoding
         self.line_term = line_term
         self.additional_headers = additional_headers
+        self.destination = destination
+        self.intensity = intensity
     
     @property
     def message_bytes(self) -> bytes:
@@ -139,11 +149,6 @@ class BeaconMessage(PyMongoModel):
             self.line_term,
             self.suffix
         ])
-
-    def transmit(self):
-        """Transmits the message"""
-        # TODO: Implement actual transmission!
-        print(f"Beacon Tx: {self.full_message_bytes}")
 
     @property
     def checksum(self):

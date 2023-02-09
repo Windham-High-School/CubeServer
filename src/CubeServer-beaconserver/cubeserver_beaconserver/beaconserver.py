@@ -1,74 +1,139 @@
-"""A simple SSL socket server for the beacon
+"""A server for sending stuff to the beacon
 
-The beacon will connect to this server (with proper auth)
+The protocol is as follows (B is beacon, S is server):
+    B->S    Establish persistent encrypted socket connection
+    ...
+    S->B    Send command in the form of a byte array
+            <Version Byte> <Destination Byte> <Intensity Byte> <Message Length MSB> <Message Length LSB> <8 Reserved Bytes> <Message Bytes> <NULL>
+    B->S    Upon receipt of the command, one byte (ACK or NAK)
+            At this point, the beacon will transmit the message.
+    B->S    Upon completion of the transmission, a byte containing
+            the remainder of the length of the message / 255,
+            and a NULL byte 
+    ...
 """
 
-import socket
-import ssl
-import hashlib
+from errno import EAGAIN
+import time
+from ssl import SSLEOFError
 
-class SSLSocketServer:
-    def __init__(
-        self,
-        host = "localhost",
-        port = 8888,
-        certfile = "/etc/ssl/beacon_cert/server.pem",
-        keyfile = "/etc/ssl/beacon_cert/server.key",
-        ca_certs = "/etc/ssl/beacon_cert/beacon.pem",
-        client_cert_reqs = ssl.CERT_REQUIRED
-    ):
+from .sslsocketserver import *
+from .beaconmessage import BeaconStatus, BeaconDestination, BeaconCommand
+
+class BeaconServer:
+    """A server for dealing with the server-beacon communications"""
+    def __init__(self, verbose=False, timeout=10, repeat_attempts=10, **kwargs):
+        self.socketserver = SSLSocketServer(**kwargs)
+        self.repeat_attempts = repeat_attempts
+        self.sock = None
+        self.v = verbose
+        self.timeout = timeout
+        self.busy = False
+
+        @self.socketserver.on_connect
+        def connect_hook(client_ssl_socket, client_cert):
+            """Runs on connect from beacon"""
+            self.sock = client_ssl_socket
+            self.sock.settimeout(self.timeout)
+
+            try:
+                # Wait/blockuntil connection ends before accepting another:
+                while True:
+                    if self.busy:  # TODO: Implement this busy-wait with asyncio or something
+                        time.sleep(1)
+                        continue
+                    if self.v:
+                        print("Sending keepalive...")
+                    self.sock.setblocking(False)
+                    self.sock.send(b'Keep-Alive\x00\x00\x00')
+                    self.sock.setblocking(True)
+                    if self.rx_bytes(1) != BeaconStatus.ACK.value:
+                        return
+                    # Connection is still alive!
+                    time.sleep(5)
+            except SSLEOFError:
+                pass
+
+            # Socket is closed upon this method's return
+            return
+
+    def send_cmd(self, message: BeaconCommand) -> True:
+        """Sends a command to the beacon.
+        Returns True on success
         """
-        Initialize the SSLSocketServer with the specified parameters.
-
-        :param host: The IP address of the server to bind to.
-        :type host: str
-        :param port: The port number to bind the server to.
-        :type port: int
-        :param certfile: The path to the certificate file used by the server for SSL.
-        :type certfile: str
-        :param keyfile: The path to the key file used by the server for SSL.
-        :type keyfile: str
-        :param ca_certs: The path to a file containing a set of concatenated CA certificates in PEM format.
-        :type ca_certs: str
-        :param client_cert_reqs: The certificate requirements for client authentication. Can be either ssl.CERT_NONE, ssl.CERT_OPTIONAL or ssl.CERT_REQUIRED.
-        :type client_cert_reqs: int (one of ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED)
-        """
-        self.host = host
-        self.port = port
-        self.certfile = certfile
-        self.keyfile = keyfile
-        self.ca_certs = ca_certs
-        self.client_cert_reqs = client_cert_reqs
-        self.server_socket = None
-
-    def run_server(self):
-        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server_socket.bind((self.host, self.port))
-        self.server_socket.listen()
-        print("Listening on {host}:{port}...".format(host=self.host, port=self.port))
-
-        while True:
-            print("Listening...")
-            client_socket, client_address = self.server_socket.accept()
-            print(f"Accepted connection from {client_address}!")
-            print("Wrapping...")
-            client_ssl_socket = ssl.wrap_socket(client_socket,
-                                                server_side=True,
-                                                certfile=self.certfile,
-                                                keyfile=self.keyfile,
-                                                ca_certs=self.ca_certs,
-                                                cert_reqs=self.client_cert_reqs)
-
-            client_cert = client_ssl_socket.getpeercert(True)
-            client_fingerprint = hashlib.sha256(client_cert).hexdigest()
-
-            # Compare the client's fingerprint to the expected fingerprint
-            if False: #client_fingerprint != self.fingerprint:
-                print("Rejected connection from {addr} due to invalid fingerprint".format(addr=client_address))
-                client_ssl_socket.close()
+        self.busy = True
+        success = False
+        for _ in range(self.repeat_attempts):
+            print("\tANOTHER ATTEMPT TO SEND CMD")
+            # Send message over:
+            self.tx_bytes(message.serialize())
+            # Check for ACK:
+            response = self.rx_bytes(1)
+            if response[0:1] != BeaconStatus.ACK.value:
+                if self.v: print("No ACK; Resending message")
                 continue
+            if self.v:
+                print("Got beacon ACK")
+            # Wait for end of transmission:
+            check = self.rx_bytes(2)
+            if self.v:
+                print("Rx'd okay bytes")
+            print(check[0])
+            print(len(message.message) % 255)
+            if check[0] != (len(message.message) % 255):
+                continue
+            if self.v:
+                print("Good length checksum")
+            
+            success = True
+            break
+        self.busy = False
+        return success
 
-            print("Sending message...")
-            client_ssl_socket.send(b"Connection Established!")
-            print("Closing socket.")
-            client_ssl_socket.close()
+    def run(self):
+        """A blocking method that never returns
+        Runs the server"""
+        self.socketserver.run_server()
+
+    def tx_bytes(self, stuff: bytes) -> int:
+        """Sends some stuff to the beacon and returns an int return code"""
+        if self.v:
+            print(f"Sending stuff:\n{stuff}")
+        if self.sock is None:
+            return ConnectionError("Connection from the beacon not established")
+        if self.v:
+            print(f"Writing {stuff}")
+        #while sent < len(stuff):
+        #    sent += self.sock.send(stuff[sent:])
+        #    if self.v:
+        #        print(f"Sent {sent}/{len(stuff)} bytes")
+        # #self.sock.flush()
+        self.sock.sendall(stuff)
+
+    def rx_bytes(self, size: int, chunkby: int = 256) -> bytes:
+        """Receives a given number of bytes from the beacon"""
+        if self.v:
+            print(f"Blocking read for {size} bytes...")
+        if self.sock is None:
+            return ConnectionError("Connection from the beacon not established")
+        self.sock.setblocking(True)
+        response = b""
+        while True:
+            buf = bytearray(min(size-len(response), chunkby))
+            try:
+                recvd = self.sock.recv_into(buf, min(size-len(response), chunkby))
+            except OSError as e:
+                if e.errno == EAGAIN:
+                    recvd = -1
+                else:
+                    raise
+            response += buf
+            del buf
+            if self.v:
+                print(f"Received {recvd} bytes")
+            if recvd == 0:
+                del recvd
+                break
+        if self.v:
+            print(f"Received stuff:\n{response}")
+        return response
