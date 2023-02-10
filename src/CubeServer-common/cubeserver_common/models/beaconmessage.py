@@ -25,8 +25,8 @@ class OutputDestination(Enum):
 class BeaconMessageEncoding(Enum):
     """Types of encodings for beacon messages
     """
-    UTF8       = "utf-8"
     ASCII      = "ascii"
+    UTF8       = "utf-8"
     HEX        = "hex dump"
     INTEGER    = "integer"
 
@@ -84,7 +84,8 @@ class BeaconMessage(PyMongoModel):
         additional_headers: Mapping[str, str] = {},
         encoding: Optional[BeaconMessageEncoding] = None,
         destination: OutputDestination = OutputDestination.IR,
-        intensity: int = 255
+        intensity: int = 255,
+        already_transmitted: bool = False
     ):
         """
         Args:
@@ -107,7 +108,8 @@ class BeaconMessage(PyMongoModel):
         self.additional_headers = additional_headers
         self.destination = destination
         self.intensity = intensity
-    
+        self.past = already_transmitted
+
     @property
     def message_bytes(self) -> bytes:
         """Returns the message, given as bytes
@@ -157,3 +159,7 @@ class BeaconMessage(PyMongoModel):
         for i, byte in enumerate(self.message_bytes):
             sum += int(byte) ^ (i*8)
         return sum % 255
+
+    def set_transmitted(self) -> None:
+        """Sets this message as having already been transmitted"""
+        self.past = True

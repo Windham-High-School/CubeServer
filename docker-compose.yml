@@ -37,6 +37,7 @@ services:
     depends_on:
       - mongodb
       - api
+      - beaconserver
     networks:
       - frontend
       - backend

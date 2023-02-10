@@ -270,9 +270,31 @@ class ScoreDeltaCol(HTMLCol):
             text_class = "text-danger"
         prefix = '+' if number >= 0 else '-'
         return (
-            '\n'.join([
-                f"<span class=\"{text_class}\">",
-                f"{prefix} {abs(content)}",
-                "</span>"
-            ])
+                f"<span class=\"{text_class}\">\n",
+                f"{prefix} {abs(content)}\n",
+                "</span>\n"
         )
+
+class PreCol(HTMLCol):
+    """A Column that displays its contents between <pre /> tags"""
+
+    def __init__(self, name, pre_classes="", *args, **kwargs):
+        super().__init__(name, *args, **kwargs)
+        self.pre_classes=pre_classes
+
+    def generate_html(self, content: Any, identifier: str, attr_list: List[str]) -> str:
+        return (
+                f"<pre class=\"{self.pre_classes}\">\n",
+                f"{content}\n",
+                "</pre>\n"
+        )
+
+
+# TODO: Finish BoolCol implementation with pretty coloring!
+#class BoolCol(HTMLCol):
+#    """A Column for displaying boolean values"""
+#
+#    def generate_html(self, content: Any, identifier: str, attr_list: List[str]) -> str:
+#        return ""
+#
+

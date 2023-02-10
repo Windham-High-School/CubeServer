@@ -20,6 +20,7 @@ from cubeserver_common.models.utils import EnumCodec
 from cubeserver_common.models.config.rules import Rules
 from cubeserver_common.models.team import Team, TeamLevel
 from cubeserver_common.models.user import User, UserLevel
+from cubeserver_common.models.beaconmessage import OutputDestination
 from cubeserver_common.models.multiplier import Multiplier, MassMultiplier, VolumeMultiplier, CostMultiplier, VolumeUnit
 from cubeserver_common.mail import Message
 from cubeserver_common.models.beaconmessage import BeaconMessage, BeaconMessageEncoding
@@ -29,6 +30,7 @@ from cubeserver_common.config import FROM_NAME, FROM_ADDR
 from cubeserver_app.tables.team import AdminTeamTable
 from cubeserver_app.tables.users import AdminUserTable
 from cubeserver_app.tables.datapoints import AdminDataTable
+from cubeserver_app.tables.beaconmessages import BeaconMessageTable
 
 from .user_form import InvitationForm
 from .config_form import ConfigurationForm
@@ -399,21 +401,27 @@ def beacon_tx():
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
     form = ImmediateBeaconForm()
+    print("Submitted form...")
+    print(form.validate_on_submit())
+    print(form.msg_format.data)
     if form.validate_on_submit():
         try:
             msg = BeaconMessage(
-                str(form.message.data),
-                BeaconMessageEncoding(form.msg_format.data)
+                instant=form.instant.data,
+                division=TeamLevel(form.division.data),
+                message=form.message.data,
+                destination=OutputDestination(form.destination.data),
+                encoding=BeaconMessageEncoding(form.msg_format.data)
             )
-            session["beacon-tx"] = jsonpickle.encode(msg)
+            msg.save()
         except:  # TODO: Is this poor practice?
             tb = traceback.format_exc()
             print(tb)
             return render_template('errorpages/500.html.jinja2', message=tb)
         return render_template(
-            'beacon_txing.html.jinja2',
-            message_bytes_as_str=str(msg.message_bytes)
+            'beacon_tx_done.html.jinja2'
         )
+    flash("Invalid input.", category="danger")
     return abort(500)
 
 
@@ -425,8 +433,8 @@ def beacon_txing():
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
 
-    msg = jsonpickle.decode(session.pop('beacon-tx'))
-    msg.transmit()
+    #msg = jsonpickle.decode(session.pop('beacon-tx'))
+    #msg.save()
 
     return render_template(
         'beacon_tx_done.html.jinja2'
@@ -449,3 +457,18 @@ def beacon_key():
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
     return send_file('/api_cert/beacon.key')
+
+@bp.route('/beacontable')
+@login_required
+def beacon_table():
+    """Renders a table with all beacon messages"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    print(BeaconMessage.find_one().message_encoding)
+    table = BeaconMessageTable(BeaconMessage.find())
+    return render_template(
+        'beacon_table.html.jinja2',
+        beacon_table=table.__html__()
+    )
+
