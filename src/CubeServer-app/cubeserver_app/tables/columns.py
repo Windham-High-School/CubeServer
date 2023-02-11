@@ -298,3 +298,9 @@ class PreCol(HTMLCol):
 #        return ""
 #
 
+#class EmergencyDeleteCol(OptionsCol):
+#    """A column for the database repair tool that allows deleting bad documents
+#    The content would otherwise be the objectid"""
+#    def __init__(self, name, *args, **kwargs):
+#        super().__init__(name, *args, model_type="Any", **kwargs)
+

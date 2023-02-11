@@ -3,7 +3,7 @@
 from typing import List
 from flask_table import Table, Col, DatetimeCol
 
-from cubeserver_common.models.team import Team
+from cubeserver_common.models.beaconmessage import BeaconMessage
 from cubeserver_app.tables.columns import EnumCol, PreCol
 
 __all__ = ['BeaconMessageTable']
@@ -31,7 +31,7 @@ class BeaconMessageTable(Table):
     suffix      = PreCol('Packet Suffix')
     checksum    = Col('Checksum')
 
-    def __init__(self, items: List[Team], **kwargs):
+    def __init__(self, items: List[BeaconMessage], **kwargs):
         """Initializes the table"""
         super().__init__(items, **kwargs)
 
