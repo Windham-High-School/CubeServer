@@ -155,7 +155,7 @@ services:
       - NET_ADMIN
     network_mode: host
 
-  # IP Camera:
+# IP Camera:
 #  cam:
 #    container_name: ${PROJECT_NAME}-kerberos
 #    image: kerberos/kerberos:latest
