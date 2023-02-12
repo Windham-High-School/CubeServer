@@ -10,18 +10,17 @@ if [ -z $1 ]; then
     exit 1
 fi
 
-case $(ps -o comm= -p "$PPID") in
-    sshd|*/sshd)
+if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
         echo -e "${RED}This is being run in an SSH session directly."
         echo -e "This is dangerous, as the build could terminate prematurely-"
         echo -e "Please run this in a screen session instead:"
         echo -e "${CYAN}screen -L bash pull_release.sh${RESTORE}"
-    ;;
-esac
+fi
 
 PREV_VER=$(cat ../version.txt)
 
 function abort {
+    git stash pop  # Prevent stashed changes from being lost in a failed update
     echo -e "${CYAN}Aborted.${RESTORE}"
     exit 1
 }
@@ -45,12 +44,16 @@ function update_release {
     echo -e "    Popping stashed changes... "
     git stash pop
 
-    echo -e "${BLUE}  Configuring build... ${RESTORE}"
+    echo -e "${BLUE}  Configuring... ${RESTORE}"
     ./configure
 
-    echo -e "${BLUE}  Building... ${RESTORE}"
-    docker compose build --parallel || abort
-    echo -e "${GREEN}  Done Building! ${RESTORE}"
+    # No longer do we build locally when we can pull.
+    #echo -e "${BLUE}  Building... ${RESTORE}"
+    #docker compose build --parallel || abort
+    #echo -e "${GREEN}  Done Building! ${RESTORE}"
+
+    echo -e "${BLUE}  Pulling... ${RESTORE}"
+    docker compose pull
 
     echo -e "${BLUE}  Recreating images... ${RESTORE}"
     docker compose up --force-recreate -d
