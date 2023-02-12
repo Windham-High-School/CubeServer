@@ -44,12 +44,16 @@ function update_release {
     echo -e "    Popping stashed changes... "
     git stash pop
 
-    echo -e "${BLUE}  Configuring build... ${RESTORE}"
+    echo -e "${BLUE}  Configuring... ${RESTORE}"
     ./configure
 
-    echo -e "${BLUE}  Building... ${RESTORE}"
-    docker compose build --parallel || abort
-    echo -e "${GREEN}  Done Building! ${RESTORE}"
+    # No longer do we build locally when we can pull.
+    #echo -e "${BLUE}  Building... ${RESTORE}"
+    #docker compose build --parallel || abort
+    #echo -e "${GREEN}  Done Building! ${RESTORE}"
+
+    echo -e "${BLUE}  Pulling... ${RESTORE}"
+    docker compose pull
 
     echo -e "${BLUE}  Recreating images... ${RESTORE}"
     docker compose up --force-recreate -d
