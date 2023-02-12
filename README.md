@@ -45,7 +45,9 @@ cd CubeServer
 sudo ./tools/install_ubuntu.sh
 ```
 This will install a Systemd service for the server and everything will be automatic and work... Unless it doesn't.
+
 **Note that this method is now unsupported and will be removed in a future version**
+
 --------------------------------------------------------------------------
 ### The Hard Way-
 Install Docker dependency-
