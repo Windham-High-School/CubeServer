@@ -1,0 +1,20 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Beacon Schedule{% endblock %}
+
+{% block header %}
+    <h4>Scheduled Transmissions</h4>
+    <p>
+        (as of {{current_time}})
+    </p>
+{% endblock %}
+
+{% block content %}
+    <div>
+        {{ beacon_table }}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script src="{{ url_for('static', filename='/js/admin.js') }}"></script>
+{% endblock %}

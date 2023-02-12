@@ -6,6 +6,7 @@ from typing import Any, List, Mapping, Optional, Tuple, Type, cast
 from pydoc import locate
 import warnings
 from bson import ObjectId
+from json import loads
 from bson import _BUILT_IN_TYPES as BSON_TYPES
 from bson.codec_options import TypeCodec, TypeRegistry
 from pymongo import MongoClient, ASCENDING
@@ -292,6 +293,13 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
     def id(self):
         """The internal document identifier"""
         return self._id
+
+    @property
+    def id_secondary(self):
+        """A dummy property; always equal to id
+        Used to have multiple id-driven columns in a Flask-tables table
+        """
+        return self.id
 
     def save(self):
         """Saves this document to the collection"""

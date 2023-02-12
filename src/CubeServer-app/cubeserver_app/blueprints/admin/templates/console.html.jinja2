@@ -46,17 +46,24 @@
             {{macros.endbox()}}
 
             {{macros.startbox("Beacon", "col")}}
+                <a href={{ url_for('admin.beacon_table') }} class="btn">See All Scheduled Messages</a>
+                <hr>
                 <p>
-                    Send a message now:
+                    Schedule a message now:
                 </p>
                 <form method="POST" action="beaconnow" class="form">
                     {{ beacon_form.hidden_tag() }}
                     {{ wtf.form_errors(beacon_form, hiddens="only") }}
 
+                    {{ wtf.form_field(beacon_form.instant) }}
                     {{ wtf.form_field(beacon_form.message) }}
+                    {{ wtf.form_field(beacon_form.division) }}
+                    {{ wtf.form_field(beacon_form.destination) }}
                     {{ wtf.form_field(beacon_form.msg_format) }}
+                    {{ wtf.form_field(beacon_form.intensity) }}
                     {{ wtf.form_field(beacon_form.submit) }}
                 </form>
+
             {{macros.endbox()}}
 
         </div>
@@ -93,6 +100,14 @@
             {{macros.startbox("System", "col")}}
                 <b>Uptime: </b>
                 <p id="uptime_counter">LOADING...</p>
+
+                <hr>
+
+                <b>Database Repair: </b>
+                <p>
+                    There is an emergency database repair tool available.
+                    Please consult documentation.
+                </p>
             {{macros.endbox()}}
 <div style="display:none">
             {{macros.startbox("Box #10", "col")}}
