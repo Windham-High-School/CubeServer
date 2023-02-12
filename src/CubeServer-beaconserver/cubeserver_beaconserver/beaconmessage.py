@@ -42,16 +42,21 @@ class BeaconCommand:
     @classmethod
     def from_BeaconMessage(cls, database_doc: BeaconMessage):
         """Creates a BeaconCommand instance from a BeaconMessage database document"""
-        return cls(
+        instance = cls(
             BeaconDestination.from_OutputDestination(database_doc.destination),
             database_doc.intensity,
             database_doc.full_message_bytes
         )
+        instance.db_doc = database_doc
+        return instance
 
     def serialize(self) -> bytes:
         """Serializes the command/message to bytes
         that can be sent as a packet to the beacon
         """
+        if self.db_doc:  # Mark this as having been processed...
+            self.db_doc.past = True
+            self.db_doc.save()
         length = len(self.message).to_bytes(2, 'big')
         return b''.join(
             [

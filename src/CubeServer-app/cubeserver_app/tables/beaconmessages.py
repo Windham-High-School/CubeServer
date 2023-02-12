@@ -22,13 +22,12 @@ class BeaconMessageTable(Table):
     destination         = EnumCol('Output')
     intensity           = Col('Intensity')
 
-    message             = PreCol('Message')
+    full_message_bytes_p= PreCol('Full Message')
+
     message_encoding    = EnumCol('Encoding')
 
     additional_headers  = Col('Additional Headers')
 
-    prefix      = PreCol('Packet Prefix')
-    suffix      = PreCol('Packet Suffix')
     checksum    = Col('Checksum')
 
     def __init__(self, items: List[BeaconMessage], **kwargs):
