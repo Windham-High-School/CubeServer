@@ -15,6 +15,7 @@ import base64
 import jsonpickle
 from json import loads, dumps
 from pprint import pformat
+from datetime import datetime
 
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.datapoint import DataPoint, DataClass
@@ -462,7 +463,8 @@ def beacon_table():
     table = BeaconMessageTable(BeaconMessage.find())
     return render_template(
         'beacon_table.html.jinja2',
-        beacon_table=table.__html__()
+        beacon_table=table.__html__(),
+        current_time = str(datetime.now())
     )
 
 
@@ -473,8 +475,8 @@ def database_repair(mode="", collection_name="", query="{}"):
     # Check admin status:
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
-    if mode not in ['all', 'broken']:
-        flash("Valid modes are `all` or `broken`.")
+    if mode not in ['all', 'broken', 'safe']:
+        flash("Valid modes are `all`, `safe`, or `broken`.")
         return abort(500)
     if collection_name not in __STR_COLLECTION_MAPPING:
         flash(f"Invalid Collection Name \"{collection}\".")
@@ -529,8 +531,12 @@ def database_repair(mode="", collection_name="", query="{}"):
     #         in the exemplary `good_doc`, something is wrong, likely remnants
     #         from a previous, database-incompatible version of CubeServer.
     for doc in all_docs:
+        print(f"Opening Document ID {doc.id}...")
         if mode == 'all':
             broken.append(BrokenDocId(doc.id, pformat(doc.encode(), indent=4)))
+            continue
+        elif mode == 'safe':
+            broken.append(BrokenDocId(doc.id, "[OPENED IN SAFE MODE; NO DATA SHOWN]"))
             continue
         for field_name in doc._fields:
             example    = good_doc.__getattribute__(field_name)
