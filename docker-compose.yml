@@ -38,6 +38,7 @@ services:
     depends_on:
       - mongodb
       - api
+      - beaconserver
     networks:
       - frontend
       - backend
@@ -81,7 +82,7 @@ services:
     image: snorklerjoe/cubeserver-beaconserver:${VERSION_TAG}
     restart: unless-stopped
     volumes:
-      - beacon-ssl-cert:/etc/ssl/beacon_cert/
+      - api-ssl-cert:/etc/ssl/beacon_cert/
     build:
       context: .
       dockerfile: Docker/CubeServer-beaconserver/Dockerfile
@@ -104,6 +105,7 @@ services:
     networks:
       - api
       - backend
+      - frontend
 
   # Database container:
   mongodb:
@@ -183,5 +185,5 @@ volumes:
     driver: local
   api-ssl-cert:
     driver: local
-  beacon-ssl-cert:
-    driver: local
+#  beacon-ssl-cert:
+#    driver: local

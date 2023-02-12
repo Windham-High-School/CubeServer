@@ -26,4 +26,5 @@ class ConfigurationForm(FlaskForm):
     smtp_credentials = StringField("SMTP Credentials as user:pass")
     team_email_quota = IntegerField("The maximum number of daily emails a team can send from their cube")
     quota_reset_hour = IntegerField("The hour at which it becomes a \"new day\" for the email quota")
+    banner_message = StringField("A message to be displayed to all web app users- Leave blank to turn off")
     submit = SubmitField('Save')

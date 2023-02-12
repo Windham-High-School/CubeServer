@@ -6,29 +6,38 @@
 from datetime import timedelta
 from math import floor
 from bson.objectid import ObjectId
-from flask import abort, Blueprint, render_template, request, url_for, current_app, flash, session
+from flask import abort, Blueprint, render_template, request, url_for, current_app, flash, session, send_file
 from flask_login import current_user, login_required
-from typing import cast
+from typing import cast, List
 from uptime import uptime
 import traceback
 import base64
 import jsonpickle
+from json import loads, dumps
+from pprint import pformat
+from datetime import datetime
 
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.datapoint import DataPoint, DataClass
-from cubeserver_common.models.utils import EnumCodec
+from cubeserver_common.models.utils import EnumCodec, Encodable
+from bson import _BUILT_IN_TYPES as BSON_TYPES
 from cubeserver_common.models.config.rules import Rules
 from cubeserver_common.models.team import Team, TeamLevel
 from cubeserver_common.models.user import User, UserLevel
+from cubeserver_common.models.beaconmessage import OutputDestination
 from cubeserver_common.models.multiplier import Multiplier, MassMultiplier, VolumeMultiplier, CostMultiplier, VolumeUnit
 from cubeserver_common.mail import Message
-from cubeserver_common.beacon import BeaconMessage, Beacon, BeaconMessageEncoding
+from cubeserver_common.models.beaconmessage import BeaconMessage, BeaconMessageEncoding
 from cubeserver_common.models.reference import ReferencePoint
 from cubeserver_common.config import FROM_NAME, FROM_ADDR
+
+from flask_table import Table
+from cubeserver_app.tables.columns import PreCol, OptionsCol
 
 from cubeserver_app.tables.team import AdminTeamTable
 from cubeserver_app.tables.users import AdminUserTable
 from cubeserver_app.tables.datapoints import AdminDataTable
+from cubeserver_app.tables.beaconmessages import BeaconMessageTable
 
 from .user_form import InvitationForm
 from .config_form import ConfigurationForm
@@ -36,6 +45,14 @@ from .rules_form import RulesForm
 from .multiplier_form import MultiplierForm, SIZE_NAME_MAPPING
 from .email_form import EmailForm
 from .beacon_form import ImmediateBeaconForm
+
+
+__STR_COLLECTION_MAPPING = {
+    "Team":Team,
+    "User":User,
+    "DataPoint":DataPoint,
+    "BeaconMessage":BeaconMessage
+}
 
 bp = Blueprint(
     'admin',
@@ -66,6 +83,7 @@ def admin_home():
     conf_form.notify_teams.data = db_conf.notify_teams
     conf_form.team_email_quota.data = db_conf.team_email_quota
     conf_form.quota_reset_hour.data = db_conf.quota_reset_hour
+    conf_form.banner_message.data = db_conf.banner_message
 
     # Render the template:
     return render_template(
@@ -141,11 +159,7 @@ def table_endpoint(table, identifier, field):
     # Check admin status:
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
-    model_class = {
-        "Team":Team,
-        "User":User,
-        "DataPoint":DataPoint
-    }[table]
+    model_class = __STR_COLLECTION_MAPPING[table]
     model_obj = model_class.find_by_id(ObjectId(identifier))
     if model_class == Team and Conf.retrieve_instance().notify_teams:  # Notify the team of changes:
         desc_str = "deleted" if request.method == 'DELETE' else f"given a {field} of {request.form.get('item')}"
@@ -210,6 +224,7 @@ def conf_change():
         return abort(403)
     form = ConfigurationForm()
     if form.validate_on_submit():
+        # Update database from form:
         db_conf: Conf = Conf.retrieve_instance()
         db_conf.registration_open = form.registration_open.data
         db_conf.home_description = form.home_description.data
@@ -219,6 +234,7 @@ def conf_change():
         db_conf.notify_teams = form.notify_teams.data
         db_conf.team_email_quota = form.team_email_quota.data
         db_conf.quota_reset_hour = form.quota_reset_hour.data
+        db_conf.banner_message = form.banner_message.data
         credentials = form.smtp_credentials.data.strip().split(':')
         if len(credentials) > 1:
             db_conf.smtp_user = credentials[0]
@@ -396,35 +412,148 @@ def beacon_tx():
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
     form = ImmediateBeaconForm()
+    print("Submitted form...")
+    print(form.validate_on_submit())
+    print(form.msg_format.data)
     if form.validate_on_submit():
         try:
             msg = BeaconMessage(
-                str(form.message.data),
-                BeaconMessageEncoding(form.msg_format.data)
+                instant=form.instant.data,
+                division=TeamLevel(form.division.data),
+                message=form.message.data,
+                destination=OutputDestination(form.destination.data),
+                encoding=BeaconMessageEncoding(form.msg_format.data)
             )
-            session["beacon-tx"] = jsonpickle.encode(msg)
+            msg.save()
         except:  # TODO: Is this poor practice?
             tb = traceback.format_exc()
             print(tb)
             return render_template('errorpages/500.html.jinja2', message=tb)
         return render_template(
-            'beacon_txing.html.jinja2',
-            message_bytes_as_str=str(msg.message_bytes)
+            'beacon_tx_done.html.jinja2'
         )
+    flash("Invalid input.", category="danger")
     return abort(500)
 
-
-@bp.route('/beacontx')
+@bp.route('/beacon.pem')
 @login_required
-def beacon_txing():
-    """Actually transmits the prepared message and waits..."""
+def beacon_pem():
+    """Downloads public key for the beacon"""
     # Check admin status:
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
+    return send_file('/api_cert/beacon.pem')
 
-    msg = jsonpickle.decode(session.pop('beacon-tx'))
-    msg.transmit()
+@bp.route('/beacon.key')
+@login_required
+def beacon_key():
+    """Downloads private key for the beacon"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    return send_file('/api_cert/beacon.key')
+
+@bp.route('/beacontable')
+@login_required
+def beacon_table():
+    """Renders a table with all beacon messages"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    table = BeaconMessageTable(BeaconMessage.find())
+    return render_template(
+        'beacon_table.html.jinja2',
+        beacon_table=table.__html__(),
+        current_time = str(datetime.now())
+    )
+
+
+@bp.route('/db-repair/<mode>/<collection_name>/<query>', methods=['GET', 'POST'])
+@login_required
+def database_repair(mode="", collection_name="", query="{}"):
+    """Allows repairing a database with some broken stuff in it"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    if mode not in ['all', 'broken', 'safe']:
+        flash("Valid modes are `all`, `safe`, or `broken`.")
+        return abort(500)
+    if collection_name not in __STR_COLLECTION_MAPPING:
+        flash(f"Invalid Collection Name \"{collection}\".")
+        return abort(500)
+    print("Opening Database Repair Tool.")
+    
+    collection = __STR_COLLECTION_MAPPING[collection_name]
+    
+    class BrokenDocId:
+        """Represents a broken document to be put into the table"""
+
+        def __init__(self, id: str, repr_str: str):
+            self.id = id
+            self.id_secondary = id
+            self.repr_str = repr_str
+
+    class BrokenDocTable(Table):
+        """Allows a group of BeaconMessage objects to be displayed in an HTML table"""
+
+        def __init_subclass__(cls, model_type:str="") -> None:
+            cls.id_secondary = OptionsCol('Delete', model_type=model_type)
+            return super().__init_subclass__()
+
+        allow_sort = False  # Let's avoid flask-table's built-in sorting
+        classes = ["table", "table-striped", "datatable", "display"]
+        thead_classes = ["thead-dark"]
+        border = True
+
+        id            = PreCol('Document ID')
+        repr_str      = PreCol('Representation')
+        id_secondary  = OptionsCol('Delete', model_type=collection_name)
+
+        def __init__(self, items: List[Encodable], **kwargs):
+            """Initializes the table"""
+            super().__init__(items, **kwargs)
+
+        def sort_url(self, col_id, reverse=False):
+            pass
+            #return url_for(self._endpoint, sort=col_id,
+            #               direction='desc' if reverse else 'asc')
+
+    # Define an exemplary object, based on the default kwargs of the constructor
+    good_doc = collection()
+
+    # Load up anything that matches the query
+    all_docs = collection.find(loads(query))
+
+    broken: List[BrokenDocId] = []
+    # Iterate through and figure out which ones are broken
+    #     What counts as broken?
+    #         If the type of a field does not match that of the same field
+    #         in the exemplary `good_doc`, something is wrong, likely remnants
+    #         from a previous, database-incompatible version of CubeServer.
+    for doc in all_docs:
+        print(f"Opening Document ID {doc.id}...")
+        if mode == 'all':
+            broken.append(BrokenDocId(doc.id, pformat(doc.encode(), indent=4)))
+            continue
+        elif mode == 'safe':
+            broken.append(BrokenDocId(doc.id, "[OPENED IN SAFE MODE; NO DATA SHOWN]"))
+            continue
+        for field_name in doc._fields:
+            example    = good_doc.__getattribute__(field_name)
+            experiment = doc.__getattribute__(field_name)
+            print(field_name, example, experiment)
+            if type(example) != type(experiment):
+                broken.append(BrokenDocId(doc.id, pformat(doc.encode(), indent=4)))
+                print(f"Document {doc.id} is broken-")
+                print(f"\tField {field_name} is type {type(experiment)} instead of {type(example)}")
+                break
+
+    table = BrokenDocTable(broken)
 
     return render_template(
-        'beacon_tx_done.html.jinja2'
+        'db_repair_tool.html.jinja2',
+        displaymode=mode.title(),
+        collection=collection_name,
+        brokendoc_table=table.__html__(),
+        exampledoc=pformat(good_doc.encode(), indent=4)
     )

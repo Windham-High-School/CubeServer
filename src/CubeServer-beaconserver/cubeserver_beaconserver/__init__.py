@@ -1,1 +1,2 @@
-# Refactor cubeserver_Common.beacon to here and import
+from cubeserver_common import configure_db_noapp
+configure_db_noapp()

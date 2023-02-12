@@ -46,17 +46,24 @@
             {{macros.endbox()}}
 
             {{macros.startbox("Beacon", "col")}}
+                <a href={{ url_for('admin.beacon_table') }} class="btn">See All Scheduled Messages</a>
+                <hr>
                 <p>
-                    Send a message now:
+                    Schedule a message now:
                 </p>
                 <form method="POST" action="beaconnow" class="form">
                     {{ beacon_form.hidden_tag() }}
                     {{ wtf.form_errors(beacon_form, hiddens="only") }}
 
+                    {{ wtf.form_field(beacon_form.instant) }}
                     {{ wtf.form_field(beacon_form.message) }}
+                    {{ wtf.form_field(beacon_form.division) }}
+                    {{ wtf.form_field(beacon_form.destination) }}
                     {{ wtf.form_field(beacon_form.msg_format) }}
+                    {{ wtf.form_field(beacon_form.intensity) }}
                     {{ wtf.form_field(beacon_form.submit) }}
                 </form>
+
             {{macros.endbox()}}
 
         </div>
@@ -71,11 +78,12 @@
                     <h4>General Settings:</h4>
                     {{ wtf.form_field(config_form.registration_open) }}
                     {{ wtf.form_field(config_form.notify_teams) }}
-                    {{ wtf.form_field(config_form.email_domain) }}
+                    {{ wtf.form_field(config_form.banner_message) }}
                     {{ wtf.form_field(config_form.home_description, rows=5, cols=20) }}
                     {{ wtf.form_field(config_form.reg_confirmation, rows=5, cols=20) }}
                     <br>
-                    <h4>Outgoing SMTP Settings:</h4>
+                    <h4>Email Settings:</h4>
+                    {{ wtf.form_field(config_form.email_domain) }}
                     {{ wtf.form_field(config_form.smtp_server) }}
                     {{ wtf.form_field(config_form.smtp_credentials) }}
                     {{ wtf.form_field(config_form.team_email_quota) }}
@@ -92,6 +100,14 @@
             {{macros.startbox("System", "col")}}
                 <b>Uptime: </b>
                 <p id="uptime_counter">LOADING...</p>
+
+                <hr>
+
+                <b>Database Repair: </b>
+                <p>
+                    There is an emergency database repair tool available.
+                    Please consult documentation.
+                </p>
             {{macros.endbox()}}
 <div style="display:none">
             {{macros.startbox("Box #10", "col")}}
