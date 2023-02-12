@@ -11,10 +11,10 @@ if [ -z $1 ]; then
 fi
 
 if [ -n "$SSH_CLIENT" ] || [ -n "$SSH_TTY" ]; then
-        echo -e "${RED}This is being run in an SSH session directly."
-        echo -e "This is dangerous, as the build could terminate prematurely-"
-        echo -e "Please run this in a screen session instead:"
-        echo -e "${CYAN}screen -L bash pull_release.sh${RESTORE}"
+        echo -e "${RED}This may be in an SSH session directly."
+        echo -e "Such behavior could be dangerous, as the build could terminate prematurely-"
+        echo -e "Consider running this in a screen session:"
+        echo -e "${CYAN}screen -L bash ./toole/pull_release.sh${RESTORE}"
 fi
 
 PREV_VER=$(cat ../version.txt)
