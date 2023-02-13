@@ -64,11 +64,11 @@ class SSLSocketServer:
 #                                                keyfile=self.keyfile,
                                                 server_side=True)
 
-            client_cert = client_ssl_socket.getpeercert(True)
+            #client_cert = client_ssl_socket.getpeercert(True)
 
             if self.connect_hook is not None:
                 print("Executing connect hook...")
-                self.connect_hook(client_ssl_socket, client_cert)
+                self.connect_hook(client_ssl_socket)
             else:
                 print("Sending test message...")
                 client_ssl_socket.send(b"Connection Established!")
@@ -77,7 +77,7 @@ class SSLSocketServer:
 
     def on_connect(self, decorated_method):
         """A decorator for a method of the following declaration:
-        connect_hook(client_ssl_socket, client_cert)
+        connect_hook(client_ssl_socket)
         ...to be run every time a connection is made.
         A new connection cannot be established until this method exits.
         """
