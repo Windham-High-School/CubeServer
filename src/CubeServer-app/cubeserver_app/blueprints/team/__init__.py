@@ -27,7 +27,7 @@ def register():
                or profanity.contains_profanity(form.member1.data) \
                or profanity.contains_profanity(form.member2.data) \
                or profanity.contains_profanity(form.member3.data)):
-                return redirect('/team/not-nice')
+                return redirect(url_for('.profanity_found'))
             # Create a Team object:
             try:
                 level = TeamLevel(form.classification.data)
@@ -47,7 +47,7 @@ def register():
             session['team_name'] = team.name
             flash("Submitted!")
 
-            return redirect('/team/success')
+            return redirect(url_for('.success'))
         return render_template('register.html.jinja2', form=form)
     return render_template('regclosed.html.jinja2')
 
@@ -136,11 +136,11 @@ def update():
     if request.method == "POST":
         if 'file' not in request.files:
             flash("No file uploaded.")
-            return redirect(request.url)
+            return redirect(url_for('.update'))
         file = request.files['file']
         if file.filename == '':
             flash('No file uploaded.')
-            return redirect(request.url)
+            return redirect(url_for('.update'))
         if file and file.filename == "code.py":
             file_contents = file.stream.read()
             file.stream.close()
