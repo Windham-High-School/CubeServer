@@ -4,6 +4,7 @@
 from enum import Enum, unique
 from typing import Optional, Union, Mapping
 from datetime import datetime
+from pprint import pformat
 
 from .utils.modelutils import PyMongoModel
 from .team import TeamLevel
@@ -30,11 +31,16 @@ class BeaconMessageEncoding(Enum):
     HEX        = "hex dump"
     INTEGER    = "integer"
 
-    def encode(self, message: str) -> bytes:
+    def encode(self, message: Union[str, bytes]) -> bytes:
         """Encodes a message according to the encoding of this enum value
+
+        Returns the parameter unchanged if already bytes.
+
         Args:
-            message (str): The message to encode
+            message (str | bytes): The message to encode
         """
+        if type(message) == bytes:
+            return message
         if self in [self.UTF8, self.ASCII]:
             return message.encode(self.value)
         elif self == self.HEX:
@@ -82,10 +88,10 @@ class BeaconMessage(PyMongoModel):
         suffix: bytes = b'===================END===MESSAGE================',
         line_term: bytes = b'\r\n',
         additional_headers: Mapping[str, str] = {},
-        encoding: Optional[BeaconMessageEncoding] = None,
+        encoding: Optional[BeaconMessageEncoding] = BeaconMessageEncoding.ASCII,
         destination: OutputDestination = OutputDestination.IR,
         intensity: int = 255,
-        already_transmitted: bool = False
+        past: bool = False
     ):
         """
         Args:
@@ -98,6 +104,11 @@ class BeaconMessage(PyMongoModel):
 
         super().__init__()
 
+        self.ignore_attribute('message')
+        self.ignore_attribute('prefix')
+        self.ignore_attribute('suffix')
+        self.ignore_attribute('line_term')
+
         self.send_at = instant
         self.division = division
         self.prefix = prefix
@@ -108,7 +119,11 @@ class BeaconMessage(PyMongoModel):
         self.additional_headers = additional_headers
         self.destination = destination
         self.intensity = intensity
-        self.past = already_transmitted
+        self.past = past
+
+        self.full_message_bytes_stored = self.full_message_bytes
+
+        #self.register_field('full_message_bytes_stored', self.full_message_bytes)
 
     @property
     def message_bytes(self) -> bytes:
@@ -123,34 +138,41 @@ class BeaconMessage(PyMongoModel):
         """Returns all headers
         """
         return {
-            b'Division': self.division.value,
+            b'Division': self.division.value.encode('ascii'),
             b'Server': SHORT_TITLE.encode('ascii') + b'/' + VERSION.encode('ascii'),
             b'Content-Length': str(len(self.message_bytes)).encode('ascii'),
             b'Checksum': str(self.checksum).encode('ascii')
-        } + self.additional_headers
+        } | self.additional_headers
 
     @property
     def headers_bytes(self) -> bytes:
         """Returns headers str as bytes
         """
         return self.line_term.join(
-            f"{header}: {value}"
-                for header, value in self.headers.values()
+            header + b': ' + value
+                for header, value in self.headers.items()
         )
 
     @property
     def full_message_bytes(self):
         """Returns the message as bytes with headers, etc.
         """
+        if self._id:  # If this came from the database, don't regen
+            return self.full_message_bytes_stored
         return self.line_term.join([
             self.prefix,
             b'CSMSG/1.0',
-            self.headers,
+            self.headers_bytes,
             self.line_term,
             self.message_bytes,
             self.line_term,
             self.suffix
         ])
+    
+    @property
+    def full_message_bytes_p(self):
+        """Pretty-printed full message"""
+        return pformat(self.full_message_bytes)
 
     @property
     def checksum(self):
@@ -159,7 +181,3 @@ class BeaconMessage(PyMongoModel):
         for i, byte in enumerate(self.message_bytes):
             sum += int(byte) ^ (i*8)
         return sum % 255
-
-    def set_transmitted(self) -> None:
-        """Sets this message as having already been transmitted"""
-        self.past = True

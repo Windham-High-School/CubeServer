@@ -46,6 +46,8 @@ sudo ./tools/install_ubuntu.sh
 ```
 This will install a Systemd service for the server and everything will be automatic and work... Unless it doesn't.
 
+**Note that this method is now unsupported and will be removed in a future version**
+
 --------------------------------------------------------------------------
 ### The Hard Way-
 Install Docker dependency-
@@ -62,6 +64,14 @@ docker-compose up
 To permanantly reset the installation to the defaults and erase ALL data, run the following:
 ```bash
 docker-compose down && docker volume rm cubeserver_mongodb-data cubeserver_api-ssl-cert cubeserver_flask-secret
+```
+
+### Cross-building and Docker Hub
+
+Containers are built on Docker Hub for arm64 and amd64 linux (moving forward)
+
+```bash
+docker buildx bake -f docker-compose.yml -f .env --set *.platform=linux/arm64,linux/amd64
 ```
 
 ## Topology & Docker Containers

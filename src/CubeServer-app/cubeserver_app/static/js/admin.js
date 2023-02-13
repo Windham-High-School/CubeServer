@@ -23,7 +23,7 @@ This action is PERMANANT and CANNOT BE UNDONE!`;
 Are you ABSOLUTELY CERTAIN?`;
     if (confirm(confirmationMessage) && confirm(secondConfirmationMessage)) {
         $.ajax({  // TODO: Generate these URLs better so stuff is less likely to break:
-            url: `table_endpoint/${item}/${id}/*`,
+            url: `/admin/table_endpoint/${item}/${id}/*`,
             type: 'DELETE',
             success: function(result) {
                 alert("Object deleted.");
@@ -51,7 +51,7 @@ function adjustScore(item, id) {
         return;
     }
     $.ajax({  // TODO: Generate these URLs better so stuff is less likely to break:
-        url: `table_endpoint/${item}/${id}/score_increment`,
+        url: `/admin/table_endpoint/${item}/${id}/score_increment`,
         type: 'POST',
         data: {'item': amt, 'comment': comment},
         success: function(result) {
