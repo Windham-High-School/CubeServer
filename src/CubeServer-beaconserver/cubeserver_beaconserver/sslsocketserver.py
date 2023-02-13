@@ -42,6 +42,13 @@ class SSLSocketServer:
         self.server_socket = None
         self.connect_hook = None
 
+        self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        self.context.check_hostname = False
+        self.context.load_verify_locations(self.ca_certs)
+        self.context.verify_mode = self.client_cert_reqs
+        self.context.load_cert_chain(self.certfile, self.keyfile)
+        self.context.minimum_version = ssl.TLSVersion.TLSv1_2
+
     def run_server(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind((self.host, self.port))
@@ -52,12 +59,10 @@ class SSLSocketServer:
             print("Listening...")
             client_socket, client_address = self.server_socket.accept()
             print(f"Accepted connection from {client_address}!")
-            client_ssl_socket = ssl.wrap_socket(client_socket,
-                                                server_side=True,
-                                                certfile=self.certfile,
-                                                keyfile=self.keyfile,
-                                                ca_certs=self.ca_certs,
-                                                cert_reqs=self.client_cert_reqs)
+            client_ssl_socket = self.context.wrap_socket(client_socket,
+#                                                certfile=self.certfile,
+#                                                keyfile=self.keyfile,
+                                                server_side=True)
 
             client_cert = client_ssl_socket.getpeercert(True)
 
