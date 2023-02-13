@@ -10,7 +10,7 @@ WORKDIR /app
 # Helper files:
 COPY Docker/common/gen_ssl_cert.sh /
 RUN chmod +x /gen_ssl_cert.sh
-RUN /gen_ssl_cert.sh ${CERT_SUBJ} ${CERT_SUBJALTNAME} ${CERT_EXP_DAYS} beacon
+#RUN /gen_ssl_cert.sh ${CERT_SUBJ} ${CERT_SUBJALTNAME} ${CERT_EXP_DAYS} beacon
 
 # Requirements:
 COPY Docker/CubeServer-beaconserver/requirements.txt /tmp/
