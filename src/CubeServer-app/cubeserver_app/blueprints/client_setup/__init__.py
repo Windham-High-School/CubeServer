@@ -119,7 +119,7 @@ def package_circuitpython_lib():
     return response
 
 @bp.route('/api_cert.pem')
-def download_api_cert():
+def api_cert():
     """Downloads the pem file for the cert of the api
     for server verification purposes"""
     response = make_response(pem_cert)

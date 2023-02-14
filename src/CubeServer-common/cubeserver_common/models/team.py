@@ -28,6 +28,7 @@ class TeamLevel(Enum):
 
     JUNIOR_VARSITY = "Nanometer"
     VARSITY = "Lumen"
+    REFERENCE = "REFERENCE"
     PSYCHO_KILLER = "Talking Head"   # Qu'est-ce que c'est, better run run run run...
 
     def __repr__(self):
@@ -53,9 +54,19 @@ class TeamStatus(Enum):
 
     @property
     def is_active(self) -> bool:
-        """Returns true if this team can upload data"""
-        return self == TeamStatus.PARTICIPATING
+        """Returns True if this team can upload data"""
+        return self in [
+            TeamStatus.PARTICIPATING,
+            TeamStatus.INTERNAL
+        ]
 
+    @property
+    def is_public(self) -> bool:
+        """Returns True if this team can be publicly visible"""
+        return self in [
+            TeamStatus.PARTICIPATING,
+            TeamStatus.DISQUALIFIED
+        ]
 
 class TeamHealth(Encodable):
     """Encapsulates the elements of the game that relate to a
@@ -269,3 +280,30 @@ class Team(PyMongoModel):
         self.code_update_taken = True
         self.save()
         return self._code_update
+
+    @classmethod
+    def find_beacon(cls) -> 'Team':
+        """Finds the reserved team for the beacon.
+        If it doesn't exist already, it will be created.
+        """
+        beacon = cls.find_by_name(config.BEACON_TEAM_NAME)
+        if beacon is not None:
+            return beacon
+        beacon = Team(
+            name=config.BEACON_TEAM_NAME,
+            weight_class=TeamLevel.REFERENCE,
+            status=TeamStatus.INTERNAL,
+            multiplier=Multiplier(0,0,0)
+        )
+        beacon.save()
+        return beacon
+
+    @classmethod
+    def find_references(cls) -> List['Team']:
+        """Lists all reference "Team"s"""
+        return cls.find(
+            {
+                "status": TeamStatus.INTERNAL.value,
+                "name": {"$nin": config.BEACON_TEAM_NAME}
+            }
+        )

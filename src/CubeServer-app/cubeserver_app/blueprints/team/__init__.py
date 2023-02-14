@@ -3,10 +3,11 @@
 from flask import Blueprint, session, redirect, render_template, url_for
 from flask import current_app, request, abort, flash
 from better_profanity import profanity
+from flask_login import current_user
 
 from cubeserver_common import config
 from cubeserver_common.mail import Message
-from cubeserver_common.models.team import Team, TeamLevel
+from cubeserver_common.models.team import Team, TeamLevel, TeamStatus
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.user import User, UserLevel
 from cubeserver_app.errorviews import server_error
@@ -127,6 +128,21 @@ def success():
 
     if 'team_secret' not in session:
         return redirect('/')
+
+    actual_team = Team.find_by_name(session['team_name'])
+    if actual_team is None:
+        flash(
+            f"Could not find registry for team {session['team_name']}",
+            category='danger'
+        )
+        return redirect('/')
+    if (
+        actual_team.status == TeamStatus.INTERNAL or \
+        actual_team.weight_class == TeamLevel.REFERENCE
+    ) and (current_user is None or current_user.level != UserLevel.ADMIN):
+        flash("You don't have permission to access this page for an internally reserved team.")
+        return abort(403)
+    
 
     return render_template(
         'success.html.jinja2',
