@@ -3,6 +3,7 @@
 from enum import Enum, unique
 from typing import List, Optional, Any
 from math import ceil
+from urllib.parse import quote_plus
 import secrets
 
 from .config.conf import Conf
@@ -44,6 +45,7 @@ class TeamStatus(Enum):
     PARTICIPATING = "Participating"
     DISQUALIFIED = "Disqualified"
     ELIMINATED = "Eliminated"
+    INTERNAL = "[Internal]"  # For the beacon & demo cubes
 
     def __repr__(self):
         """Forms a string representation of a TeamStatus value"""
@@ -221,8 +223,13 @@ class Team(PyMongoModel):
 
     @property
     def id_2(self):  # TODO: Fix this (and AdminTeamsTable.id_2)
+                     # TODO: Replace all usages with id_primary (property of PyMongoModel's)
         """Just to allow multiple columns in the adminteamstable to rely upon the id..."""
         return self._id
+
+    @property
+    def custom_link(self) -> str:  # TODO: Make better
+        return f"http://whsproject.club/team/success?team_secret={self.secret}&team_name={quote_plus(self.name)}"
 
     def send_api_email(self, subject, message):
         """Send an email from their cube to them"""
