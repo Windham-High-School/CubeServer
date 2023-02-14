@@ -97,6 +97,22 @@
         </div>
 
         <div class="row">
+            {{macros.startbox("Internal API \"Team\"s", "col")}}
+                <b>Reserved team names: </b>
+                <ul>
+                    {% for name in reserved_names %}
+                        <li>{{name}}</li>
+                    {% endfor %}
+                </ul>
+
+                <hr>
+
+                <b>Database Repair: </b>
+                <p>
+                    There is an emergency database repair tool available.
+                    Please consult documentation.
+                </p>
+            {{macros.endbox()}}
             {{macros.startbox("System", "col")}}
                 <b>Uptime: </b>
                 <p id="uptime_counter">LOADING...</p>

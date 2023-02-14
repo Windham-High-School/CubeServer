@@ -125,6 +125,12 @@ class TeamHealth(Encodable):
 class Team(PyMongoModel):
     """Models a team"""
 
+    RESERVED_NAMES = [
+        config.BEACON_TEAM_NAME
+    ] + [
+        config.REFERENCE_TEAM_NAME.format(i) for i in range(10)
+    ]
+
     @classmethod
     def _gen_secret(cls) -> str:
         """Generates a crypto-safe secret of the length defined by

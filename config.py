@@ -105,6 +105,16 @@ TEAM_MAX_UPDATE_LENGTH: int = 32768  # 32KiB
 
 
 
+# Internal Teams (for extending api functionality for behind-the-scenes use):
+
+BEACON_TEAM_NAME: str = "CubeServer-beacon"
+"""The name of the "team" for the beacon"""
+
+REFERENCE_TEAM_NAME: str = "CubeServer-reference-{}"
+"""The naming pattern for reference "team"s"""
+
+
+
 # Cubes:
 
 COMMENT_FILTER_PROFANITY: bool = True

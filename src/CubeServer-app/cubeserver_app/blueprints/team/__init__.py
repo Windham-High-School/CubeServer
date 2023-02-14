@@ -28,6 +28,15 @@ def register():
                or profanity.contains_profanity(form.member2.data) \
                or profanity.contains_profanity(form.member3.data)):
                 return redirect(url_for('.profanity_found'))
+            if form.team_name.data in Team.RESERVED_NAMES:
+                server_error(
+                    ValueError(f"Cannot use reserved name {form.team_name.data}"),
+                    message=(
+                        "You tried to use a reserved name for your team. "
+                        "Certain names are reserved for internal uses of the api and teams database, "
+                        "interference with which could compromise the competition."
+                    )
+                )
             # Create a Team object:
             try:
                 level = TeamLevel(form.classification.data)

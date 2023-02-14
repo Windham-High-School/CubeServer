@@ -105,7 +105,8 @@ def admin_home():
                 ', '.join(team.emails) for team in
                     Team.find()
             ]).encode())
-        }.items()
+        }.items(),
+        reserved_names=Team.RESERVED_NAMES
     )
 
 @bp.route('/users')
