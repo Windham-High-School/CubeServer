@@ -5,8 +5,10 @@ from typing import List, Optional, Any
 from math import ceil
 import secrets
 
+from .config.conf import Conf
 from cubeserver_common.models.utils import Encodable, PyMongoModel
 from cubeserver_common.models.user import User
+from cubeserver_common.mail import Message
 from cubeserver_common import config
 
 __all__ = ['TeamLevel', 'TeamStatus', 'TeamHealth', 'Team']
@@ -132,7 +134,10 @@ class Team(PyMongoModel):
                  weight_class: Optional[TeamLevel] = TeamLevel.PSYCHO_KILLER,
                  health: TeamHealth = TeamHealth(),
                  status: TeamStatus = TeamStatus.UNAPPROVED,
-                 multiplier: Multiplier = DEFAULT_MULTIPLIER):
+                 multiplier: Multiplier = DEFAULT_MULTIPLIER,
+                 emails_sent_today: int = 0,
+                 code_update: bytes = b'',
+                 code_update_taken: bool = False):
         super().__init__()
         self.name = name
         self.weight_class = weight_class
@@ -141,6 +146,9 @@ class Team(PyMongoModel):
         self.health = health
         self.secret = Team._gen_secret()
         self.multiplier = multiplier
+        self.emails_sent = emails_sent_today
+        self._code_update = code_update
+        self.code_update_taken = code_update_taken
 
     def add_member(self, member: User):
         """Adds a member (a User object) to the team"""
@@ -215,3 +223,36 @@ class Team(PyMongoModel):
     def id_2(self):  # TODO: Fix this (and AdminTeamsTable.id_2)
         """Just to allow multiple columns in the adminteamstable to rely upon the id..."""
         return self._id
+
+    def send_api_email(self, subject, message):
+        """Send an email from their cube to them"""
+        if self.emails_sent >= Conf.retrieve_instance().team_email_quota:
+            return False
+        self.emails_sent += 1  # MUST remain within the quota:
+        self.save()
+        return Message(
+            config.FROM_NAME,
+            config.FROM_ADDR,
+            self.emails,
+            subject,
+            message
+        ).send()
+
+    @classmethod
+    def reset_sent_emails(cls):
+        """Resets the email send counter for the day"""
+        for team in cls.find():
+            team.emails_sent = 0
+            team.save()
+
+    def update_code(self, code:bytes):
+        """Uploads a string of python code to be transferred to the cube"""
+        self.code_update_taken = False
+        self._code_update = code
+        self.save()
+
+    def get_code_update(self) -> bytes:
+        """Grabs the latest code update given by the team"""
+        self.code_update_taken = True
+        self.save()
+        return self._code_update

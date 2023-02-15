@@ -14,8 +14,14 @@ echo -e "    Running \"make clean\""
 make clean 2>/dev/null 1>/dev/null
 
 
-echo -e "${BLUE}  Updating constants... ${RESTORE}"
+echo -e "${BLUE}  Cleaning installed config.py... ${RESTORE}"
 cd "$parent_path"
+rm ../src/CubeServer-common/cubeserver_common/config.py 2>/dev/null && echo "    Done." || echo "    [nonexistent]"
+
+echo -e "${BLUE}  Cleaning installed .env file... ${RESTORE}"
+rm ../.env 2>/dev/null && echo "    Done." || echo "    [nonexistent]"
+
+echo -e "${BLUE}  Updating constants... ${RESTORE}"
 
 echo -e "    Updating license strings"
 source inc/update_license.sh

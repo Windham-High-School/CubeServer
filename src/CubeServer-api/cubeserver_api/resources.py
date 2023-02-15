@@ -8,6 +8,7 @@ from flask import request
 from flask_restful import Resource
 from flask_httpauth import HTTPBasicAuth
 from json import dumps, loads, decoder
+from base64 import encodebytes
 
 from cubeserver_common.models.config.rules import Rules
 from cubeserver_common.models.team import Team
@@ -54,6 +55,27 @@ class Data(Resource):
             return request.form, 201
         return request.form, 400  # TODO: Support better response codes?
 
+class Email(Resource):
+    """A POST-only resource for datapoints"""
+
+    decorators = [auth.login_required]
+
+    def post(self):
+        team = Team.find_by_name(auth.username())
+        print(f"Email submission from: {team.name}")
+        # Get DataClass and cast the value:
+        data_str = request.get_json()
+        subject = data_str['subject']
+        message = data_str['message']
+        print(f"Subject: {subject}")
+        print(message)
+        print("Sending...")
+        if team.send_api_email(subject, message):
+            print("Success!")
+            return request.form, 201
+        print("Failure.")
+        return request.form, 400  # TODO: Support better response codes?
+
 class Status(Resource):
     """A resource with some basic info"""
 
@@ -65,4 +87,19 @@ class Status(Resource):
             "datetime": datetime.now().isoformat(),
             "unix_time": int(time()),
             "status": {"score": team.score, "strikes": team.strikes}
+        }, 200
+
+class CodeUpdate(Resource):
+    """A resource for teams to update code.py on their circuitpython cubes"""
+
+    decorators = [auth.login_required]
+
+    def get(self):
+        team = Team.find_by_name(auth.username())
+        return {
+            "datetime": datetime.now().isoformat(),
+            "unix_time": int(time()),
+            "encoding": "base64",
+            "new": not team.code_update_taken,
+            "code": encodebytes(team.get_code_update()).decode('utf-8')
         }, 200

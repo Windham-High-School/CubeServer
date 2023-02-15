@@ -4,6 +4,7 @@ services:
   # Main application container:
   app:
     container_name: ${PROJECT_NAME}-app
+    image: snorklerjoe/cubeserver-app:${VERSION_TAG}
     restart: unless-stopped
     volumes:
       - flask-secret:/secret/
@@ -37,6 +38,7 @@ services:
     depends_on:
       - mongodb
       - api
+      - beaconserver
     networks:
       - frontend
       - backend
@@ -44,6 +46,7 @@ services:
   # API server container:
   api:
     container_name: ${PROJECT_NAME}-api
+    image: snorklerjoe/cubeserver-api:${VERSION_TAG}
     restart: unless-stopped
     volumes:
       - flask-secret:/secret/
@@ -76,9 +79,10 @@ services:
   # Beacon server container:
   beaconserver:
     container_name: ${PROJECT_NAME}-beaconserver
+    image: snorklerjoe/cubeserver-beaconserver:${VERSION_TAG}
     restart: unless-stopped
     volumes:
-      - beacon-ssl-cert:/etc/ssl/beacon_cert/
+      - api-ssl-cert:/etc/ssl/beacon_cert/
     build:
       context: .
       dockerfile: Docker/CubeServer-beaconserver/Dockerfile
@@ -101,6 +105,7 @@ services:
     networks:
       - api
       - backend
+      - frontend
 
   # Database container:
   mongodb:
@@ -122,6 +127,7 @@ services:
   # WiFi Access Point
   accesspoint:
     container_name: ${PROJECT_NAME}-accesspoint
+    image: snorklerjoe/cubeserver-accesspoint:${VERSION_TAG}
     restart: unless-stopped
     build:
       context: .
@@ -149,7 +155,7 @@ services:
       - NET_ADMIN
     network_mode: host
 
-  # IP Camera:
+# IP Camera:
 #  cam:
 #    container_name: ${PROJECT_NAME}-kerberos
 #    image: kerberos/kerberos:latest
@@ -179,5 +185,5 @@ volumes:
     driver: local
   api-ssl-cert:
     driver: local
-  beacon-ssl-cert:
-    driver: local
+#  beacon-ssl-cert:
+#    driver: local

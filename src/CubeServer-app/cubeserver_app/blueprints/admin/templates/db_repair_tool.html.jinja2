@@ -1,0 +1,47 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Database Repair Tool{% endblock %}
+
+{% block header %}
+    <h4 class="text-danger">Database Repair Tool</h4>
+    <p>
+        A message from The CubeServer Guru-
+    </p>
+    <p>
+        Please make a backup of the database before using this tool!
+    </p>
+    <p>
+        The hope is that this tool <i>never</i> becomes necessary.
+        But there is a reasonable likelihood that something will go wrong and all hope for not losing all
+        data whatsoever will lay in the arms of this tool, which is why I am creating it right now at 2:14 AM.
+    </p>
+    <p>
+        Things can go seriously wrong if you mess up with this tool-
+        it is intended to fix bug-induced type corruption in database fields for specific documents.
+        If you did not understand that sentence, please do not use this tool without guidance from
+        either Joseph R. Freeston or someone who has studied the CubeServer database & modelutils
+        and has a little experience with MongoDB.
+    </p>
+    <p>
+        Thank you!<br>
+        - Joseph R. Freeston
+    </p>
+{% endblock %}
+
+{% block content %}
+    <p>
+        URL Syntax: /admin/db-repair/&lt;broken|all|safe&gt;/&lt;Collection/class name&gt;/&lt;URLEncoded Query&gt;
+    </p>
+    <hr>
+    <h5 class="text-danger">Default document (unbroken):</h5>
+    <pre>
+{{exampledoc}}
+    </pre>
+    <hr>
+    <h5 class="text-danger">{{displaymode}} {{collection}} documents:</h5>
+    {{brokendoc_table}}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script src="{{ url_for('static', filename='/js/admin.js') }}"></script>
+{% endblock %}

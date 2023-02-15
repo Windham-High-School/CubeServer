@@ -20,7 +20,6 @@ class AdminTeamTable(Table):
     #_id             = Col('Identifier')
     weight_class    = DropDownEnumCol('Division', TeamLevel,
                                       exclude_option=TeamLevel.PSYCHO_KILLER)
-                                      # ^^ (Hide the easter egg) ^^
     status          = DropDownEnumCol('Status', TeamStatus)
     members_str     = Col('Members')  # TODO: Perhaps employ a nested table to list members of a group
     score           = Col('Score')
