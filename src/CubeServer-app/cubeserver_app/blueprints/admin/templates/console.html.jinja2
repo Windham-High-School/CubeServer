@@ -98,12 +98,17 @@
 
         <div class="row">
             {{macros.startbox("Internal API \"Team\"s", "col")}}
-                <b>Reserved team names: </b>
+                <b>Reserved team names </b> (click to generate)<b>:</b> 
                 <ul>
-                    {% for name in reserved_names %}
-                        <li>{{name}}</li>
+                    {% for name, url in reserved_names %}
+                        {% if url == None %}
+                            <li>{{name}}</li>
+                        {% else %}
+                            <li><a href={{url}}>{{name}}</a></li>
+                        {% endif %}
                     {% endfor %}
                 </ul>
+
                 <b>Generated Certicicates: </b>
                 <ul>
                     <li>Beacon Client Certificate <a href={{url_for('admin.beacon_pem')}}>beacon.pem</a></li>
@@ -111,13 +116,6 @@
                     <li>API Server Certificate <a href={{url_for('config.api_cert')}}>cert.pem</a></li>
                 </ul>
 
-                <hr>
-
-                <b>Database Repair: </b>
-                <p>
-                    There is an emergency database repair tool available.
-                    Please consult documentation.
-                </p>
             {{macros.endbox()}}
             {{macros.startbox("System", "col")}}
                 <b>Uptime: </b>

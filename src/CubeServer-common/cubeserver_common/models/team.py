@@ -143,11 +143,11 @@ class Team(PyMongoModel):
     ]
 
     @classmethod
-    def _gen_secret(cls) -> str:
+    def _gen_secret(cls, length: int) -> str:
         """Generates a crypto-safe secret of the length defined by
         config.TEAM_SECRET_LENGTH"""
-        return secrets.token_hex(ceil(config.TEAM_SECRET_LENGTH / 2)) \
-            [:config.TEAM_SECRET_LENGTH]
+        return secrets.token_hex(ceil(length / 2)) \
+            [:length]
 
     def __init__(self, name: str = "",
                  weight_class: Optional[TeamLevel] = TeamLevel.PSYCHO_KILLER,
@@ -156,14 +156,15 @@ class Team(PyMongoModel):
                  multiplier: Multiplier = DEFAULT_MULTIPLIER,
                  emails_sent_today: int = 0,
                  code_update: bytes = b'',
-                 code_update_taken: bool = False):
+                 code_update_taken: bool = False,
+                 _secret_length: int = config.TEAM_SECRET_LENGTH):
         super().__init__()
         self.name = name
         self.weight_class = weight_class
         self._members = []
         self.status = status
         self.health = health
-        self.secret = Team._gen_secret()
+        self.secret = Team._gen_secret(_secret_length)
         self.multiplier = multiplier
         self.emails_sent = emails_sent_today
         self._code_update = code_update

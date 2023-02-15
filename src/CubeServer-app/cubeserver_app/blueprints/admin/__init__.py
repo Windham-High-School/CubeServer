@@ -22,14 +22,14 @@ from cubeserver_common.models.datapoint import DataPoint, DataClass
 from cubeserver_common.models.utils import EnumCodec, Encodable
 from bson import _BUILT_IN_TYPES as BSON_TYPES
 from cubeserver_common.models.config.rules import Rules
-from cubeserver_common.models.team import Team, TeamLevel
+from cubeserver_common.models.team import Team, TeamLevel, TeamStatus
 from cubeserver_common.models.user import User, UserLevel
 from cubeserver_common.models.beaconmessage import OutputDestination
 from cubeserver_common.models.multiplier import Multiplier, MassMultiplier, VolumeMultiplier, CostMultiplier, VolumeUnit
 from cubeserver_common.mail import Message
 from cubeserver_common.models.beaconmessage import BeaconMessage, BeaconMessageEncoding
 from cubeserver_common.models.reference import ReferencePoint
-from cubeserver_common.config import FROM_NAME, FROM_ADDR
+from cubeserver_common.config import FROM_NAME, FROM_ADDR, INTERNAL_SECRET_LENGTH
 
 from flask_table import Table
 from cubeserver_app.tables.columns import PreCol, OptionsCol
@@ -85,6 +85,13 @@ def admin_home():
     conf_form.quota_reset_hour.data = db_conf.quota_reset_hour
     conf_form.banner_message.data = db_conf.banner_message
 
+    reserved_links = []
+    for name in Team.RESERVED_NAMES:
+        if Team.find_by_name(name) is not None:
+            reserved_links += [(name, None)]
+        else:
+            reserved_links += [(name, url_for('.gen_reserved', name=name))]
+
     # Render the template:
     return render_template(
         'console.html.jinja2',
@@ -106,7 +113,7 @@ def admin_home():
                     Team.find()
             ]).encode())
         }.items(),
-        reserved_names=Team.RESERVED_NAMES
+        reserved_names=reserved_links
     )
 
 @bp.route('/users')
@@ -558,3 +565,26 @@ def database_repair(mode="", collection_name="", query="{}"):
         brokendoc_table=table.__html__(),
         exampledoc=pformat(good_doc.encode(), indent=4)
     )
+
+@bp.route('/db-gen-reserved/<name>', methods=['GET'])
+@login_required
+def gen_reserved(name: str = ""):
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    if name == "":
+        flash("No team specified")
+        return abort(500)
+    if Team.find_by_name(name) is not None:
+        flash(f"Please delete `{name}` before regenerating.")
+        return render_template('redirect_back.html.jinja2')
+    
+    team = Team(
+        name=name,
+        weight_class=TeamLevel.REFERENCE,
+        status=TeamStatus.INTERNAL,
+        _secret_length=INTERNAL_SECRET_LENGTH
+    )
+    team.save()
+    flash(f"Successfully created reserved team {name} ({team.id})", category='success')
+    return render_template('redirect_back.html.jinja2')

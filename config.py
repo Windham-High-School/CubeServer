@@ -5,7 +5,7 @@ This defines values that cannot be set with the Admin panel but are
 "hard-coded" into the software.
 Code regarding values set by the Admin panel can be found in
 app.app.models.config.
-A recompile of the docker container is
+A rebuild of the docker container is
 required to implement changes from this file.
 """
 
@@ -79,7 +79,6 @@ LONG_TITLE: str = "The Project"
 
 # Beacon:
 
-
 DEFAULT_BEACON_TX_HEADER: bytes = b"<>"
 
 
@@ -98,7 +97,10 @@ PROFANITY_MESSAGE: str = "Not Funny. \n" \
 """The message to use if profanity is detected in the user's input"""
 
 TEAM_SECRET_LENGTH: int = 16
-"""Number of characters in the team's secret ID"""
+"""Number of characters in teams' secret IDs"""
+
+INTERNAL_SECRET_LENGTH: int = 32
+"""Number of characters in internal teams' secret IDs"""
 
 TEAM_MAX_UPDATE_LENGTH: int = 32768  # 32KiB
 """Maximum length of a team's code update"""
