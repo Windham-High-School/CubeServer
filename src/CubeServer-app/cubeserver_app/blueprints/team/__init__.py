@@ -3,10 +3,11 @@
 from flask import Blueprint, session, redirect, render_template, url_for
 from flask import current_app, request, abort, flash
 from better_profanity import profanity
+from flask_login import current_user
 
 from cubeserver_common import config
 from cubeserver_common.mail import Message
-from cubeserver_common.models.team import Team, TeamLevel
+from cubeserver_common.models.team import Team, TeamLevel, TeamStatus
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.user import User, UserLevel
 from cubeserver_app.errorviews import server_error
@@ -28,6 +29,15 @@ def register():
                or profanity.contains_profanity(form.member2.data) \
                or profanity.contains_profanity(form.member3.data)):
                 return redirect(url_for('.profanity_found'))
+            if form.team_name.data in Team.RESERVED_NAMES:
+                server_error(
+                    ValueError(f"Cannot use reserved name {form.team_name.data}"),
+                    message=(
+                        "You tried to use a reserved name for your team. "
+                        "Certain names are reserved for internal uses of the api and teams database, "
+                        "interference with which could compromise the competition."
+                    )
+                )
             # Create a Team object:
             try:
                 level = TeamLevel(form.classification.data)
@@ -118,6 +128,21 @@ def success():
 
     if 'team_secret' not in session:
         return redirect('/')
+
+    actual_team = Team.find_by_name(session['team_name'])
+    if actual_team is None:
+        flash(
+            f"Could not find registry for team {session['team_name']}",
+            category='danger'
+        )
+        return redirect('/')
+    if (
+        actual_team.status == TeamStatus.INTERNAL or \
+        actual_team.weight_class == TeamLevel.REFERENCE
+    ) and (current_user is None or current_user.level != UserLevel.ADMIN):
+        flash("You don't have permission to access this page for an internally reserved team.")
+        return abort(403)
+    
 
     return render_template(
         'success.html.jinja2',

@@ -3,6 +3,7 @@
 from enum import Enum, unique
 from typing import List, Optional, Any
 from math import ceil
+from urllib.parse import quote_plus
 import secrets
 
 from .config.conf import Conf
@@ -27,6 +28,7 @@ class TeamLevel(Enum):
 
     JUNIOR_VARSITY = "Nanometer"
     VARSITY = "Lumen"
+    REFERENCE = "REFERENCE"
     PSYCHO_KILLER = "Talking Head"   # Qu'est-ce que c'est, better run run run run...
 
     def __repr__(self):
@@ -44,6 +46,7 @@ class TeamStatus(Enum):
     PARTICIPATING = "Participating"
     DISQUALIFIED = "Disqualified"
     ELIMINATED = "Eliminated"
+    INTERNAL = "[Internal]"  # For the beacon & demo cubes
 
     def __repr__(self):
         """Forms a string representation of a TeamStatus value"""
@@ -51,9 +54,19 @@ class TeamStatus(Enum):
 
     @property
     def is_active(self) -> bool:
-        """Returns true if this team can upload data"""
-        return self == TeamStatus.PARTICIPATING
+        """Returns True if this team can upload data"""
+        return self in [
+            TeamStatus.PARTICIPATING,
+            TeamStatus.INTERNAL
+        ]
 
+    @property
+    def is_public(self) -> bool:
+        """Returns True if this team can be publicly visible"""
+        return self in [
+            TeamStatus.PARTICIPATING,
+            TeamStatus.DISQUALIFIED
+        ]
 
 class TeamHealth(Encodable):
     """Encapsulates the elements of the game that relate to a
@@ -123,12 +136,18 @@ class TeamHealth(Encodable):
 class Team(PyMongoModel):
     """Models a team"""
 
+    RESERVED_NAMES = [
+        config.BEACON_TEAM_NAME
+    ] + [
+        config.REFERENCE_TEAM_NAME.format(i) for i in range(10)
+    ]
+
     @classmethod
-    def _gen_secret(cls) -> str:
+    def _gen_secret(cls, length: int) -> str:
         """Generates a crypto-safe secret of the length defined by
         config.TEAM_SECRET_LENGTH"""
-        return secrets.token_hex(ceil(config.TEAM_SECRET_LENGTH / 2)) \
-            [:config.TEAM_SECRET_LENGTH]
+        return secrets.token_hex(ceil(length / 2)) \
+            [:length]
 
     def __init__(self, name: str = "",
                  weight_class: Optional[TeamLevel] = TeamLevel.PSYCHO_KILLER,
@@ -137,14 +156,15 @@ class Team(PyMongoModel):
                  multiplier: Multiplier = DEFAULT_MULTIPLIER,
                  emails_sent_today: int = 0,
                  code_update: bytes = b'',
-                 code_update_taken: bool = False):
+                 code_update_taken: bool = False,
+                 _secret_length: int = config.TEAM_SECRET_LENGTH):
         super().__init__()
         self.name = name
         self.weight_class = weight_class
         self._members = []
         self.status = status
         self.health = health
-        self.secret = Team._gen_secret()
+        self.secret = Team._gen_secret(_secret_length)
         self.multiplier = multiplier
         self.emails_sent = emails_sent_today
         self._code_update = code_update
@@ -221,8 +241,13 @@ class Team(PyMongoModel):
 
     @property
     def id_2(self):  # TODO: Fix this (and AdminTeamsTable.id_2)
+                     # TODO: Replace all usages with id_primary (property of PyMongoModel's)
         """Just to allow multiple columns in the adminteamstable to rely upon the id..."""
         return self._id
+
+    @property
+    def custom_link(self) -> str:  # TODO: Make better
+        return f"http://whsproject.club/team/success?team_secret={self.secret}&team_name={quote_plus(self.name)}"
 
     def send_api_email(self, subject, message):
         """Send an email from their cube to them"""
@@ -256,3 +281,30 @@ class Team(PyMongoModel):
         self.code_update_taken = True
         self.save()
         return self._code_update
+
+    @classmethod
+    def find_beacon(cls) -> 'Team':
+        """Finds the reserved team for the beacon.
+        If it doesn't exist already, it will be created.
+        """
+        beacon = cls.find_by_name(config.BEACON_TEAM_NAME)
+        if beacon is not None:
+            return beacon
+        beacon = Team(
+            name=config.BEACON_TEAM_NAME,
+            weight_class=TeamLevel.REFERENCE,
+            status=TeamStatus.INTERNAL,
+            multiplier=Multiplier(0,0,0)
+        )
+        beacon.save()
+        return beacon
+
+    @classmethod
+    def find_references(cls) -> List['Team']:
+        """Lists all reference "Team"s"""
+        return cls.find(
+            {
+                "status": TeamStatus.INTERNAL.value,
+                "name": {"$nin": config.BEACON_TEAM_NAME}
+            }
+        )

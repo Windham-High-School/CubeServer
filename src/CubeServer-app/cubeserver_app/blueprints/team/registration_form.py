@@ -28,7 +28,7 @@ class RegistrationForm(FlaskForm):
     member3 = StringField('Member #3 (not recommended)')
     email3 = EmailField('Email #3')
 
-    classification = RadioField('Class', validators=[DataRequired(message="Please select either Varsity or J.V.")], choices=[TeamLevel.VARSITY.value, TeamLevel.JUNIOR_VARSITY.value])
+    classification = RadioField('Class', validators=[DataRequired(message="Please select a weight class!")], choices=[TeamLevel.VARSITY.value, TeamLevel.JUNIOR_VARSITY.value])
 
     submit = SubmitField('Register!')
 

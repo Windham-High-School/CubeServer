@@ -34,10 +34,10 @@ def leaderboard(sel_div: str = ""):
         selected_division = TeamLevel(sel_div)
     # Fetch teams from database and populate a table:
     team_objects = [Team.decode(team) for team in Team.collection.find(
-        {"status": {"$nin":[TeamStatus.UNAPPROVED.value]}} \
+        {"status": {"$nin":[TeamStatus.UNAPPROVED.value, TeamStatus.INTERNAL.value]}} \
             if selected_division is None else \
                 {
-                    "status": {"$nin":[TeamStatus.UNAPPROVED.value]},
+                    "status": {"$nin":[TeamStatus.UNAPPROVED.value, TeamStatus.INTERNAL.value]},
                     "weight_class": selected_division.value
                 }
     )]
