@@ -304,3 +304,17 @@ class PreCol(HTMLCol):
 #    def __init__(self, name, *args, **kwargs):
 #        super().__init__(name, *args, model_type="Any", **kwargs)
 
+class CustomLinkCol(HTMLCol):
+    """A column for links :)"""
+
+    def __init__(self, name, *args, link_text:Optional[str]=None, a_classes:str="", **kwargs):
+        super().__init__(name, *args, **kwargs)
+        self.link_name = link_text
+        self.a_classes = a_classes
+
+    def generate_html(self, content: Any, identifier: str, attr_list: List[str]) -> str:
+        return (
+            f"<a class=\"{self.a_classes}\" href=\"{content}\">"
+            f"{content if self.link_name is None else self.link_name}"
+            f"</a>"
+        )

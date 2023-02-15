@@ -25,4 +25,4 @@ echo -e "\n# Automatically copied version tag (from version.txt- copied by confi
 echo -e "VERSION_TAG=\"${VERSION_STR}\"\n"          >> ../.env
 
 echo -e "\n${LGREEN}Finished Configuring.${RESTORE}"
-echo -e "\nReady to run ${CYAN}docker compose build${RESTORE}\n"
+echo -e "\nReady to run ${CYAN}docker compose build${RESTORE} or ${CYAN}docker compose pull${RESTORE}\n"

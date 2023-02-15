@@ -97,6 +97,26 @@
         </div>
 
         <div class="row">
+            {{macros.startbox("Internal API \"Team\"s", "col")}}
+                <b>Reserved team names </b> (click to generate)<b>:</b> 
+                <ul>
+                    {% for name, url in reserved_names %}
+                        {% if url == None %}
+                            <li>{{name}}</li>
+                        {% else %}
+                            <li><a href={{url}}>{{name}}</a></li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+
+                <b>Generated Certicicates: </b>
+                <ul>
+                    <li>Beacon Client Certificate <a href={{url_for('admin.beacon_pem')}}>beacon.pem</a></li>
+                    <li>Beacon Client Private Key <a href={{url_for('admin.beacon_key')}}>beacon.key</a></li>
+                    <li>API Server Certificate <a href={{url_for('config.api_cert')}}>cert.pem</a></li>
+                </ul>
+
+            {{macros.endbox()}}
             {{macros.startbox("System", "col")}}
                 <b>Uptime: </b>
                 <p id="uptime_counter">LOADING...</p>
