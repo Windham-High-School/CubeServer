@@ -3,7 +3,7 @@
  *
  */
 
- @font-face {
+@font-face {
     font-family: "Nunito";
         src: url('fonts/Nunito-Regular.ttf');
 }
@@ -101,6 +101,14 @@ header h1,h2,h3,h4 {
     background-color: var(--light);
     color: var(--dark);
     margin: 5px;
+}
+
+input[type=submit] {
+    border-color: var(--danger);
+}
+
+input[type=submit]:hover {
+    color: var(--warning) !important;
 }
 
 pre {
