@@ -2,7 +2,7 @@ __license__ = """
 
 MIT License
 
-Copyright (c) 2022 Joseph R. Freeston (snorklerjoe)
+Copyright (c) 2022-2023 The CubeServer Authors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,3 +23,4 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
 """
+

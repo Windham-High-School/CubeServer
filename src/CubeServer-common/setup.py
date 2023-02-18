@@ -33,6 +33,7 @@ setup(name='CubeServer-common',
             'Flask-PyMongo>=2.3.0,<3.0',
             'Flask-Login>=0.6.1',
             'bcrypt>=4.0.0,<5.0',
-            'jsonpickle>=3.0.1,<4.0'
+            'jsonpickle>=3.0.1,<4.0',
+            'PyYAML>=6.0,<7.0'
       ]
      )

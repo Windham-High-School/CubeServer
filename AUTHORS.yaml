@@ -1,0 +1,57 @@
+%YAML 1.2
+---
+# This is the list of CubeServer's significant contributors.
+#
+# This does not necessarily list everyone who has contributed code,
+# especially since many employees of one corporation may be contributing.
+# To see the full list of contributors, see the revision history in
+# source control.
+#
+# This file is actually parsed and used in the 'about' page of the webapp-
+# Please adhere to YAML syntax and follow the structure exemplified by
+# existing entries.
+# Please test build and open the "About" page before committing changes
+# to this file.
+#
+# Thank you :)
+#
+
+# Name:
+Joseph R. Freeston:
+# OSS role within the project:
+  role: |-
+    Primary Maintainer
+# Short multi-line list of contributions:
+  contributions: |-
+    CubeServer Architect
+    Lead software developer 2022-present
+# Link to a personal website, profile, etc.
+  link: https://github.com/snorklerjoe
+
+Heather Brayer:
+  role: |-
+    Contributor
+  contributions: |-
+    Graphic Design
+  link: https://github.com/avocadoheather
+
+Greg Kindrat:
+  role: |-
+    Contributor
+  contributions: |-
+    Graphic Design Assistant
+  link: ''
+
+Julia Miller:
+  role: |-
+    Contributor
+  contributions: |-
+    Graphic Design Assistant
+  link: ''
+
+Ryan Burbo:
+  role: |-
+    Contributor
+  contributions: |-
+    Graphic Design Assistant
+  link: ''
