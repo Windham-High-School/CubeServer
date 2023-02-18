@@ -181,3 +181,8 @@ class BeaconMessage(PyMongoModel):
         for i, byte in enumerate(self.message_bytes):
             sum += int(byte) ^ (i*8)
         return sum % 255
+
+    @classmethod
+    def find_unsent(cls):
+        """Returns all yet-unsent beacon packets"""
+        return cls.find({'past': False})
