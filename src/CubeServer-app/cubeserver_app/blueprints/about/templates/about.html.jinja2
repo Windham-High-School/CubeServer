@@ -11,7 +11,7 @@
     <ul style="list-style-type: none;">
         {% for author in contributors.items() %}
         <li>
-            <a href="{{ author[1]['link'] }}" {{ "target=\"_blank\"" if author[1]['link'] != None }} {{ "disabled" if author[1]['link'] == None }}><h5 class="text-info">{{ author[0] }}</h5></a>
+            <a href="{{ author[1]['link'] }}" {{ "disabled" if author[1]['link'] == '' else "target=\"_blank\"" }}><h5 class="text-info">{{ author[0] }}</h5></a>
             <div class="px-3">{{ author[1]['role'] }}</div>
 <pre class="px-5">
 {{ author[1]['contributions'] }}
