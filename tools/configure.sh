@@ -16,6 +16,10 @@ python3 ../config.py || { echo -e "${LRED}Invalid config.py; please fix.${RESTOR
 
 echo -e "${BLUE}  Installing config.py... ${RESTORE}"
 cp ../config.py ../src/CubeServer-common/cubeserver_common/
+echo -e "${BLUE}  Appending AUTHORS.yaml... ${RESTORE}"
+echo -e " = \"\"\"" >> ../src/CubeServer-common/cubeserver_common/config.py
+grep -o '^[^#]*' ../AUTHORS.yaml >> ../src/CubeServer-common/cubeserver_common/config.py
+echo -e "\"\"\"" >> ../src/CubeServer-common/cubeserver_common/config.py
 
 echo -e "${BLUE}  Generating .env docker-compose config... ${RED}"
 VERSION_STR=$(cat ../version.txt)

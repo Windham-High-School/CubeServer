@@ -28,10 +28,6 @@ This can be changed after the first login."""
 
 # User interface stuff:
 
-CREDITS: str = "Code by Joseph R. Freeston"
-"""The development credits to be shown in the about page
-    (Add your own name here if you contributed!!!) """
-
 DEFAULT_THEME: str = "dark"
 """The *default* theme to use (users can change this individually)"""
 
@@ -163,3 +159,12 @@ assert PASSWORD_HASH_ALGORITHM in algorithms_available, \
     "Selected password hash must be available on this system."
 assert CRYPTO_HASH_ALGORITHM in algorithms_available, \
     "Selected crypto hash must be available on this system."
+
+
+
+########################
+#      Generated       #
+########################
+
+# Contributors (loaded from AUTHORS.yaml):
+CONTRIBUTORS_YAML: str
