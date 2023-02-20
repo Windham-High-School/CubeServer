@@ -171,7 +171,7 @@ def table_endpoint(table, identifier, field):
     model_obj = model_class.find_by_id(ObjectId(identifier))
     if model_class == Team and Conf.retrieve_instance().notify_teams:  # Notify the team of changes:
         desc_str = "deleted" if request.method == 'DELETE' else f"given a {field} of {request.form.get('item')}"
-        Message(
+        if Message(
             FROM_NAME,
             FROM_ADDR,
             cast(Team, model_obj).emails,
@@ -184,7 +184,10 @@ def table_endpoint(table, identifier, field):
             ((
                 f"\n\nComment: {request.form.get('comment')}"
             ) if request.form.get('comment') is not None else "") 
-        ).send()
+        ).send():
+            flash(f"Notified {cast(Team, model_obj).name} of change", category="info")
+        else:
+            flash("Failed to notify the team {cast(Team, model_obj).name}.", category="danger")
     if request.method == 'POST':
         if field == "score_increment" and model_class == Team:
             cast(Team, model_obj).health.change(float(request.form.get('item')))

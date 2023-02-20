@@ -348,7 +348,13 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
 
     def set_attr_from_string(self, field_name: str, value: str):
         """Decodes and updates a single string value to the document object"""
-        self._setattr_shady(
-            field_name,
-            self._fields[field_name].transform_bson(value)
-        )
+        if self._fields[field_name] is not None:
+            self._setattr_shady(
+                field_name,
+                self._fields[field_name].transform_bson(value)
+            )
+        else:  # None means the value is already bson-serializable
+            self._setattr_shady(
+                field_name,
+                type(self.__getattribute__(field_name))(value)
+            )

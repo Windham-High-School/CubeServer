@@ -4,7 +4,7 @@ from typing import List
 from flask_table import Table, Col
 
 from cubeserver_common.models.team import Team, TeamLevel, TeamStatus
-from cubeserver_app.tables.columns import CustomLinkCol, DropDownEnumCol, EnumCol, OptionsCol, TeamNameCol, AdminTeamNameCol, ManualScoring, ScoreDeltaCol
+from cubeserver_app.tables.columns import CustomLinkCol, DropDownEnumCol, EnumCol, OptionsCol, TeamNameCol, AdminTeamNameCol, ManualScoring, ScoreDeltaCol, TextEditCol
 
 __all__ = ['AdminTeamTable', 'LeaderboardTeamTable']
 
@@ -16,7 +16,7 @@ class AdminTeamTable(Table):
     thead_classes = ["thead-dark"]
     border = True
 
-    name            = AdminTeamNameCol('Team Name')
+    name_secondary  = AdminTeamNameCol('Team Name')
     #_id             = Col('Identifier')
     weight_class    = DropDownEnumCol('Division', TeamLevel,
                                       exclude_option=TeamLevel.PSYCHO_KILLER)
@@ -29,6 +29,7 @@ class AdminTeamTable(Table):
     all_verified    = Col('Emails Verified?')
 
     custom_link     = CustomLinkCol('Secret Link', a_classes="btn btn-info")
+    name            = TextEditCol('Edit Name')
 
     def __init__(self, items: List[Team], **kwargs):
         """Initializes the table"""

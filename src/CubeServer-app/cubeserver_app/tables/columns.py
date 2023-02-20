@@ -5,7 +5,7 @@ from typing import List, Mapping, Optional, Tuple, Any
 from flask import render_template_string, url_for
 from flask_table import Col, html
 from flask_wtf import FlaskForm
-from wtforms import SelectField, HiddenField, SubmitField
+from wtforms import SelectField, HiddenField, SubmitField, StringField
 from abc import ABCMeta, abstractmethod
 
 from cubeserver_common.models.datapoint import DataClass
@@ -200,6 +200,61 @@ class DropDownEnumCol(Col):
             escape_content=False,
             attrs=td_attrs | self.td_html_attrs)
 
+# TODO: Eliminate repetitive code from DropDownEnumCol
+class TextEditCol(Col):
+    """A Column with a text box to edit a string"""
+
+    # TODO: Neaten this constructor:
+    def __init__(self, name, *args, model_type: str="Team", **kwargs):
+        """Specify the column name and the class of the Enum"""
+        super().__init__(name, *args, **kwargs)
+        self.model_type = model_type
+        class ColTextBoxForm(FlaskForm):
+            """A custom form for just this column"""
+            item = StringField()
+            parameter = HiddenField()
+            identifier = HiddenField()
+        self.form = ColTextBoxForm
+
+    def custom_td_format(
+        self,
+        content: str,
+        identifier: str,
+        attr_list: List[str]
+    ):
+        """A custom version of td_format, renamed to avoid
+        PyLint from getting upset from the different parameter list
+        This creates a form for each cell."""
+        form_instance = self.form()
+        form_instance.item.data = content
+        attr_name = attr_list[0]
+        return _render_form(
+            form_instance,
+            action=f"table_endpoint/{self.model_type}/{identifier}/{attr_name}",
+        )
+
+    def td_contents(self, item, attr_list):
+        return (
+            self.custom_td_format(
+                self.from_attr_list(item, attr_list=attr_list),
+                str(item.id),
+                attr_list
+            )
+        )
+
+    def td(self, item, attr):
+        content = self.td_contents(item, self.get_attr_list(attr))
+        item: Enum = self.from_attr_list(item, attr_list=attr)
+        td_attrs = {
+            'data-search': item,
+            'data-order': item
+        }
+        return html.element(
+            'td',
+            content=content,
+            escape_content=False,
+            attrs=td_attrs | self.td_html_attrs)
+
 # TODO: Add more options? Perhaps the ability to make custom BSON modifications
 class OptionsCol(HTMLCol):
     """A Column with a menu of options
@@ -227,6 +282,11 @@ class OptionsCol(HTMLCol):
                         f"onclick=\"adjustScore('{self.model_type}', '{{{{id}}}}')\" "
                         "class=\"btn btn-info\">&#x2696;</button>\n"
                     ) if self.model_type == "Team" else "")
+                    +((
+                        "<button title=\"Force-verify their email\" "
+                        f"onclick=\"verify('{self.model_type}', '{{{{id}}}}')\" "
+                        "class=\"btn btn-info\">Force Verify</button>\n"
+                    ) if self.model_type == "User" else "")
                 ) +
                 "</div>\n"
             ),
