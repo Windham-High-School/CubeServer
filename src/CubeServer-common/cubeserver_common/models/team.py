@@ -246,6 +246,11 @@ class Team(PyMongoModel):
         return self._id
 
     @property
+    def name_secondary(self):
+        """Just to allow multiple columns in the adminteamstable to rely upon the name..."""
+        return self.name
+
+    @property
     def custom_link(self) -> str:  # TODO: Make better
         return f"http://whsproject.club/team/success?team_secret={self.secret}&team_name={quote_plus(self.name)}"
 
