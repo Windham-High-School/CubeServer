@@ -86,7 +86,7 @@ class Status(Resource):
         return {
             "datetime": datetime.now().isoformat(),
             "unix_time": int(time()),
-            "status": {"score": team.score, "strikes": team.strikes}
+            "status": {"score": team.score}
         }, 200
 
 class CodeUpdate(Resource):

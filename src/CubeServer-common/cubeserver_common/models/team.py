@@ -76,14 +76,12 @@ class TeamHealth(Encodable):
         * score - The score of the team as last calculated
         * last_score - The score of the team before the most recently
             added points
-        * strikes - Generally unused; exists for compatibility
         * multiplier - Per-team value to scale every added point value
     """
 
-    def __init__(self, score: int = 0, strikes: int = 0, multiplier: float = 1.0):
+    def __init__(self, score: int = 0, multiplier: float = 1.0):
         self.score = score
         self.last_score = 0
-        self.strikes = strikes
         self.multiplier = multiplier
         super().__init__()
 
@@ -111,14 +109,9 @@ class TeamHealth(Encodable):
         self.last_score = self.score
         self.score += amt
 
-    def strike(self):
-        """Doles out a strike!"""
-        self.strikes += 1
-
     def encode(self) -> dict:  # TODO: Replaced by AutoEncodable when written
         return {
             "score": self.score,
-            "strikes": self.strikes,
             "lastScore": self.last_score,
             "multiplier": self.multiplier
         }
@@ -127,7 +120,6 @@ class TeamHealth(Encodable):
     def decode(cls, value: dict):
         health = cls()
         health.score = value["score"]
-        health.strikes = value["strikes"]
         health.last_score = value["lastScore"]
         health.multiplier = value["multiplier"]
         return health
@@ -207,11 +199,6 @@ class Team(PyMongoModel):
         """Returns a human-readable string listing representations
         of the members"""
         return ', '.join(member.name for member in self.members)
-
-    @property
-    def strikes(self) -> int:
-        """Returns the number of strikes from the TeamHealth object"""
-        return self.health.strikes
 
     @property
     def score(self) -> float:
