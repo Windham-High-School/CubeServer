@@ -72,10 +72,12 @@ class DataPoint(PyMongoModel):
     def __init__(self, team_identifier: Optional[ObjectId] = None,
                  category: Optional[DataClass] = DataClass.COMMENT,
                  value: Optional[Any] = None,
-                 date: Optional[datetime] = datetime.now(),
+                 date: Optional[datetime] = None,
                  is_reference: bool = False):
         """Creates a DataPoint object from a category and value
         Specify a team_identifier (the id of the team that posted these data)
+        A date value of None or unspecified will result in the time at
+            instantiation being used.
         """
 
         super().__init__()
