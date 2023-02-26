@@ -187,7 +187,7 @@ def table_endpoint(table, identifier, field):
         ).send():
             flash(f"Notified {cast(Team, model_obj).name} of change", category="info")
         else:
-            flash("Failed to notify the team {cast(Team, model_obj).name}.", category="danger")
+            flash(f"Failed to notify the team {cast(Team, model_obj).name}.", category="danger")
     if request.method == 'POST':
         if field == "score_increment" and model_class == Team:
             cast(Team, model_obj).health.change(float(request.form.get('item')))
