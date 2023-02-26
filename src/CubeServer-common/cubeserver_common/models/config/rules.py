@@ -80,7 +80,8 @@ class Rules(PyMongoModel):
                 DataClass.COMMENT: 0,
                 DataClass.PRESSURE: 1,
                 DataClass.SIGNAL_LIGHT: 25,
-                DataClass.TEMPERATURE: 1
+                DataClass.TEMPERATURE: 1,
+                DataClass.BEACON_CHALLENGE: 10,
             }
         },
         # Times data should be posted, measured in offsets from the hour in seconds:
@@ -203,13 +204,16 @@ class Rules(PyMongoModel):
            datapoint.category in DataClass.manual or \
            datapoint.category not in DataClass.measurable:
             return
-        tol = self.accuracy_tolerance[team, datapoint.category]
-        points_possible = self.point_menu[team.weight_class][datapoint.category]
-        reference = ReferenceStation.get_window_point(self.reference_window)
-        if abs(reference.of(datapoint.category).value - datapoint.value) <= tol:
-            datapoint.rawscore = points_possible
-        else:
-            datapoint.rawscore = 0.0
+        try:
+            tol = self.accuracy_tolerance[team, datapoint.category]
+            points_possible = self.point_menu[team.weight_class][datapoint.category]
+            reference = ReferenceStation.get_window_point(self.reference_window)
+            if abs(reference.of(datapoint.category).value - datapoint.value) <= tol:
+                datapoint.rawscore = points_possible
+            else:
+                datapoint.rawscore = 0.0
+        except IndexError:
+            pass
 
     # The initial instance is created in cubeserver_common/__init__.py
     @staticmethod
