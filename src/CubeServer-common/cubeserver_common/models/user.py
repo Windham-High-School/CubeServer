@@ -9,7 +9,7 @@ from flask_login import UserMixin
 from secrets import token_urlsafe
 
 from cubeserver_common.models.utils import PyMongoModel
-from cubeserver_common.mail import Message
+from cubeserver_common.models.mail import Message
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common import config
 from cubeserver_common import gensecret

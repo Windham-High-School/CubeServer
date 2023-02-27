@@ -9,7 +9,7 @@ import secrets
 from .config.conf import Conf
 from cubeserver_common.models.utils import Encodable, PyMongoModel
 from cubeserver_common.models.user import User
-from cubeserver_common.mail import Message
+from cubeserver_common.models.mail import Message
 from cubeserver_common import config
 
 __all__ = ['TeamLevel', 'TeamStatus', 'TeamHealth', 'Team']
@@ -245,15 +245,18 @@ class Team(PyMongoModel):
         """Send an email from their cube to them"""
         if self.emails_sent >= Conf.retrieve_instance().team_email_quota:
             return False
-        self.emails_sent += 1  # MUST remain within the quota:
-        self.save()
-        return Message(
+        msg = Message(
             config.FROM_NAME,
             config.FROM_ADDR,
             self.emails,
             subject,
             message
-        ).send()
+        )
+        if msg.send():
+            self.emails_sent += 1
+            self.save()
+            return True
+        return False
 
     @classmethod
     def reset_sent_emails(cls):

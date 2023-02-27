@@ -31,6 +31,8 @@ class AdminTeamTable(Table):
     custom_link     = CustomLinkCol('Secret Link', a_classes="btn btn-info")
     name            = TextEditCol('Edit Name')
 
+    emails_sent     = Col('Daily Emails Sent')
+
     def __init__(self, items: List[Team], **kwargs):
         """Initializes the table"""
         super().__init__(items, **kwargs)

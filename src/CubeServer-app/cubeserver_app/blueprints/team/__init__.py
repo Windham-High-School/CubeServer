@@ -6,7 +6,7 @@ from better_profanity import profanity
 from flask_login import current_user
 
 from cubeserver_common import config
-from cubeserver_common.mail import Message
+from cubeserver_common.models.mail import Message
 from cubeserver_common.models.team import Team, TeamLevel, TeamStatus
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.user import User, UserLevel
