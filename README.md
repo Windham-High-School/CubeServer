@@ -10,11 +10,11 @@ Software to manage, store, score, and publish data received by Wifi-equipped mic
 A live instance of this may or may not be available at https://whsproject.club/.
 
 ## Terminology:
-  CubeServer
+  **CubeServer**<br>
     - The name of the software backing "The Project"
     This includes the web application and leaderboard, the admin panel,
-    the team API, and any other software contained within this repository.
-  Cube
+    the team API, and any other software contained within this repository.<br>
+  **Cube**<br>
     - An individual team's station that will be mounted atop the roof of the school
 
 ## Versioning:
@@ -49,7 +49,7 @@ This will install a Systemd service for the server and everything will be automa
 **Note that this method is now unsupported and will be removed in a future version**
 
 --------------------------------------------------------------------------
-### The Hard Way-
+### Using &nbsp; `docker compose build` -
 Install Docker dependency-
 ```bash
 sudo apt install docker-ce docker-ce-cli containerd.io docker-compose-plugin docker-compose
@@ -74,20 +74,29 @@ Containers are built on Docker Hub for arm64 and amd64 linux (moving forward)
 docker buildx bake -f docker-compose.yml -f .env --set *.platform=linux/arm64,linux/amd64
 ```
 
+Thus, the latest version can also be installed for arm64 ([**Only ARMv8.2A or later!**](https://www.mongodb.com/docs/manual/administration/production-notes/#arm64)) and amd64:
+```bash
+./configure
+docker compose pull
+```
+
 ## Topology & Docker Containers
 CubeServer is built upon the containerization platform Docker. As described in docker-compose.yml, CubeServer is essentially comprised of the following parts as Docker containers:
 - CubeServer-app
-    The web app, served by GUnicorn and Flask.
+  - The web app, served by GUnicorn and Flask.
 - CubeServer-api
-    The API for Cubes, also served by GUnicorn and Flask
+  - The API for Cubes, also served by GUnicorn and Flask
 - CubeServer-mongodb
-    A standalone MongoDB server, central to the other containers
+  - A standalone MongoDB server, central to the other containers
 - CubeServer-accesspoint
-    The container from which the WiFi access point and routing is taken care of to allow Cubes to connect to the API.
+  - The container from which the WiFi access point and routing is taken care of to allow Cubes to connect to the API.
+- CubeServer-beaconserver
+  - The container that deals with talking to the beacon
+
 Files used for building each of these containers (other than CubeServer-mongodb, which is prebuilt) may be found in Docker/.
 
 ## Customization:
 The rules and workings of the "game" may be customized and/or modified as described in [CUSTOMIZATION.md](./CUSTOMIZATION.md).
 
 ## Todos:
-  See the [Issues](https://github.com/snorklerjoe/CubeServer/issues)
+CubeServer development is tracked by this [GitHub Project](https://github.com/orgs/Windham-High-School/projects/1)
