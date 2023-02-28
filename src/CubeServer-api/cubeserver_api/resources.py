@@ -3,6 +3,7 @@
 
 from datetime import datetime
 from time import time
+import logging
 
 from flask import request
 from flask_restful import Resource
@@ -25,7 +26,7 @@ def get_team_secret(team_name: str) -> str:
     """Returns the secret code of a team by name
     (The digest username is the team name)"""
     team = Team.find_by_name(team_name)
-    print(f"Request from {team_name}")
+    logging.debug(f"Request from {team_name}")
     if team and team.status.is_active:
         return team.secret
     return None
@@ -37,26 +38,30 @@ class Data(Resource):
 
     def post(self):
         team = Team.find_by_name(auth.username())
-        print(f"Data submission from: {team.name}")
+        logging.info(f"Data submission de {team.name}")
         # Get DataClass and cast the value:
         data_str = request.get_json()
+        logging.debug(f"Request: {data_str}")
         if data_str is None:
             data_str = loads(request.form['data'])
-        print(data_str)
         data_class = DataClass(data_str['type'])
         if data_class in DataClass.manual:
+            logging.debug("Manually-determined- Rejecting")
             return request.form, 400  # If this should be manually-determined..
         data_value = data_class.datatype(data_str['value'])
+        logging.debug(f"Value: {data_value}")
         # Create the DataPoint object:
         point = DataPoint(
             team_identifier=team.id,
             category=data_class,
             value=data_value
         )
-        print(point)
-        print("Posting data...")
+        logging.debug(f"DataPoint object: {point}")
+        logging.info("Posting data")
         if Rules.retrieve_instance().post_data(team, point):
+            logging.info("Success!")
             return request.form, 201
+        logging.info("Something happened suboptimally.")
         return request.form, 400  # TODO: Support better response codes?
 
 class Email(Resource):
@@ -66,14 +71,14 @@ class Email(Resource):
 
     def post(self):
         team = Team.find_by_name(auth.username())
-        print(f"Email submission from: {team.name}")
+        logging.info(f"Email submission from: {team.name}")
         # Get DataClass and cast the value:
         data_str = request.get_json()
         subject = data_str['subject']
         message = data_str['message']
-        print(f"Subject: {subject}")
-        print(message)
-        print("Sending...")
+        logging.debug(f"Subject: {subject}")
+        logging.debug(message)
+        logging.info("Sending...")
         def send_team_email():
             if team.emails_sent >= Conf.retrieve_instance().team_email_quota:
                 return False
@@ -92,9 +97,9 @@ class Email(Resource):
                 return True
             return False
         if send_team_email():
-            print("Success!")
+            logging.info("Success!")
             return request.form, 201
-        print("Failure.")
+        logging.warning("Failed to send email.")
         return request.form, 400  # TODO: Support better response codes?
 
 class Status(Resource):
@@ -104,6 +109,7 @@ class Status(Resource):
 
     def get(self):
         team = Team.find_by_name(auth.username())
+        logging.info(f"Status req de {team.name}")
         return {
             "datetime": datetime.now().isoformat(),
             "unix_time": int(time()),
@@ -118,6 +124,7 @@ class CodeUpdate(Resource):
 
     def get(self):
         team = Team.find_by_name(auth.username())
+        logging.info(f"Code update req de {team.name}")
         return {
             "datetime": datetime.now().isoformat(),
             "unix_time": int(time()),
@@ -125,7 +132,3 @@ class CodeUpdate(Resource):
             "new": not team.code_update_taken,
             "code": encodebytes(team.get_code_update()).decode('utf-8')
         }, 200
-
-class BeaconMessages(Resource):
-    def get(self):
-        return str(BeaconMessage.find()), 200

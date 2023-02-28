@@ -4,7 +4,13 @@ import os
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
 from cubeserver_common.models import PyMongoModel
+import logging
+from . import config
 
+def init_logging():
+    """Init logger"""
+    logging.basicConfig(format=config.LOGGING_FORMAT, level=config.LOGGING_LEVEL)
+    logging.log(100, f"CubeServer loglevel is {logging.getLevelName(config.LOGGING_LEVEL)}")
 
 def configure_db(app=None):
     """Configures the database"""
@@ -19,7 +25,6 @@ def configure_db(app=None):
         mongo = PyMongo(uri=uri)
         mongo.cx = MongoClient(uri)
         mongo.db = mongo.cx[os.environ['MONGODB_DATABASE']]
-    print(f"\n\n\tMONGO: {mongo}\n\n")
     PyMongoModel.update_mongo_client(mongo)
     # Don't let the model classes load until after the db is init'd:
     from cubeserver_common.models.config.conf import Conf

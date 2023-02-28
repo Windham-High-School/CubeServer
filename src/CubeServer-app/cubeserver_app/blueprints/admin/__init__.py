@@ -3,6 +3,7 @@
 # TODO: Restructure blueprint files- This whole thing is an absolute mess!
 # Arnold Schwarzenegger looked at this code and called it "one ugly motha*****".
 
+import logging
 from datetime import timedelta
 from math import floor
 from bson.objectid import ObjectId
@@ -323,9 +324,9 @@ def settings_change():
         try:
             db_conf = Rules.from_json(form.json_str.data)
             db_conf.save()
-        except:  # TODO: Is this poor practice?
+        except:
             tb = traceback.format_exc()
-            print(tb)
+            logging.error(tb)
             return render_template('errorpages/500.html.jinja2', message=tb)
         return render_template('redirect_back.html.jinja2')
     return abort(500)
@@ -377,9 +378,9 @@ def multiplier_change():
                 )
             )
             team.save()
-        except:  # TODO: Is this poor practice?
+        except:
             tb = traceback.format_exc()
-            print(tb)
+            logging.error(tb)
             return render_template('errorpages/500.html.jinja2', message=tb)
         return render_template('redirect_back.html.jinja2')
     return abort(500)
@@ -442,9 +443,6 @@ def beacon_tx():
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
     form = ImmediateBeaconForm()
-    print("Submitted form...")
-    print(form.validate_on_submit())
-    print(form.msg_format.data)
     if form.validate_on_submit():
         try:
             msg = BeaconMessage(
@@ -456,9 +454,9 @@ def beacon_tx():
                 misfire_grace=form.misfire_grace.data
             )
             msg.save()
-        except:  # TODO: Is this poor practice?
+        except:
             tb = traceback.format_exc()
-            print(tb)
+            logging.error(tb)
             return render_template('errorpages/500.html.jinja2', message=tb)
         return render_template(
             'beacon_tx_done.html.jinja2'
@@ -512,7 +510,7 @@ def database_repair(mode="", collection_name="", query="{}"):
     if collection_name not in __STR_COLLECTION_MAPPING:
         flash(f"Invalid Collection Name \"{collection}\".")
         return abort(500)
-    print("Opening Database Repair Tool.")
+    logging.warn("Opening Database Repair Tool.")
     
     collection = __STR_COLLECTION_MAPPING[collection_name]
     
@@ -562,7 +560,7 @@ def database_repair(mode="", collection_name="", query="{}"):
     #         in the exemplary `good_doc`, something is wrong, likely remnants
     #         from a previous, database-incompatible version of CubeServer.
     for doc in all_docs:
-        print(f"Opening Document ID {doc.id}...")
+        logging.debug(f"Opening Document ID {doc.id}...")
         if mode == 'all':
             broken.append(BrokenDocId(doc.id, pformat(doc.encode(), indent=4)))
             continue
@@ -572,11 +570,11 @@ def database_repair(mode="", collection_name="", query="{}"):
         for field_name in doc._fields:
             example    = good_doc.__getattribute__(field_name)
             experiment = doc.__getattribute__(field_name)
-            print(field_name, example, experiment)
+            logging.debug(field_name, example, experiment)
             if type(example) != type(experiment):
                 broken.append(BrokenDocId(doc.id, pformat(doc.encode(), indent=4)))
-                print(f"Document {doc.id} is broken-")
-                print(f"\tField {field_name} is type {type(experiment)} instead of {type(example)}")
+                logging.warn(f"Document {doc.id} is broken-")
+                logging.info(f"\tField {field_name} is type {type(experiment)} instead of {type(example)}")
                 break
 
     table = BrokenDocTable(broken)

@@ -5,6 +5,7 @@ The beacon will connect to this server (with proper auth)
 
 import socket
 import ssl
+import logging
 
 class SSLSocketServer:
     def __init__(
@@ -52,12 +53,12 @@ class SSLSocketServer:
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server_socket.bind((self.host, self.port))
         self.server_socket.listen()
-        print("Listening on {host}:{port}...".format(host=self.host, port=self.port))
+        logging.info("Listening on {host}:{port}...".format(host=self.host, port=self.port))
 
         while True:
-            print("Listening...")
+            logging.info("Listening...")
             client_socket, client_address = self.server_socket.accept()
-            print(f"Accepted connection from {client_address}!")
+            logging.info(f"Accepted connection from {client_address}!")
             client_ssl_socket = self.context.wrap_socket(client_socket,
 #                                                certfile=self.certfile,
 #                                                keyfile=self.keyfile,
@@ -66,12 +67,12 @@ class SSLSocketServer:
             #client_cert = client_ssl_socket.getpeercert(True)
 
             if self.connect_hook is not None:
-                print("Executing connect hook...")
+                logging.debug("Executing connect hook...")
                 self.connect_hook(client_ssl_socket)
             else:
-                print("Sending test message...")
+                logging.debug("Sending test message...")
                 client_ssl_socket.send(b"Connection Established!")
-            print("Closing socket.")
+            logging.info("Closing socket.")
             client_ssl_socket.close()
 
     def on_connect(self, decorated_method):

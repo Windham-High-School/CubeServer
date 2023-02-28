@@ -1,6 +1,7 @@
 """ This is executed within the CubeServer-beaconserver container
 """
 
+import logging
 from typing import List
 from sys import argv
 
@@ -10,27 +11,26 @@ from cubeserver_common.models.config.conf import Conf
 
 from .beaconserver import BeaconServer, BeaconCommand
 
-
+logging.debug("Initializing APScheduler")
 scheduler = BackgroundScheduler()
 
 server = BeaconServer(
     host=argv[1],
-    port=int(argv[2]),
-    verbose=True
+    port=int(argv[2])
 )
 
 def load_packets_from_db():
     """Loads the current database into the jobs"""
-    print("Polling scheduled jobs...")
+    logging.debug("Polling scheduled jobs...")
     scheduled = [job.name for job in scheduler.get_jobs()]
-    print(scheduled)
+    logging.debug(scheduled)
     jobs: List[BeaconMessage] = BeaconMessage.find()
-    print(jobs)
+    logging.debug(jobs)
     for job in jobs:
-        print("Potential job-")
-        print(job.full_message_bytes)
+        logging.debug("Potential job-")
+        logging.debug(job.full_message_bytes)
         if str(job.id) not in scheduled:
-            print("Adding job")
+            logging.debug("Adding job")
             scheduler.add_job(
                 server.send_cmd,
                 'date', run_date=job.send_at,
@@ -40,6 +40,8 @@ def load_packets_from_db():
             )
 
 load_packets_from_db()
+
+logging.debug("Starting scheduler")
 scheduler.start()
 
 # Poll to get new packets
@@ -50,4 +52,5 @@ scheduler.add_job(
     name='db_updater'
 )
 
+logging.info("Starting beacon server")
 server.run()
