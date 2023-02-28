@@ -5,7 +5,6 @@ The beacon will connect to this server (with proper auth)
 
 import socket
 import ssl
-import hashlib
 
 class SSLSocketServer:
     def __init__(

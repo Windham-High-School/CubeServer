@@ -2,6 +2,7 @@
 
 import os
 from flask_pymongo import PyMongo
+from pymongo import MongoClient
 from cubeserver_common.models import PyMongoModel
 
 
@@ -16,6 +17,8 @@ def configure_db(app=None):
         mongo = PyMongo(app, uri=uri)
     else:
         mongo = PyMongo(uri=uri)
+        mongo.cx = MongoClient(uri)
+        mongo.db = mongo.cx[os.environ['MONGODB_DATABASE']]
     print(f"\n\n\tMONGO: {mongo}\n\n")
     PyMongoModel.update_mongo_client(mongo)
     # Don't let the model classes load until after the db is init'd:
