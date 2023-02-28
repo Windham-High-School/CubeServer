@@ -32,6 +32,7 @@ class AdminTeamTable(Table):
     name            = TextEditCol('Edit Name')
 
     emails_sent     = Col('Daily Emails Sent')
+    link_emails     = CustomLinkCol('See Emails Sent', link_text="View Sent Emails", a_classes="btn btn-info")
 
     def __init__(self, items: List[Team], **kwargs):
         """Initializes the table"""

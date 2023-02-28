@@ -9,7 +9,7 @@ import secrets
 from .config.conf import Conf
 from cubeserver_common.models.utils import Encodable, PyMongoModel
 from cubeserver_common.models.user import User
-from cubeserver_common.models.mail import Message
+#from cubeserver_common.models.mail import Message
 from cubeserver_common import config
 
 __all__ = ['TeamLevel', 'TeamStatus', 'TeamHealth', 'Team']
@@ -228,7 +228,7 @@ class Team(PyMongoModel):
 
     @property
     def id_2(self):  # TODO: Fix this (and AdminTeamsTable.id_2)
-                     # TODO: Replace all usages with id_primary (property of PyMongoModel's)
+                     # TODO: Replace all usages with id_secondary (property of PyMongoModel's)
         """Just to allow multiple columns in the adminteamstable to rely upon the id..."""
         return self._id
 
@@ -241,11 +241,17 @@ class Team(PyMongoModel):
     def custom_link(self) -> str:  # TODO: Make better
         return f"http://whsproject.club/team/success?team_secret={self.secret}&team_name={quote_plus(self.name)}"
 
+    @property
+    def link_emails(self) -> str:  # TODO: Make better
+        return f"http://whsproject.club/admin/sent-messages/{self.id}"
+
     def send_api_email(self, subject, message):
         """Send an email from their cube to them"""
         if self.emails_sent >= Conf.retrieve_instance().team_email_quota:
             return False
-        msg = Message(
+        # Placed here to remove circular import... not great but...
+        import cubeserver_common.models.mail
+        msg = cubeserver_common.models.mail.Message(
             config.FROM_NAME,
             config.FROM_ADDR,
             self.emails,

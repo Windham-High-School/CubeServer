@@ -3,10 +3,13 @@
 import smtplib
 from email.mime.text import MIMEText
 from datetime import datetime
+from typing import Optional, List
+from bson.objectid import ObjectId
 
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.utils.modelutils import PyMongoModel
 from cubeserver_common.models.utils.dummycodec import DummyCodec
+#from cubeserver_common.models.team import Team  # Creates circular import; removed
 
 class Message(PyMongoModel):
     """Describes an email to be sent"""
@@ -17,7 +20,8 @@ class Message(PyMongoModel):
         from_addr: str = "",
         recipients: list[str] = [],
         subject: str = "",
-        message: str = ""
+        message: str = "",
+        team_identifier: Optional[ObjectId] = None
     ) -> None:
         super().__init__()
         self.from_addr = from_addr
@@ -25,6 +29,7 @@ class Message(PyMongoModel):
         self.from_name = from_name
         self.subject = subject
         self.message = message
+        self.team_reference = team_identifier
 
         self.register_field('sent_at', custom_codec=DummyCodec(datetime))
         self._ignored += ['_mimetext']
@@ -43,7 +48,7 @@ class Message(PyMongoModel):
 
         self._mimetext = MIMEText(self.message)
         self._mimetext['Subject'] = self.subject
-        self._mimetext['From'] = self.sender_string
+        self._mimetext['From'] = self.sender_str
         self._mimetext['To'] = ', '.join(self.recipients)
 
         success = True
@@ -65,3 +70,19 @@ class Message(PyMongoModel):
         if success:  # Save into database of messages if it sent okay...
             self.save()
         return success
+
+    @classmethod  # TODO: Structure other "find_by..."'s similarly to reduce repetitive code:
+    def find_by_team(cls, team: ObjectId | str | None) -> List['Message']:
+        """Returns a list of Messages sent by this team"""
+        if isinstance(team, ObjectId):
+            team_id = team
+#        elif isinstance(team, Team):  # Circular import; removed.
+#            team_id = team.id         # TODO: Add back in with issue #134
+        elif isinstance(team, str):
+            team_id = ObjectId(team)
+        elif team is None:
+            team_id = None
+        else:
+            raise TypeError("Invalid type with which to filter messages by team")
+
+        return cls.find({"team_reference": team_id})

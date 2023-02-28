@@ -416,14 +416,16 @@ def email(recipients):
     )
 
 
-@bp.route('/sent-messages')
+@bp.route('/sent-messages', defaults={'teamid': None})
+@bp.route('/sent-messages/<teamid>')
 @login_required
-def sent_email():
+def sent_email(teamid):
     """Shows a page with all sent emails"""
     # Check admin status:
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
-    table = AdminEmailTable(Message.find())
+    messages = Message.find() if teamid is None else Message.find_by_team(teamid)
+    table = AdminEmailTable(messages)
     # Render the template:
     return render_template(
         'email_table.html.jinja2',
