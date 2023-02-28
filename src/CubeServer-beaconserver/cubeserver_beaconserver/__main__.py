@@ -20,7 +20,7 @@ server = BeaconServer(
 
 def load_packets_from_db():
     """Loads the current database into the jobs"""
-    print("Polling for scheduled jobs...")
+    print("Polling scheduled jobs...")
     scheduled = [job.name for job in scheduler.get_jobs()]
     print(scheduled)
     jobs: List[BeaconMessage] = BeaconMessage.find()
@@ -38,8 +38,7 @@ def load_packets_from_db():
             )
 
 load_packets_from_db()
-
+scheduler.start()
 scheduler.add_job(load_packets_from_db, 'interval', seconds=10, name='db_updater')
 
-scheduler.start()
 server.run()

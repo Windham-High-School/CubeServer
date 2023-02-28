@@ -61,6 +61,8 @@ class BeaconServer:
         """Sends a command to the beacon.
         Returns True on success
         """
+        print("\n\n")
+        print("send_cmd", message)
         self.busy = True
         success = False
         for _ in range(self.repeat_attempts):
