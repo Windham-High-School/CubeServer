@@ -24,6 +24,7 @@ class BeaconDestination(Enum):
             OutputDestination.RED: BeaconDestination.RED
         }[database_doc.destination]
 
+# TODO: Consider taking advantage of Python's @dataclass
 class BeaconCommand:
     """Describes a command sent to the beacon-
     <Version Byte> <Destination Byte> <Intensity Byte> <Message Length MSB> <Message Length LSB> <8 Reserved Bytes> <Message Bytes> <NULL>

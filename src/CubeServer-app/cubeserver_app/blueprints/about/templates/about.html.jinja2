@@ -3,24 +3,26 @@
 
 {% block header %}
     <h4 class="glow text-light">{{ config['CONSTANTS'].SHORT_TITLE }} Revision {{ version }}</h4>
+    <pre class="px-1 text-warning">Build Configured {{ timestamp }}</pre>
 {% endblock %}
 
 {% block content %}
-    <h5>Development</h5>
-    <p class="px-3">
-        {{ config['CONSTANTS'].CREDITS }}
-    </p>
+    <h5>Authors</h5>
+    <ul style="list-style-type: none;">
+        {% for author in contributors.items() %}
+        <li>
+            <a href="{{ author[1]['link'] }}" {{ "disabled" if author[1]['link'] == '' else "target=\"_blank\"" }}><h5 class="text-info">{{ author[0] }}</h5></a>
+            <div class="px-3">{{ author[1]['role'] }}</div>
+<pre class="px-5">
+{{ author[1]['contributions'] }}
+</pre>
+        </li>
+        {% endfor %}
+    </ul>
 
     <hr>
 
-    <h5>Graphic Design</h5>
-    <p class="px-3">
-        Thanks to Greg Kindrat, Heather Brayer, Julia Miller, and Ryan Burbo for the color scheme and graphic design!
-    </p>
-
-    <hr>
-
-    <h5>Frameworks</h5>
+    <h5>Major Frameworks</h5>
     <p class="px-3">
         Webapp and API powered by <a target="_blank" class="text-info" href="https://flask.palletsprojects.com/">Flask</a>
         <!-- (This is not a redistribution of Flask in binary or source-code form, but rather a usage of it. Thus, the full license does not need to be included by my understanding) -->
@@ -54,10 +56,12 @@ Copyright (c) 2011-2022 The Bootstrap Authors</pre>
     <hr>
 
     <p>
-        A great many other wonderful dependencies allow this project to happen.
+        A great many other wonderful dependencies and contributions allow this
+        project to happen.
         Only a mere summary of a small handful of dependencies are listed above,
         and not every contributor to each of the above dependencies can be mentioned here.
-        For more up-to-date and detailed dependency information, please see the source code.
+        For more detailed and up-to-date dependency information, please consult the source code
+        and official source control.
     </p>
 
     <hr>

@@ -3,7 +3,7 @@
 from typing import List
 from flask_table import Table, Col
 
-from cubeserver_app.tables.columns import DropDownEnumCol, OptionsCol
+from cubeserver_app.tables.columns import DropDownEnumCol, OptionsCol, TextEditCol
 from cubeserver_common.models.team import Team
 from cubeserver_common.models.user import UserActivation, UserLevel
 
@@ -17,9 +17,9 @@ class AdminUserTable(Table):
     thead_classes = ["thead-dark"]
     border = True
 
-    name            = Col('User Name')
+    name            = TextEditCol('User Name', model_type="User")
     level           = DropDownEnumCol('User Level', UserLevel, model_type='User')
-    email           = Col('Email')
+    email           = TextEditCol('Email', model_type="User")
     activated       = DropDownEnumCol('Active?', UserActivation, model_type='User')
     verified        = Col('Email verified?')
 
