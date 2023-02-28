@@ -1,4 +1,4 @@
-"""
+""" This is executed within the CubeServer-beaconserver container
 """
 
 from typing import List
@@ -6,6 +6,7 @@ from sys import argv
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from cubeserver_common.models.beaconmessage import BeaconMessage
+from cubeserver_common.models.config.conf import Conf
 
 from .beaconserver import BeaconServer, BeaconCommand
 
@@ -34,11 +35,19 @@ def load_packets_from_db():
                 server.send_cmd,
                 'date', run_date=job.send_at,
                 args=[BeaconCommand.from_BeaconMessage(job)],
-                name=str(job.id)
+                name=str(job.id),
+                misfire_grace_time=job.misfire_grace
             )
 
 load_packets_from_db()
 scheduler.start()
-scheduler.add_job(load_packets_from_db, 'interval', seconds=10, name='db_updater')
+
+# Poll to get new packets
+scheduler.add_job(
+    load_packets_from_db,
+    'interval',
+    seconds=Conf.retrieve_instance().beacon_polling_period,
+    name='db_updater'
+)
 
 server.run()

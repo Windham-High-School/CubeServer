@@ -91,7 +91,8 @@ class BeaconMessage(PyMongoModel):
         encoding: Optional[BeaconMessageEncoding] = BeaconMessageEncoding.ASCII,
         destination: OutputDestination = OutputDestination.IR,
         intensity: int = 255,
-        past: bool = False
+        past: bool = False,
+        misfire_grace: int = 30
     ):
         """
         Args:
@@ -120,6 +121,7 @@ class BeaconMessage(PyMongoModel):
         self.destination = destination
         self.intensity = intensity
         self.past = past
+        self.misfire_grace = misfire_grace
 
         self.full_message_bytes_stored = self.full_message_bytes
 
@@ -186,3 +188,13 @@ class BeaconMessage(PyMongoModel):
     def find_unsent(cls):
         """Returns all yet-unsent beacon packets"""
         return cls.find({'past': False})
+
+    @property
+    def str_status(self):
+        if self.past:
+            return "Transmitted"
+        if (
+            datetime.now().timestamp() - self.send_at.timestamp()
+        ) > self.misfire_grace:
+            return "Missed"
+        return "Queued"

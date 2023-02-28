@@ -62,6 +62,7 @@
                     {{ wtf.form_field(beacon_form.destination) }}
                     {{ wtf.form_field(beacon_form.msg_format) }}
                     {{ wtf.form_field(beacon_form.intensity) }}
+                    {{ wtf.form_field(beacon_form.misfire_grace) }}
                     {{ wtf.form_field(beacon_form.submit) }}
                 </form>
 
@@ -73,6 +74,9 @@
                 <p>
                     Note: It may take up to 30 seconds for all server threads to sync their configuration after a change.
                 </p>
+                <p>
+                    An asterisk (*) indicates that the change will not take effect until a restart of all containers.
+                </p>
                 <br>
                 <form method="POST" action="configchange" class="form">
                     {{ config_form.hidden_tag() }}
@@ -82,6 +86,7 @@
                     {{ wtf.form_field(config_form.banner_message) }}
                     {{ wtf.form_field(config_form.home_description, rows=5, cols=20) }}
                     {{ wtf.form_field(config_form.reg_confirmation, rows=5, cols=20) }}
+                    {{ wtf.form_field(config_form.beacon_polling_period) }}
                     <br>
                     <h4>Email Settings:</h4>
                     {{ wtf.form_field(config_form.email_domain) }}
