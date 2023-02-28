@@ -75,7 +75,8 @@ LONG_TITLE: str = "The Project"
 
 # Beacon:
 
-DEFAULT_BEACON_TX_HEADER: bytes = b"<>"
+DEFAULT_BEACON_POLLING_PERIOD: int = 10
+"""The default period of the BeaconMessage collection polling in seconds"""
 
 
 

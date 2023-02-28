@@ -31,7 +31,7 @@ class BeaconServer:
         self.busy = False
 
         @self.socketserver.on_connect
-        def connect_hook(client_ssl_socket, client_cert):
+        def connect_hook(client_ssl_socket):
             """Runs on connect from beacon"""
             self.sock = client_ssl_socket
             self.sock.settimeout(self.timeout)
@@ -61,6 +61,8 @@ class BeaconServer:
         """Sends a command to the beacon.
         Returns True on success
         """
+        print("\n\n")
+        print("send_cmd", message)
         self.busy = True
         success = False
         for _ in range(self.repeat_attempts):

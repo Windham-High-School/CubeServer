@@ -85,6 +85,7 @@ def admin_home():
     conf_form.team_email_quota.data = db_conf.team_email_quota
     conf_form.quota_reset_hour.data = db_conf.quota_reset_hour
     conf_form.banner_message.data = db_conf.banner_message
+    conf_form.beacon_polling_period.data = db_conf.beacon_polling_period
 
     reserved_links = []
     for name in Team.RESERVED_NAMES:
@@ -247,6 +248,7 @@ def conf_change():
         db_conf.team_email_quota = form.team_email_quota.data
         db_conf.quota_reset_hour = form.quota_reset_hour.data
         db_conf.banner_message = form.banner_message.data
+        db_conf.beacon_polling_period = form.beacon_polling_period.data
         credentials = form.smtp_credentials.data.strip().split(':')
         if len(credentials) > 1:
             db_conf.smtp_user = credentials[0]
@@ -450,7 +452,8 @@ def beacon_tx():
                 division=TeamLevel(form.division.data),
                 message=form.message.data,
                 destination=OutputDestination(form.destination.data),
-                encoding=BeaconMessageEncoding(form.msg_format.data)
+                encoding=BeaconMessageEncoding(form.msg_format.data),
+                misfire_grace=form.misfire_grace.data
             )
             msg.save()
         except:  # TODO: Is this poor practice?

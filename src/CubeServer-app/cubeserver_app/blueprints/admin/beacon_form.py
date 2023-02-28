@@ -25,6 +25,7 @@ class ImmediateBeaconForm(FlaskForm):
                 for option in BeaconMessageEncoding
         ]
     )
+    misfire_grace = IntegerField("Misfire Grace Time (Sec)")
     intensity = IntegerField("Intensity")
     submit = SubmitField('Schedule Transmission')
 

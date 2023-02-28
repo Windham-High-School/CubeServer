@@ -13,6 +13,7 @@ from base64 import encodebytes
 from cubeserver_common.models.config.rules import Rules
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.team import Team
+from cubeserver_common.models.beaconmessage import BeaconMessage
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 from cubeserver_common import config
 from cubeserver_common.metadata import VERSION
@@ -124,3 +125,7 @@ class CodeUpdate(Resource):
             "new": not team.code_update_taken,
             "code": encodebytes(team.get_code_update()).decode('utf-8')
         }, 200
+
+class BeaconMessages(Resource):
+    def get(self):
+        return str(BeaconMessage.find()), 200

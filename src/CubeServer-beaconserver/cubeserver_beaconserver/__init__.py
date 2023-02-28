@@ -1,2 +1,2 @@
-from cubeserver_common import configure_db_noapp
-configure_db_noapp()
+from cubeserver_common import configure_db
+configure_db()

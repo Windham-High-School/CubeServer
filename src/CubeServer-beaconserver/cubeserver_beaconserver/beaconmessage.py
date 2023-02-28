@@ -18,11 +18,11 @@ class BeaconDestination(Enum):
     IR  = b'\x02'
 
     @classmethod
-    def from_OutputDestination(cls, database_doc: OutputDestination):
+    def from_OutputDestination(cls, od: OutputDestination):
         return {
             OutputDestination.IR: BeaconDestination.IR,
             OutputDestination.RED: BeaconDestination.RED
-        }[database_doc.destination]
+        }[od]
 
 # TODO: Consider taking advantage of Python's @dataclass
 class BeaconCommand:

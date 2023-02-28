@@ -105,7 +105,6 @@ services:
     networks:
       - api
       - backend
-      - frontend
 
   # Database container:
   mongodb:

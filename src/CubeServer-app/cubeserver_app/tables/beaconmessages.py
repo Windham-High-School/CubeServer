@@ -17,7 +17,7 @@ class BeaconMessageTable(Table):
     border = True
 
     send_at             = DatetimeCol('Scheduled Time')
-    past                = Col('Transmitted Yet?')
+    str_status          = Col('Status')
     division            = EnumCol('Division')
     destination         = EnumCol('Output')
     intensity           = Col('Intensity')
@@ -28,7 +28,9 @@ class BeaconMessageTable(Table):
 
     additional_headers  = Col('Additional Headers')
 
-    checksum    = Col('Checksum')
+    checksum            = Col('Checksum')
+
+    misfire_grace       = Col('Misfire Grace Time')
 
     def __init__(self, items: List[BeaconMessage], **kwargs):
         """Initializes the table"""

@@ -37,9 +37,10 @@ if all(key in environ for key in [
     scheduler.start()
 
     # Import after init'ing the db:
-    from cubeserver_api.resources import Data, Status, Email, CodeUpdate
+    from cubeserver_api.resources import Data, Status, Email, CodeUpdate, BeaconMessages
     # Attach resources:
     api.add_resource(Data, '/data')  # TODO: Use as decorators?
     api.add_resource(Status, '/status')
     api.add_resource(Email, '/email')
     api.add_resource(CodeUpdate, '/update')
+    #api.add_resource(BeaconMessages, '/test')  # A dummy api endpoint for db testing
