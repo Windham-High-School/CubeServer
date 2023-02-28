@@ -11,6 +11,7 @@
         {% for group, mailing_list in email_groups %}
             <a href={{ url_for('admin.email', recipients=mailing_list) }} class="btn">Email {{ group }}</a>
         {% endfor %}
+        <a href={{ url_for('admin.sent_email') }} class="btn bg-info">Review Sent Mail</a>
     </div>
     <br><br>
     <div class="btn-group" role="group">

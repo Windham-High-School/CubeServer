@@ -1,0 +1,17 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Sent Emails{% endblock %}
+
+{% block header %}
+    <h4>Sent Emails</h4>
+{% endblock %}
+
+{% block content %}
+    <div>
+        {{table}}
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script src="{{ url_for('static', filename='/js/admin.js') }}"></script>
+{% endblock %}

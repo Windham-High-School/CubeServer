@@ -20,20 +20,18 @@ class DataClass(Enum):
     COMMENT = "comment"
     SIGNAL_LIGHT = "signal"
     BATTERY_REMAINING = "remaining battery"
-#    HUMIDITY = "humidity"
-#    LIGHT_INTENSITY = "light intensity"
+    BEACON_CHALLENGE = "beacon challenge"
 
     @property
     def datatype(self) -> type:
         """Returns the Python type for this category of data"""
         return {
             DataClass.TEMPERATURE: float,
-#            DataClass.HUMIDITY: float,
             DataClass.PRESSURE: float,
-#            DataClass.LIGHT_INTENSITY: float,
             DataClass.COMMENT: str,
             DataClass.SIGNAL_LIGHT: bool,
-            DataClass.BATTERY_REMAINING: int
+            DataClass.BATTERY_REMAINING: int,
+            DataClass.BEACON_CHALLENGE: str
         }[self]
 
     @property
@@ -42,10 +40,9 @@ class DataClass(Enum):
         with this class of data"""
         return {  # These values align with those in the API wrapper libs:
             DataClass.TEMPERATURE: "\N{DEGREE SIGN}F",
-#            DataClass.HUMIDITY: "%",
             DataClass.PRESSURE: "inHg",
-#            DataClass.LIGHT_INTENSITY: "lux",
             DataClass.COMMENT: "",
+            DataClass.BEACON_CHALLENGE: "",
             DataClass.SIGNAL_LIGHT: "",
             DataClass.BATTERY_REMAINING: "%"
         }[self]
