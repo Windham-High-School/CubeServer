@@ -15,6 +15,7 @@ from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.team import Team
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 from cubeserver_common import config
+from cubeserver_common.metadata import VERSION
 
 auth = HTTPBasicAuth()
 
@@ -105,7 +106,8 @@ class Status(Resource):
         return {
             "datetime": datetime.now().isoformat(),
             "unix_time": int(time()),
-            "status": {"score": team.score}
+            "status": {"score": team.score},
+            "CubeServer_version": VERSION
         }, 200
 
 class CodeUpdate(Resource):
