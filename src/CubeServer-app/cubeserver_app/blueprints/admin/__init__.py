@@ -26,7 +26,7 @@ from cubeserver_common.models.team import Team, TeamLevel, TeamStatus
 from cubeserver_common.models.user import User, UserLevel
 from cubeserver_common.models.beaconmessage import OutputDestination
 from cubeserver_common.models.multiplier import Multiplier, MassMultiplier, VolumeMultiplier, CostMultiplier, VolumeUnit
-from cubeserver_common.mail import Message
+from cubeserver_common.models.mail import Message
 from cubeserver_common.models.beaconmessage import BeaconMessage, BeaconMessageEncoding
 from cubeserver_common.models.reference import ReferencePoint
 from cubeserver_common.config import FROM_NAME, FROM_ADDR, INTERNAL_SECRET_LENGTH
@@ -38,6 +38,7 @@ from cubeserver_app.tables.team import AdminTeamTable
 from cubeserver_app.tables.users import AdminUserTable
 from cubeserver_app.tables.datapoints import AdminDataTable
 from cubeserver_app.tables.beaconmessages import BeaconMessageTable
+from cubeserver_app.tables.email import AdminEmailTable
 
 from .user_form import InvitationForm
 from .config_form import ConfigurationForm
@@ -187,7 +188,7 @@ def table_endpoint(table, identifier, field):
         ).send():
             flash(f"Notified {cast(Team, model_obj).name} of change", category="info")
         else:
-            flash("Failed to notify the team {cast(Team, model_obj).name}.", category="danger")
+            flash(f"Failed to notify the team {cast(Team, model_obj).name}.", category="danger")
     if request.method == 'POST':
         if field == "score_increment" and model_class == Team:
             cast(Team, model_obj).health.change(float(request.form.get('item')))
@@ -414,6 +415,22 @@ def email(recipients):
         mail_form = form
     )
 
+
+@bp.route('/sent-messages', defaults={'teamid': None})
+@bp.route('/sent-messages/<teamid>')
+@login_required
+def sent_email(teamid):
+    """Shows a page with all sent emails"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    messages = Message.find() if teamid is None else Message.find_by_team(teamid)
+    table = AdminEmailTable(messages)
+    # Render the template:
+    return render_template(
+        'email_table.html.jinja2',
+        table = table.__html__()
+    )
 
 @bp.route('/beaconnow', methods=['POST'])
 @login_required

@@ -11,9 +11,12 @@ from json import dumps, loads, decoder
 from base64 import encodebytes
 
 from cubeserver_common.models.config.rules import Rules
+from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.team import Team
 from cubeserver_common.models.beaconmessage import BeaconMessage
 from cubeserver_common.models.datapoint import DataClass, DataPoint
+from cubeserver_common import config
+from cubeserver_common.metadata import VERSION
 
 auth = HTTPBasicAuth()
 
@@ -71,7 +74,24 @@ class Email(Resource):
         print(f"Subject: {subject}")
         print(message)
         print("Sending...")
-        if team.send_api_email(subject, message):
+        def send_team_email():
+            if team.emails_sent >= Conf.retrieve_instance().team_email_quota:
+                return False
+            import cubeserver_common.models.mail
+            msg = cubeserver_common.models.mail.Message(
+                config.FROM_NAME,
+                config.FROM_ADDR,
+                team.emails,
+                subject,
+                message,
+                team.id
+            )
+            if msg.send():
+                team.emails_sent += 1
+                team.save()
+                return True
+            return False
+        if send_team_email():
             print("Success!")
             return request.form, 201
         print("Failure.")
@@ -87,7 +107,8 @@ class Status(Resource):
         return {
             "datetime": datetime.now().isoformat(),
             "unix_time": int(time()),
-            "status": {"score": team.score, "strikes": team.strikes}
+            "status": {"score": team.score},
+            "CubeServer_version": VERSION
         }, 200
 
 class CodeUpdate(Resource):
