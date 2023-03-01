@@ -11,15 +11,15 @@
 
 {% block content %}
     <form class="alert w-50" method="POST" action="/admin/multiplier" class="form">
-        <p><b>Multiplier:</b> [Cost {{team.multiplier.cost_mult.__str__()}}] X [Mass {{team.multiplier.mass_mult.__str__()}}] X [Volume {{team.multiplier.vol_mult.__str__()}}]
+        <p><b>Multiplier:</b> [Mass {{team.multiplier.mass_mult.__str__()}}]
         <hr>
         <b>{{team.multiplier.amount}}</b>
         </p>
         {{ mult_form.hidden_tag() }}
         {{ wtf.form_errors(mult_form, hiddens="only") }}
 
-        {{ wtf.form_field(mult_form.cost) }}
-        {{ wtf.form_field(mult_form.size) }}
+        {# wtf.form_field(mult_form.cost) #}
+        {# wtf.form_field(mult_form.size) #}
         {{ wtf.form_field(mult_form.mass) }}
         {{ wtf.form_field(mult_form.submit) }}
     </form>
