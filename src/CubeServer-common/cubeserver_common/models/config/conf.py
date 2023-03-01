@@ -9,6 +9,7 @@ from cubeserver_common.config import DEFAULT_HOME_DESCRIPTION, DEFAULT_REG_CONFI
 from cubeserver_common.models import PyMongoModel
 
 # TODO: Rewrite to use a mapping (key:value) scheme instead of individual variables. Read the defaults in from a file or something?
+# TODO: Consider DataClass?
 class Conf(PyMongoModel):
     """Defines the exact rules for a game.
 
