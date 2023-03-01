@@ -1,0 +1,33 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Send Email{% endblock %}
+
+{% block header %}
+    <h4>Send Email</h4>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <p>
+            Send a custom email:
+        </p>
+        <form method="POST" class="form">
+            {{ mail_form.hidden_tag() }}
+            <br>
+            <h4>Sender:</h4>
+            {{ wtf.form_field(mail_form.name) }}
+            {{ wtf.form_field(mail_form.addr) }}
+            <br>
+            <h4>Message:</h4>
+            {{ wtf.form_field(mail_form.to) }}
+            {{ wtf.form_field(mail_form.subject) }}
+            {{ wtf.form_field(mail_form.message) }}
+            <br>
+            {{ wtf.form_field(mail_form.submit) }}
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script src="{{ url_for('static', filename='/js/admin.js') }}"></script>
+{% endblock %}

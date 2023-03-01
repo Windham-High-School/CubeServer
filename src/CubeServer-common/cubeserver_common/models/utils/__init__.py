@@ -3,5 +3,6 @@
 from .enumcodec import EnumCodec
 from .listcodec import ListCodec
 from .dummycodec import DummyCodec
+from .complexdictcodec import ComplexDictCodec
 
 from .modelutils import PyMongoModel, Encodable, EncodableCodec

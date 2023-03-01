@@ -1,0 +1,31 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Game Settings{% endblock %}
+
+{% block header %}
+    <h4>Game Settings</h4>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <p>
+            Please be <i>very careful</i> here.
+            If you screw something up, it might cause either apparent or quiet failures.
+            That would be bad. Please make a backup or something if you are <i>at all</i> concerned.
+            Best of luck!
+        </p>
+        <p>
+            Also- Like the game configuration, there may be a delay before all server threads will update
+            their configuration. A server restart is recommended to apply all changes.
+        </p>
+        <form method="POST" action="settingschange" class="form">
+            {{ config_form.hidden_tag() }}
+            {{ wtf.form_field(config_form.json_str) }}
+            {{ wtf.form_field(config_form.submit) }}
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script src="{{ url_for('static', filename='/js/admin.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Beacon Tx{% endblock %}
+
+{% block header %}
+    <h4>Queued Message!</h4>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <p>Success</p>
+        <br>
+        <p>
+            This packet has been scheduled in the database.
+            There will be a short delay before the beaconserver container pulls the latest updates from the database.
+        </p>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script src="{{ url_for('static', filename='/js/admin.js') }}"></script>
+{% endblock %}

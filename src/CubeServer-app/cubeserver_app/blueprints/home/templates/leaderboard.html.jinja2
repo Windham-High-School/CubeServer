@@ -6,5 +6,22 @@
 {% endblock %}
 
 {% block content %}
+
+    <div class="btn-group">
+        <a class="btn buttons-collection {{"bg-info btn-secondary" if selected_division == None}}" href={{ url_for('home.leaderboard', sel_div="all") }}>Show All</a>
+        {% for weight_class in divisions %}
+            <a class="btn buttons-collection {{"bg-info btn-secondary" if weight_class == selected_division}}" href={{ url_for('home.leaderboard', sel_div=weight_class.value) }}>{{ weight_class.value }}</a>
+        {% endfor %}
+    </div>
+
+    <p>
+        <a onclick="prompt('Share the following link:', window.location);" href="#">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-share" viewBox="0 0 16 16">
+                <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+            </svg>
+            Share this view
+        </a>
+    </p>
     {{teams_table}}
+    <i>(Shift-click to order by multiple fields)</i>
 {% endblock %}

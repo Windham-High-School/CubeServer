@@ -5,14 +5,12 @@ ARG CERT_SUBJ
 ARG CERT_SUBJALTNAME
 ARG CERT_EXP_DAYS
 
-# TODO: Make these ENVs more easily configurable and documented ^^
-
 WORKDIR /app
 
 # Helper files:
-COPY Docker/CubeServer-api/gen_ssl_cert.sh /
+COPY Docker/common/gen_ssl_cert.sh /
 RUN chmod +x /gen_ssl_cert.sh
-RUN /gen_ssl_cert.sh ${CERT_SUBJ} ${CERT_SUBJALTNAME} ${CERT_EXP_DAYS}
+#RUN /gen_ssl_cert.sh ${CERT_SUBJ} ${CERT_SUBJALTNAME} ${CERT_EXP_DAYS} server
 
 COPY Docker/CubeServer-api/gunicorn.conf.py /
 

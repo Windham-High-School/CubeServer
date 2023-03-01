@@ -3,14 +3,25 @@
 from enum import Enum, unique
 from typing import Optional, cast
 from secrets import token_urlsafe
-from hmac import HMAC, compare_digest
+from base64 import urlsafe_b64decode, urlsafe_b64encode
+from bcrypt import hashpw, gensalt, checkpw
 from flask_login import UserMixin
+from secrets import token_urlsafe
 
 from cubeserver_common.models.utils import PyMongoModel
+from cubeserver_common.models.mail import Message
+from cubeserver_common.models.config.conf import Conf
 from cubeserver_common import config
 from cubeserver_common import gensecret
 
 __all__ = ['UserLevel', 'User']
+
+
+recent_bad_login_attempts = {}
+
+def clear_bad_attempts():
+    global recent_bad_login_attempts
+    recent_bad_login_attempts.clear()
 
 @unique
 class UserLevel(Enum):
@@ -32,8 +43,6 @@ class UserActivation(Enum):
 class User(PyMongoModel, UserMixin):
     """Models a user"""
 
-    collection = PyMongoModel.mongo.db.users
-
     def __init__(self, name: str = "", level: UserLevel = UserLevel.SUSPENDED,
         email: Optional[str] = None, pwd: bytes = b""):
         """Creates a User object.
@@ -47,6 +56,11 @@ class User(PyMongoModel, UserMixin):
 
         self.name = name
         self.email = email
+        if email is None:
+            self.email = ''
+        # If an email is provided, they will need to verify it:
+        self.verified = self.email is None
+        self._verification_token_raw = token_urlsafe(16)
         self.pwd = pwd
         self.level = level
         self.activated = UserActivation.DEACTIVATED
@@ -64,9 +78,10 @@ class User(PyMongoModel, UserMixin):
 
     @staticmethod
     def _hashpwd(pwd: str) -> bytes:
-        """Runs the known HMAC hash algorithm on the given string."""
-        return HMAC(gensecret.check_secrets().encode(config.ENCODING),
-            msg=pwd.encode(config.ENCODING), digestmod=config.CRYPTO_HASH_ALGORITHM).digest()
+        """Runs the bcrypt hash algorithm on the given string."""
+        return hashpw(pwd.encode('utf-8'), gensalt())
+        #return HMAC(gensecret.check_secrets().encode(config.ENCODING),
+        #    msg=pwd.encode(config.ENCODING), digestmod=config.CRYPTO_HASH_ALGORITHM).digest()
 
     def __str__(self) -> str:
         return (
@@ -88,9 +103,46 @@ class User(PyMongoModel, UserMixin):
 
     def verify_pwd(self, pwd) -> bool:
         """Checks the supplied password against the stored hash"""
-        return compare_digest(self._hashpwd(pwd), self.pwd)
+        result = checkpw(pwd.encode('utf-8'), self.pwd)
+        if not result:
+            if self.name not in recent_bad_login_attempts:
+                recent_bad_login_attempts[self.name] = 0
+            recent_bad_login_attempts[self.name] += 1
+        if self.name in recent_bad_login_attempts and \
+           recent_bad_login_attempts[self.name] > 100:
+            return False
+        return result
+        #return compare_digest(self._hashpwd(pwd), self.pwd)
+
+
+    @property
+    def verification_token(self) -> str:
+        """A bcrypt token for email verification"""
+        # Why use bcrypt for a one-time token?
+        #return urlsafe_b64encode(
+        #    User._hashpwd(self._verification_token_raw)
+        #)
+        return self._verification_token_raw
+
+    def verify(self, token: str) -> bool:
+        """Verifies this user's email, returning True on success"""
+        # Why use bcrypt for a one-time token?
+        #if checkpw(
+        #    urlsafe_b64decode(token),
+        #    self._verification_token_raw.encode('utf-8')
+        #):
+        if token == self._verification_token_raw:
+            self.verified = True
+        return self.verified
 
     @classmethod
     def find_by_username(cls, name):
         """Returns the first known user with that username"""
         return cast(User, super().find_one({"name": name}))
+
+    @classmethod
+    def find_by_email(cls, email):
+        """Returns the first known user with that email"""
+        if len(email) < 1:
+            return None
+        return cast(User, super().find_one({"email": email}))

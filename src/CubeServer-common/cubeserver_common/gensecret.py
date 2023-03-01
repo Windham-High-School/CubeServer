@@ -5,6 +5,7 @@ Command-line flags:
 -f/--force  Forces the replacement of the key
 """
 
+import logging
 from functools import cache
 from secrets import token_hex
 from os.path import exists

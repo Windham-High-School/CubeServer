@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# Prepare for commit
+source ./tools/clean.sh

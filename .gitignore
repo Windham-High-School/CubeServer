@@ -28,3 +28,5 @@ share/python-wheels/
 MANIFEST
 
 .vscode/
+.VSCodeCounter/
+files.exclude

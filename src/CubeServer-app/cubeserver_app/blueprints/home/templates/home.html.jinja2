@@ -2,11 +2,11 @@
 {% block title %}Home{% endblock %}
 
 {% block header %}
-    <h4>{{ config['CONSTANTS'].LONG_TITLE }}</h4>
+    <h4 class="text-light glow">{{ config['CONSTANTS'].LONG_TITLE }}</h4>
 {% endblock %}
 
 {% block content %}
     <p>
-        {{ config['CONSTANTS'].HOME_DESCRIPTION }}
+        {{ config['CONFIGURABLE'].home_description }}
     </p>
 {% endblock %}

@@ -1,5 +1,6 @@
 """Outlines the form used to activate a new user"""
 
+from flask import session
 from flask_wtf import FlaskForm
 from wtforms import EmailField, StringField, PasswordField, SubmitField, ValidationError
 from wtforms.validators import InputRequired, EqualTo, Length, Email
@@ -18,7 +19,7 @@ class UserActivationForm(FlaskForm):
         InputRequired("Please put in some kind of name.")
     ])
     password = PasswordField('Secret Password', validators=[
-        InputRequired("Now, how do you intend to log in without a password?"),
+        InputRequired("Now, how do you intend to be able to log in without a password?"),
         Length(min=5,
             message="What kind of password is fewer than 5 characters long?")
     ])
@@ -28,9 +29,9 @@ class UserActivationForm(FlaskForm):
     ])
     submit = SubmitField('Register!')
 
-    # TODO: Disable this validation when updating an existing user profile:
     @staticmethod
     def validate_username(_, field):
         """Validates the username to ensure that it is unique"""
-        if User.find_by_username(field.data) is not None:
+        if 'username' not in session and \
+           User.find_by_username(field.data) is not None:
             raise ValidationError("That username is already taken.")

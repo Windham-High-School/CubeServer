@@ -1,30 +1,52 @@
 version: '3'
 services:
+
   # Main application container:
   app:
     container_name: ${PROJECT_NAME}-app
+    image: snorklerjoe/cubeserver-app:${VERSION_TAG}
     restart: unless-stopped
     volumes:
       - flask-secret:/secret/
+      - api-ssl-cert:/api_cert/
     build:
       context: .
       dockerfile: Docker/CubeServer-app/Dockerfile
     environment:
-      # MongoDB credentials:
+      # MongoDB credentials stuff:
       - MONGODB_DATABASE=flaskdb
       - MONGODB_USERNAME=flask
       - MONGODB_HOSTNAME=mongodb
       - MONGODB_PASSWORD=${MONGODB_PWD}
+      # Wrapper packaging stuff:
+      - API_WRAPPER_GIT_URL_ARDUINO=${API_WRAPPER_GIT_URL_ARDUINO}
+      - API_WRAPPER_ZIP_FILENAME_ARDUINO=${API_WRAPPER_ZIP_FILENAME_ARDUINO}
+      - API_WRAPPER_GIT_URL_PYTHON=${API_WRAPPER_GIT_URL_PYTHON}
+      - API_WRAPPER_ZIP_FILENAME_PYTHON=${API_WRAPPER_ZIP_FILENAME_PYTHON}
+      - API_WRAPPER_GIT_URL_CIRCUITPYTHON=${API_WRAPPER_GIT_URL_CIRCUITPYTHON}
+      - API_WRAPPER_ZIP_FILENAME_CIRCUITPYTHON=${API_WRAPPER_ZIP_FILENAME_CIRCUITPYTHON}
+      - API_WRAPPER_PEM_FILENAME=${API_WRAPPER_PEM_FILENAME}
+      # Connection stuff:
+      - AP_SSID=${AP_SSID}
+      - API_ADDR=${API_ADDR}
+      - API_ALT_ADDR=${API_ALT_ADDR}
+      - API_PORT=${API_PORT}
+      # Flask stuff:
+      - SERVER_NAME=${DOMAIN}
     ports: # Bind the port for the web server
       - "${WEBAPP_PORT}:80"
     depends_on:
       - mongodb
+      - api
+      - beaconserver
     networks:
       - frontend
       - backend
+
   # API server container:
   api:
     container_name: ${PROJECT_NAME}-api
+    image: snorklerjoe/cubeserver-api:${VERSION_TAG}
     restart: unless-stopped
     volumes:
       - flask-secret:/secret/
@@ -33,7 +55,40 @@ services:
       context: .
       dockerfile: Docker/CubeServer-api/Dockerfile
       args:
-        CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}"
+        CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}/"
+#        CERT_SUBJ: "${API_ADDR}"
+        CERT_SUBJALTNAME: "${API_ALT_ADDR}"
+        CERT_EXP_DAYS: ${API_CERT_EXP_DAYS}
+    environment:
+      # MongoDB credentials:
+      - MONGODB_DATABASE=flaskdb
+      - MONGODB_USERNAME=flask
+      - MONGODB_HOSTNAME=mongodb
+      - MONGODB_PASSWORD=${MONGODB_PWD}
+      # Flask stuff:
+      - SERVER_NAME=${DOMAIN}
+    ports: # Bind the port for the web server
+      - "${API_PORT}:443"
+    depends_on:
+      - mongodb
+      - accesspoint
+    networks:
+      - api
+      - backend
+
+  # Beacon server container:
+  beaconserver:
+    container_name: ${PROJECT_NAME}-beaconserver
+    image: snorklerjoe/cubeserver-beaconserver:${VERSION_TAG}
+    restart: unless-stopped
+    volumes:
+      - api-ssl-cert:/etc/ssl/beacon_cert/
+    build:
+      context: .
+      dockerfile: Docker/CubeServer-beaconserver/Dockerfile
+      args:
+        CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}/"
+#        CERT_SUBJ: "${API_ADDR}"
         CERT_SUBJALTNAME: "${API_ALT_ADDR}"
         CERT_EXP_DAYS: ${API_CERT_EXP_DAYS}
     environment:
@@ -43,17 +98,18 @@ services:
       - MONGODB_HOSTNAME=mongodb
       - MONGODB_PASSWORD=${MONGODB_PWD}
     ports: # Bind the port for the web server
-      - "${API_PORT}:443"
+      - "${BEACON_PORT}:8888"
     depends_on:
       - mongodb
       - accesspoint
     networks:
       - api
       - backend
+
   # Database container:
   mongodb:
     container_name: ${PROJECT_NAME}-mongodb
-    image: mongo:5.0
+    image: mongo:4.4
     volumes: # Corresponds with volume at the bottom
       - mongodb-data:/data/db
     restart: unless-stopped
@@ -66,9 +122,11 @@ services:
       MONDODB_LOG_DIR: /dev/null
     networks:
       - backend
+
   # WiFi Access Point
   accesspoint:
     container_name: ${PROJECT_NAME}-accesspoint
+    image: snorklerjoe/cubeserver-accesspoint:${VERSION_TAG}
     restart: unless-stopped
     build:
       context: .
@@ -78,11 +136,14 @@ services:
       COUNTRY: ${COUNTRY}
       AP_INTERFACE: ${AP_INTERFACE}
       AP_SSID: ${AP_SSID}
+      API_ADDR: ${API_ADDR}
+      API_PORT: ${API_PORT}
       AP_CHANNEL: ${AP_CHANNEL}
       # DHCPD params:
       DHCP_SUBNET: ${DHCP_SUBNET}
       DHCP_NETMASK: ${DHCP_NETMASK}
-      DHCP_RANGE_LOW: ${DHCP_RANGE_HIGH}
+      DHCP_RANGE_LOW: ${DHCP_RANGE_LOW}
+      DHCP_RANGE_HIGH: ${DHCP_RANGE_HIGH}
       DHCP_BROADCAST_ADDR: ${DHCP_BROADCAST_ADDR}
       DHCP_ROUTER_ADDR: ${DHCP_ROUTER_ADDR}
       DHCP_DEFAULT_LEASE_TIME: ${DHCP_DEFAULT_LEASE_TIME}
@@ -92,6 +153,19 @@ services:
     cap_add:
       - NET_ADMIN
     network_mode: host
+
+# IP Camera:
+#  cam:
+#    container_name: ${PROJECT_NAME}-kerberos
+#    image: kerberos/kerberos:latest
+#    restart: unless-stopped
+#    ports:
+#      - 8889:8889
+#      - 81:80
+#    devices:
+#      - ${VIDEO_DEV}
+#    networks:
+#      - frontend
 
 networks:
   frontend:
@@ -110,3 +184,5 @@ volumes:
     driver: local
   api-ssl-cert:
     driver: local
+#  beacon-ssl-cert:
+#    driver: local

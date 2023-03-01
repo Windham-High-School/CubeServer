@@ -4,10 +4,12 @@ from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Any, List, Mapping, Optional, Tuple, Type, cast
 from pydoc import locate
+import warnings
 from bson import ObjectId
+from json import loads
 from bson import _BUILT_IN_TYPES as BSON_TYPES
 from bson.codec_options import TypeCodec, TypeRegistry
-from pymongo import MongoClient
+from pymongo import MongoClient, ASCENDING
 from pymongo.collection import Collection
 
 from .dummycodec import DummyCodec
@@ -74,14 +76,17 @@ class Encodable(_Encoder):
     def decode(cls, value: dict) -> _Encoder:
         """Decodes a dictionary into an Encodable object"""
 
-class PyMongoModel(Encodable):
+class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
+                                #  AutoEncodable superclass that implements
+                                #  encode() and decode() for non-document
+                                #  objects.
     """A class for easy object-mapping to bson.
     Extend this class for any classes that describe a type of document."""
 
     mongo: Optional[MongoClient] = None
 
     @classmethod
-    def update_mongo_client(cls, mongo_client: MongoClient):
+    def update_mongo_client(cls, mongo_client: Optional[MongoClient]):
         """Sets the MongoClient reference in PyMongoModel, which is then
         used by any models that extend this class."""
         cls.mongo = mongo_client
@@ -94,19 +99,29 @@ class PyMongoModel(Encodable):
         return TypeRegistry([EncodableCodec(cls)])
 
     @property
-    @abstractmethod
-    def collection(self) -> Collection:
+    @classmethod
+    def collection(cls) -> Collection:
         """Define the Mongodb collection in your class.
         Use the PyMongoModel.model_type_registry as the type registry."""
+
+    @classmethod
+    def set_collection_name(cls, collection_name: str):
+        """Define the Mongodb collection in your class.
+        Use the PyMongoModel.model_type_registry as the type registry."""
+        try:
+            cls.collection = PyMongoModel.mongo.db.get_collection(collection_name)
+        except AttributeError:
+            pass
 
     def __init_subclass__(cls):
         """Note that subclasses must implement a constructor or a __new__()
         which initializes all attributes with the proper values."""
 
-
         if PyMongoModel.mongo is None:
-            raise AttributeError("Dude, you forgot to initialize PyMongoModel"
-                                "with the MongoClient!")
+            warnings.warn("Buddy, you forgot to initialize PyMongoModel"
+                                "with the MongoClient!\n"
+                                "You can ignore this if it is a part of the"
+                                "Sphinx-api build process.")
 
         cls._ignored: List[str] = [
             "_id",
@@ -122,6 +137,8 @@ class PyMongoModel(Encodable):
         # Registered fields and their corresponding TypeCodecs:
         # (None is an acceptable codec for directly bson-compatible types)
         cls._fields: Mapping[str, Optional[TypeCodec]] = {}
+
+        cls.set_collection_name(cls.__name__.lower())
 
         super().__init_subclass__()
 
@@ -173,10 +190,13 @@ class PyMongoModel(Encodable):
         The value does not need to be specified ONLY IF a custom_codec is
         provided.
         This method returns immediately if a field with the given name is
-        already registered."""
+        already registered.
+        The force parameter allows you to force the registration of a field
+        despite checks failing or the type appearing to be bson-compatible"""
         if attr_name in self._fields:
             return
         codec = custom_codec
+        # TODO: Check recursively for bson compat- there can be dicts of enums for ex
         if codec is None and \
            value is not None and \
            type(value) not in BSON_TYPES and \
@@ -195,7 +215,9 @@ class PyMongoModel(Encodable):
             self.register_codec(codec)
         if codec is None and type(value) in self._codecs:
             codec = self._codecs[type(value)]
-        self._fields[attr_name] = codec
+        if value is not None:  # Also set the value while we're at it:
+            self._setattr_shady(attr_name, value)
+        self._fields[attr_name] = codec  # Register the field!
 
     def encode(self) -> dict:
         """Encodes this into a dictionary for BSON to be happy"""
@@ -272,6 +294,13 @@ class PyMongoModel(Encodable):
         """The internal document identifier"""
         return self._id
 
+    @property
+    def id_secondary(self):
+        """A dummy property; always equal to id
+        Used to have multiple id-driven columns in a Flask-tables table
+        """
+        return self.id
+
     def save(self):
         """Saves this document to the collection"""
         if not self._id:
@@ -297,6 +326,16 @@ class PyMongoModel(Encodable):
         ]
     
     @classmethod
+    def find_sorted(cls, *args, key: str=..., order=ASCENDING, **kwargs):
+        """Same a find(), but with sorting!"""
+        if key is ...:
+            raise ValueError("No sorting key was specified")
+        return [
+                    cls.decode(document)
+                    for document in cls.collection.find(*args, **kwargs).sort(key, order)
+                ]
+
+    @classmethod
     def find_one(cls, *args, **kwargs):
         """Finds a document from the collection
         Arguments are the same as those for PyMongo's find_one()."""
@@ -309,7 +348,13 @@ class PyMongoModel(Encodable):
 
     def set_attr_from_string(self, field_name: str, value: str):
         """Decodes and updates a single string value to the document object"""
-        self._setattr_shady(
-            field_name,
-            self._fields[field_name].transform_bson(value)
-        )
+        if self._fields[field_name] is not None:
+            self._setattr_shady(
+                field_name,
+                self._fields[field_name].transform_bson(value)
+            )
+        else:  # None means the value is already bson-serializable
+            self._setattr_shady(
+                field_name,
+                type(self.__getattribute__(field_name))(value)
+            )

@@ -1,38 +1,79 @@
 {% extends "base.html.jinja2" %}
 {% block title %}Sign-Up{% endblock %}
 
+{% block head %}
+    {{ super() }}
+    {% if not verified %}
+        <meta http-equiv="refresh" content="5" />
+    {% endif %}
+{% endblock %}
+
 {% block header %}
     <h4>Registration Successful.</h4>
 {% endblock %}
 
 {% block content %}
-    <div class="alert alert-info">
-        <h3>Success!</h3>
-        <hr>
-        <h4>Your secret identifier is</h4>
-        <h1 class="alert alert-warning">{{secret}}</h1>
-        <hr>
-        <p>Do <b>NOT</b> lose this-- only an administrator has the access to 
-        check your secret identifier.</p>
-        <p>You will need to put this into your code as described in the 
-        instructions given in the tutorial.</p>
-        <hr>
-        <p>
-            Your team will appear on the leaderboard upon approval by an
-            administrator.
-        </p>
-        <hr>
-        <p><i>What's the point of a secret identifier?</i></p>
-        <p>
-            To ensure that the competition remains fair and trustworthy, 
-            this secret is used by the api to ensure that no other team is 
-            capable of impersonating your data. This eliminates the 
-            possibility of one team attempting to sabotage another by sending 
-            false data, as well as reducing unfair cooperation between teams.
-            The server can then verify that your data is legitimately
-            coming from your microcontroller.
-        </p>
-        <hr>
-        <h2>Good Luck!</h2>
+    <div>
+        {% if not verified %}
+            <h3>Verifying emails...</h3>
+            <div class="alert alert-primary text-danger">
+                <h4>Waiting for email verification...</h4>
+                <p>
+                    You will not be able to continue until <i>every</i> member has verified their email and consented to a role in this team.
+                    If there was a mistake, please contact an administrator.
+                </p>
+            </div>
+        {% else %}
+            <h3>Success!</h3>
+            
+            {{ message }}
+            <hr>
+            <a href={{ url_for('config.index') }}>Click Here to Get Started with Programming!</a>
+            <hr>
+            <a href={{ url_for('team.update') }}>Click here to update your cube's code once it is set up</a>
+            <hr>
+
+            <div class="alert alert-info" style="display: none;">
+            <!-- Good on you if you look at this HTML.
+            Here's some crap from a distant past that I didn't want to throw away so I hid it here: -->
+            <h4>Advanced Information (for advanced programmers):</h4>
+                <h4>Your secret identifier is</h4>
+                <h1 class="alert alert-warning">{{secret}}</h1>
+                <p>Use this in your code</p>
+                <hr>
+                <p>Do <b>NOT</b> lose this-- only an administrator has the access to 
+                check your secret identifier.</p>
+                <p>You will need to put this into your code as described in the 
+                instructions given in the tutorial.</p>
+                <hr>
+                <p>
+                    Your team will appear on the leaderboard upon approval by an
+                    administrator.
+                </p>
+                <hr>
+                <p><i>What's the point of a secret identifier?</i></p>
+                <p>
+                    To ensure that the competition remains fair and trustworthy, 
+                    this secret is used by the api to ensure that no other team is 
+                    capable of impersonating your data. This eliminates the 
+                    possibility of one team attempting to sabotage another by sending 
+                    false data, as well as reducing unfair cooperation between teams.
+                    The server can then verify that your data is legitimately
+                    coming from your microcontroller.
+                </p>
+                <hr>
+                <h2>Good Luck!</h2>
+            {% endif %}
+        </div>
     </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+// Don't need this anymore:
+//    window.addEventListener('beforeunload', (event) => {
+//      event.returnValue = `Select an option or your team will be locked!`;
+//    });
+</script>
 {% endblock %}

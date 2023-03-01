@@ -9,7 +9,7 @@
     - Current Date/time
     - Game info
         - Game start datetime
-        - Current points/strikes
+        - Current points
     - Allowed methods: HEAD, GET, OPTIONS
 
 ## Authorization Scheme:

@@ -5,11 +5,14 @@ from flask_login import login_required, login_user, logout_user, current_user
 from is_safe_url import is_safe_url
 
 from cubeserver_common.config import DEFAULT_ADMIN_USERNAME, DEFAULT_ADMIN_PASSWORD
-from cubeserver_common.models.team import Team, TeamStatus
+from cubeserver_common.models.team import Team, TeamStatus, TeamLevel
 from cubeserver_common.models.user import User, UserLevel
+from cubeserver_common.models.datapoint import DataPoint
+from cubeserver_common.models.config.conf import Conf
 from cubeserver_app.tables.team import LeaderboardTeamTable
 from cubeserver_app.blueprints.home.activation_form import UserActivationForm
 from cubeserver_app.blueprints.home.login_form import LoginForm
+from cubeserver_app.tables.datapoints import LeaderboardDataTable
 
 bp = Blueprint('home', __name__, url_prefix='/', template_folder='templates')
 
@@ -21,18 +24,44 @@ def home():
         return redirect(url_for('admin.admin_home'))
     return render_template('home.html.jinja2')
 
-@bp.route('/stats')
-def leaderboard():
+@bp.route('/stats', defaults={'sel_div': "all"})
+@bp.route('/stats/<sel_div>')
+def leaderboard(sel_div: str = ""):
     """Renders the leaderboard/stats"""
+    # Figure out which division is selected:
+    selected_division = None
+    if sel_div in [l.value for l in TeamLevel]:
+        selected_division = TeamLevel(sel_div)
     # Fetch teams from database and populate a table:
     team_objects = [Team.decode(team) for team in Team.collection.find(
-        {"status": {"$nin":[TeamStatus.UNAPPROVED.value]}}
+        {"status": {"$nin":[TeamStatus.UNAPPROVED.value, TeamStatus.INTERNAL.value]}} \
+            if selected_division is None else \
+                {
+                    "status": {"$nin":[TeamStatus.UNAPPROVED.value, TeamStatus.INTERNAL.value]},
+                    "weight_class": selected_division.value
+                }
     )]
     teams_table = LeaderboardTeamTable(team_objects)
     # Render the template:
     return render_template(
         'leaderboard.html.jinja2',
-        teams_table = teams_table.__html__()
+        teams_table = teams_table.__html__(),
+        divisions = [TeamLevel.JUNIOR_VARSITY, TeamLevel.VARSITY],
+        selected_division = selected_division
+    )
+
+@bp.route('/team/<team_name>')
+def team_info(team_name: str = ""):
+    """A page showing team info & score tally"""
+    # Look-up the team:
+    team = Team.find_by_name(team_name)
+    if team is None:
+        return abort(400)
+    data_table = LeaderboardDataTable(DataPoint.find_by_team(team))
+    return render_template(
+        'team_info.html.jinja2',
+        team=team,
+        table=data_table.__html__()
     )
 
 @bp.route('/activate', methods=['GET', 'POST'])
@@ -48,9 +77,11 @@ def activation():
     # GET variables from the invitation link:
     form = UserActivationForm()
     user = None
+    updating = False
     if current_user and current_user.is_authenticated \
        and current_user.is_active:
         user = current_user
+        updating = True
     else:
         inactive_username = request.args.get('user')
         activation_token = request.args.get('token')
@@ -73,6 +104,9 @@ def activation():
                 session.clear()
             flash('Successfully reset account. Try logging in.')
             return redirect(url_for('home.login'))
+        if updating:
+            form.username.data = user.name
+            form.email.data = user.email
         return render_template(
             'activation_form.html.jinja2',
             form=form

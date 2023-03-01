@@ -11,7 +11,7 @@ with open("cubeserver_app/_version.py", "r", encoding="utf-8") as version_file:
 VERSION: str = __version__
 """Version string"""
 
-AUTHORS: str = "Joseph R. Freeston"
+AUTHORS: str = "Joseph R. Freeston, Greg Kindrat, Heather Brayer, Julia Miller, Ryan Burbo"
 """A comma-separated list of contributors"""
 
 GITHUB_URL: str = "https://github.com/snorklerjoe/CubeServer"
@@ -40,6 +40,7 @@ setup(name='CubeServer-app',
             'Flask-Table>=0.5.0',
             'Flask-Login>=0.6.1',
             'is-safe-url',
-            'CubeServer-common'
+            'CubeServer-common',
+            'Flask-APScheduler>=1.12.4,<2.0'
       ]
      )

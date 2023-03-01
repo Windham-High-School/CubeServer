@@ -5,18 +5,30 @@ This defines values that cannot be set with the Admin panel but are
 "hard-coded" into the software.
 Code regarding values set by the Admin panel can be found in
 app.app.models.config.
-A recompile of the docker container is
+A rebuild of the docker container is
 required to implement changes from this file.
 """
 
 from hashlib import algorithms_available
+import logging
 
 ############################
 # Configuration variables: #
 ############################
 
 
+# Logging:
+
+LOGGING_LEVEL: int = logging.DEBUG
+"""The log level (DEBUG, INFO, WARN, ERROR, FATAL)"""
+
+LOGGING_FORMAT: str = "%(asctime)s : %(levelname)s : %(process)d => %(message)s"
+"""The format for logging stuff, see Python's `logging` library"""
+
+
+
 # Default Credentials:
+
 DEFAULT_ADMIN_USERNAME: str = "admin"
 """This is the default first user"""
 
@@ -26,12 +38,39 @@ This can be changed after the first login."""
 
 
 # User interface stuff:
-CREDITS: str = "Joseph R. Freeston, Ryan Burbo"
-"""The development credits to be shown in the about page
-    (Add your own name here if you contributed!!!) """
 
-DEFAULT_THEME: str = "quartz"
+DEFAULT_THEME: str = "dark"
 """The *default* theme to use (users can change this individually)"""
+
+
+
+# Defaults changable by the admin panel:
+
+DEFAULT_HOME_DESCRIPTION: str = "Thunder. Time. Tech.<br>\nTeams compete with data to win."
+"""A brief description of this whole thing which will appear on the home page
+This can be changed by an admin user at any point during the competition!"""
+
+DEFAULT_REG_CONFIRMATION: str = "Thank you for registering your team!<br>\nGood Luck!"
+"""The screen that is shown when a team's registration is complete"""
+
+DEFAULT_EMAIL_QUOTA: int = 2
+"""The default maximum number of daily emails that can be sent by a team"""
+
+
+
+# Scoring Scheme:
+# For more config, check out the cubeserver_common.scoring package
+#   and cubeserver_common.models.config.rules
+
+
+
+# Emails:
+
+FROM_NAME: str = "The Project CubeServer"
+"""The name with which most emails will be sent"""
+
+FROM_ADDR: str = "noreply@whsproject.club"
+"""The address from which most emails will be sent"""
 
 
 
@@ -40,18 +79,19 @@ DEFAULT_THEME: str = "quartz"
 SHORT_TITLE: str = "CubeServer"
 """A short name that describes this software more than the prize"""
 
-LONG_TITLE: str = "The JagSat Prize"
+LONG_TITLE: str = "The Project"
 """A longer name that describes the prize. This should still be succinct."""
 
-HOME_DESCRIPTION: str = "Thunder. Time. Tech.\nTeams compete with data to win."
-"""A brief description of this whole thing which will appear on the home page"""
+
+
+# Beacon:
+
+DEFAULT_BEACON_POLLING_PERIOD: int = 10
+"""The default period of the BeaconMessage collection polling in seconds"""
 
 
 
 # Teams:
-
-TEAM_MIN_MEMBERS: int = 2
-"""Minimum number of members to make a team"""
 
 TEAM_MAX_CHARS: int = 30
 """Maximum number of characters in a team name"""
@@ -64,15 +104,31 @@ PROFANITY_MESSAGE: str = "Not Funny. \n" \
                          "Profanity is not allowed by the administrator."
 """The message to use if profanity is detected in the user's input"""
 
-TEAM_SECRET_LENGTH: int = 5
-"""Number of characters in the team's secret ID"""
+TEAM_SECRET_LENGTH: int = 16
+"""Number of characters in teams' secret IDs"""
+
+INTERNAL_SECRET_LENGTH: int = 32
+"""Number of characters in internal teams' secret IDs"""
+
+TEAM_MAX_UPDATE_LENGTH: int = 32768  # 32KiB
+"""Maximum length of a team's code update"""
 
 
 
-# Boxes:
+# Internal Teams (for extending api functionality for behind-the-scenes use):
+
+BEACON_TEAM_NAME: str = "CubeServer-beacon"
+"""The name of the "team" for the beacon"""
+
+REFERENCE_TEAM_NAME: str = "CubeServer-reference-{}"
+"""The naming pattern for reference "team"s"""
+
+
+
+# Cubes:
 
 COMMENT_FILTER_PROFANITY: bool = True
-"""Whether to filter profanity from comments posted by the boxes"""
+"""Whether to filter profanity from comments posted by the cubes"""
 
 
 
@@ -115,3 +171,12 @@ assert PASSWORD_HASH_ALGORITHM in algorithms_available, \
     "Selected password hash must be available on this system."
 assert CRYPTO_HASH_ALGORITHM in algorithms_available, \
     "Selected crypto hash must be available on this system."
+
+
+
+########################
+#      Generated       #
+########################
+
+# Contributors (loaded from AUTHORS.yaml):
+CONTRIBUTORS_YAML: str

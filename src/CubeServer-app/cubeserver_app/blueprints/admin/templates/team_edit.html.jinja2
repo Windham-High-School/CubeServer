@@ -1,0 +1,37 @@
+{% extends "base.html.jinja2" %}
+{% block title %}{{team.name}}{% endblock %}
+
+{% block header %}
+    <h3>{{team.name}}-</h3>
+    <p>{{team.status.value}} <b>{{team.weight_class.value}}</b></p>
+    <p class="px-2 alert alert-primary">{{team.members_str}}
+        <a href={{ url_for('admin.email', recipients=emails) }} class="btn">Email this team</a>
+    </p>
+{% endblock %}
+
+{% block content %}
+    <form class="alert w-50" method="POST" action="/admin/multiplier" class="form">
+        <p><b>Multiplier:</b> [Mass {{team.multiplier.mass_mult.__str__()}}]
+        <hr>
+        <b>{{team.multiplier.amount}}</b>
+        </p>
+        {{ mult_form.hidden_tag() }}
+        {{ wtf.form_errors(mult_form, hiddens="only") }}
+
+        {# wtf.form_field(mult_form.cost) #}
+        {# wtf.form_field(mult_form.size) #}
+        {{ wtf.form_field(mult_form.mass) }}
+        {{ wtf.form_field(mult_form.submit) }}
+    </form>
+
+    <h2>Score: {{team.score}}</h2>
+
+    <hr>
+    <h4>Score Tally:</h4>
+    {{table}}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script src="{{ url_for('static', filename='/js/admin.js') }}"></script>
+{% endblock %}

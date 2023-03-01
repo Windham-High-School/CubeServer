@@ -1,0 +1,27 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Beacon Tx{% endblock %}
+
+{% block head %}
+    <meta http-equiv="refresh" content="0;URL='/admin/beacontx'" />
+{{ super() }}
+{% endblock %}
+
+{% block header %}
+    <h4>Transmitting Message...</h4>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <p>
+            Sending the following message:
+        </p>
+        <pre>
+{{ message_bytes_as_str }}
+        </pre>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script src="{{ url_for('static', filename='/js/admin.js') }}"></script>
+{% endblock %}

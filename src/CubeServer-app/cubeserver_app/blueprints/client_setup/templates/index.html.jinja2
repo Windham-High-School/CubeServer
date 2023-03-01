@@ -1,0 +1,81 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Client Configuration{% endblock %}
+
+{% block header %}
+    <h3>Configuring your code</h4>
+{% endblock %}
+
+{% block content %}
+    <h4>Please choose one of the following options-</h5>
+    <p>
+        <i>Click on an option to download the required file(s)</i>
+    </p>
+    <br>
+    <h5>Pre-packaged libraries:</h5>
+    <p>
+        This is the <b>recommended option</b>. Just download the library and everything will be preconfigured to let you send data to the server.
+    </p>
+    {% if "team_name" not in session %}
+        <div class="alert alert-danger">
+            <h3>Your team info has expired from your browsing session!</h3>
+            <p>
+                <b>These plug-'n-play options will not work for you out of the box.</b>
+                <br>
+                Please contact an administrator to delete your records and try registering your team again.
+            </p>
+        </div>
+    {% endif %}
+    <p>
+        No need to worry about fingerprints and "team secrets" and all of that. This option just works.
+    </p>
+
+    <ul>
+        <li>
+            <a href={{ url_for('config.package_circuitpython_lib') }} download><h6>CircuitPython .ZIP Library</h6></a>
+            <p>
+                Choose this option if you are programming with CircuitPython.
+            </p>
+            <p>
+                Extract the contents of this file onto the CIRCUITPY drive to get started.
+                For more info, see the README.md file in the ZIP file.
+            </p>
+        </li>
+        <li>
+            <a href={{ url_for('config.package_arduino_lib') }} download><h6>Arduino .ZIP Library</h6></a>
+            <p>
+                Choose this option if you are programming with the Arduino IDE.
+            </p>
+            <p>
+                Use "Add ZIP Library" from the sketch menu to add this. Also, add the library ArduinoJson, which is a dependency of this library.
+                For more info, see the README.md file in the ZIP file.
+            </p>
+        </li>
+    </ul>
+
+    <hr>
+
+    <h5>Constants files:</h5>
+    <p><i>(For more advanced users)</i></p>
+    <p>
+        This is a file with a few constants specified that allow your code to make your microcontroller communicate with the server properly.
+        You would use these constants manually in your code when initializing the API wrapper library you are using (for which you would use a regular release).
+    </p>
+    <p>
+        Better instructions are coming soon (maybe)!
+    </p>
+
+    <ul>
+        <li>
+            <a href={{ url_for('config.py_file') }} download><h6>Python Constants File</h6></a>
+            <p>
+                Choose this option if you are programming in Python (CircuitPython, Micropython, or regular Python).
+            </p>
+        </li>
+        <li>
+            <a href={{ url_for('config.header_file') }} download><h6>Arduino C/C++ Header File</h6></a>
+            <p>
+                Choose this option if you are programming in Arduino C/C++ (with Arduino IDE or Platformio).
+            </p>
+        </li>
+    </ul>
+{% endblock %}
