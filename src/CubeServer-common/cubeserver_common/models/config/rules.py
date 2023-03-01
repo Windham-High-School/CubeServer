@@ -2,6 +2,7 @@
 
 See app.models.team for more information regarding the game aspect"""
 
+import logging
 from typing import Optional, Mapping, List
 from datetime import datetime
 import json
@@ -172,15 +173,15 @@ class Rules(PyMongoModel):
         try:
             # If they didn't miss the window, give 'em some points:
             window = self.times[team.weight_class][datapoint.category]
-            print(f"Window: {window}")
+            logging.debug(f"Window: {window}")
             if window.follows(datapoint.moment):
                 # Get some reference data:
                 self._score(team, datapoint)
-                print("Window met.")
+                logging.debug("Window met.")
             else:
-                print("Window missed.")
+                logging.debug("Window missed.")
         except KeyError:  # If this type of datapoint doesn't get scored:
-            print("Not a scored data category for this weight class.")
+            logging.debug("Not a scored data category for this weight class.")
             datapoint.rawscore = 0
         
         # Score the datapoint:

@@ -9,5 +9,4 @@ bp = Blueprint('about', __name__, url_prefix='/about', template_folder='template
 @bp.route('/')
 def about():
     """Renders the main about page"""
-    print(AUTHORS)
     return render_template('about.html.jinja2', version=VERSION, license=LICENSE, contributors=AUTHORS, timestamp=TIMESTAMP)

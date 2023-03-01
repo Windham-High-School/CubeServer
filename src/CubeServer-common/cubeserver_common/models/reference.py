@@ -2,6 +2,7 @@
 This is the data that is used to score team data"""
 
 from datetime import datetime
+import logging
 from typing import Mapping, List, Optional
 
 from cubeserver_common.models.datapoint import DataClass, DataPoint
@@ -84,9 +85,9 @@ class ReferenceStation:
     @classmethod
     def get_window_point(cls, window: int) -> ReferencePoint:
         """Returns the most recent reference point in the db if it falls within the time window of now in seconds"""
-        print("Getting a reference point within " + str(window) + " seconds...")
+        logging.debug("Getting a reference point within " + str(window) + " seconds...")
         most_recent = ReferencePoint.find_most_recent()
-        print(most_recent)
+        logging.debug(most_recent)
         elapsed = datetime.now() - most_recent.moment
         if elapsed.total_seconds() <= window:
             return most_recent

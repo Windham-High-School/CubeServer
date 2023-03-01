@@ -35,7 +35,6 @@ class ComplexDictCodec(TypeCodec):
         return dict
 
     def transform_python(self, value: dict):
-        print(value)
         return {
             self.key_codec.transform_python(k): self.value_codec.transform_python(v)
             for k,v in value.items()

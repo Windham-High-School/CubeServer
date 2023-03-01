@@ -31,6 +31,8 @@ class ImmediateBeaconForm(FlaskForm):
 
     @staticmethod
     def validate_intensity(_, field):
+        if field.data is None:
+            raise ValidationError("Bud, you gotta specify some value for the intensity!")
         if 0 <= field.data <= 255:
             return
         raise ValidationError("Intensity must be an 8-bit integer!")
