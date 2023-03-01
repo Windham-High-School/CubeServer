@@ -1,6 +1,7 @@
 """Handles sending emails"""
 
 import smtplib
+import logging
 from email.mime.text import MIMEText
 from datetime import datetime
 from typing import Optional, List
@@ -62,7 +63,7 @@ class Message(PyMongoModel):
             s.sendmail(self.from_addr, self.recipients, self._mimetext.as_string())
             self.sent_at = datetime.now()
         except smtplib.SMTPException:
-            print("we had a little oopsie with the SMTP server...")
+            logging.error("we had a little oopsie with the SMTP server...")
             success = False
         finally:
             s.quit()

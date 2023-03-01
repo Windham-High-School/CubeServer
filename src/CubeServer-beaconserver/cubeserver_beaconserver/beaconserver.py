@@ -13,6 +13,7 @@ The protocol is as follows (B is beacon, S is server):
     ...
 """
 
+import logging
 from errno import EAGAIN
 import time
 from ssl import SSLEOFError
@@ -22,11 +23,10 @@ from .beaconmessage import BeaconStatus, BeaconDestination, BeaconCommand
 
 class BeaconServer:
     """A server for dealing with the server-beacon communications"""
-    def __init__(self, verbose=False, timeout=10, repeat_attempts=10, **kwargs):
+    def __init__(self, timeout=10, repeat_attempts=10, **kwargs):
         self.socketserver = SSLSocketServer(**kwargs)
         self.repeat_attempts = repeat_attempts
         self.sock = None
-        self.v = verbose
         self.timeout = timeout
         self.busy = False
 
@@ -42,8 +42,7 @@ class BeaconServer:
                     if self.busy:  # TODO: Implement this busy-wait with asyncio or something
                         time.sleep(1)
                         continue
-                    if self.v:
-                        print("Sending keepalive...")
+                    logging.debug("Sending keepalive...")
                     self.sock.setblocking(False)
                     self.sock.send(b'Keep-Alive\x00\x00\x00')
                     self.sock.setblocking(True)
@@ -61,31 +60,28 @@ class BeaconServer:
         """Sends a command to the beacon.
         Returns True on success
         """
-        print("\n\n")
-        print("send_cmd", message)
+        logging.debug("\n\n")
+        logging.debug(f"send_cmd {message}")
         self.busy = True
         success = False
         for _ in range(self.repeat_attempts):
-            print("\tANOTHER ATTEMPT TO SEND CMD")
+            logging.debug("\tANOTHER ATTEMPT TO SEND CMD")
             # Send message over:
             self.tx_bytes(message.serialize())
             # Check for ACK:
             response = self.rx_bytes(1)
             if response[0:1] != BeaconStatus.ACK.value:
-                if self.v: print("No ACK; Resending message")
+                logging.debug("No ACK; Resending message")
                 continue
-            if self.v:
-                print("Got beacon ACK")
+            logging.debug("Got beacon ACK")
             # Wait for end of transmission:
             check = self.rx_bytes(2)
-            if self.v:
-                print("Rx'd okay bytes")
-            print(check[0])
-            print(len(message.message) % 255)
+            logging.debug("Rx'd okay bytes")
+            logging.debug(check[0])
+            logging.debug(len(message.message) % 255)
             if check[0] != (len(message.message) % 255):
                 continue
-            if self.v:
-                print("Good length checksum")
+            logging.debug("Good length checksum")
             
             success = True
             break
@@ -99,12 +95,10 @@ class BeaconServer:
 
     def tx_bytes(self, stuff: bytes) -> int:
         """Sends some stuff to the beacon and returns an int return code"""
-        if self.v:
-            print(f"Sending stuff:\n{stuff}")
+        logging.debug(f"Sending stuff:\n{stuff}")
         if self.sock is None:
             return ConnectionError("Connection from the beacon not established")
-        if self.v:
-            print(f"Writing {stuff}")
+        logging.debug(f"Writing {stuff}")
         #while sent < len(stuff):
         #    sent += self.sock.send(stuff[sent:])
         #    if self.v:
@@ -114,8 +108,7 @@ class BeaconServer:
 
     def rx_bytes(self, size: int, chunkby: int = 256) -> bytes:
         """Receives a given number of bytes from the beacon"""
-        if self.v:
-            print(f"Blocking read for {size} bytes...")
+        logging.debug(f"Blocking read for {size} bytes...")
         if self.sock is None:
             return ConnectionError("Connection from the beacon not established")
         self.sock.setblocking(True)
@@ -131,11 +124,9 @@ class BeaconServer:
                     raise
             response += buf
             del buf
-            if self.v:
-                print(f"Received {recvd} bytes")
+            logging.debug(f"Received {recvd} bytes")
             if recvd == 0:
                 del recvd
                 break
-        if self.v:
-            print(f"Received stuff:\n{response}")
+        logging.debug(f"Received stuff:\n{response}")
         return response

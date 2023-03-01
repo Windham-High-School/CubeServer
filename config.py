@@ -10,10 +10,21 @@ required to implement changes from this file.
 """
 
 from hashlib import algorithms_available
+import logging
 
 ############################
 # Configuration variables: #
 ############################
+
+
+# Logging:
+
+LOGGING_LEVEL: int = logging.DEBUG
+"""The log level (DEBUG, INFO, WARN, ERROR, FATAL)"""
+
+LOGGING_FORMAT: str = "%(asctime)s : %(levelname)s : %(process)d => %(message)s"
+"""The format for logging stuff, see Python's `logging` library"""
+
 
 
 # Default Credentials:

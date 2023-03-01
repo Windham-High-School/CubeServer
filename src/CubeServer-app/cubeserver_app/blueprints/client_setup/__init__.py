@@ -1,5 +1,6 @@
 """Flask blueprint managing API client (team) configuration stuff"""
 
+import logging
 from datetime import datetime
 from random import randint
 from subprocess import call
@@ -11,6 +12,7 @@ from flask import Blueprint, render_template, session, make_response
 bp = Blueprint('config', __name__, url_prefix='/setup', template_folder='templates')
 
 
+logging.debug("Loading server API certificates")
 with open("/api_cert/sha1_fingerprint.txt", "r", encoding="utf-8") as fh:
     sha_fingerprint = fh.read()
 with open("/api_cert/sha256_fingerprint.txt", "r", encoding="utf-8") as fh:
@@ -27,11 +29,14 @@ def index():
 @bp.route('/client_config.h')
 def header_file():
     """Renders a configuration header file"""
+    team_name   = session['team_name'] if 'team_name' in session else None
+    team_secret = session['team_secret'] if 'team_secret' in session else None
+    logging.info(f"Rendering client_config.h for {team_name}")
     return render_template(
         'client_config.h.jinja2',
         timestamp=datetime.now().isoformat(),
-        team_name=(session['team_name'] if 'team_name' in session else None),
-        team_secret=(session['team_secret'] if 'team_secret' in session else None),
+        team_name=team_name,
+        team_secret=team_secret,
         server_fingerprint=sha_fingerprint.strip(),
         server_fingerprint_256=sha_fingerprint_256.strip(),
         ssid=environ['AP_SSID'],
@@ -43,11 +48,14 @@ def header_file():
 @bp.route('/client_config.py')
 def py_file():
     """Renders a configuration python file"""
+    team_name   = session['team_name'] if 'team_name' in session else None
+    team_secret = session['team_secret'] if 'team_secret' in session else None
+    logging.info(f"Rendering client_config.py for {team_name}")
     return render_template(
         'client_config.py.jinja2',
         timestamp=datetime.now().isoformat(),
-        team_name=(session['team_name'] if 'team_name' in session else None),
-        team_secret=(session['team_secret'] if 'team_secret' in session else None),
+        team_name=team_name,
+        team_secret=team_secret,
         server_fingerprint=sha_fingerprint.strip(),
         server_fingerprint_256=sha_fingerprint_256.strip(),
         ssid=environ['AP_SSID'],
@@ -61,6 +69,7 @@ def py_file():
 @bp.route('/Arduino_lib.zip')
 def package_arduino_lib():
     """Packages and downloads the Arduino ZIP library"""
+    logging.info(f"Packing Arduino ZIP")
     working_dir = f"/tmp/lib_pack_{str(randint(100,999))}"
     mkdir(working_dir)
     chdir(working_dir)
@@ -91,6 +100,7 @@ def package_arduino_lib():
 @bp.route('/CircuitPython_lib.zip')
 def package_circuitpython_lib():
     """Packages and downloads the CircuitPython ZIP library"""
+    logging.info(f"Packing CircuitPython ZIP")
     working_dir = f"/tmp/lib_pack_{str(randint(100,999))}"
     mkdir(working_dir)
     chdir(working_dir)
@@ -122,6 +132,7 @@ def package_circuitpython_lib():
 def api_cert():
     """Downloads the pem file for the cert of the api
     for server verification purposes"""
+    logging.info("Downloading api_cert.pem")
     response = make_response(pem_cert)
     response.headers.set('Content-Type', 'application/x-pem-file')
     response.headers.set(
