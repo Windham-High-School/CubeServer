@@ -344,8 +344,8 @@ def team_info(team_name: str = ""):
     # Multiplier editing form:
     form = MultiplierForm()
     form.team_id.data = str(team._id)
-    form.size.data = team.multiplier.vol_mult.amt
-    form.cost.data = team.multiplier.cost_mult.amt
+    #form.size.data = team.multiplier.vol_mult.amt
+    #form.cost.data = team.multiplier.cost_mult.amt
     form.mass.data = team.multiplier.mass_mult.amt
     # Render the template
     return render_template(
@@ -371,11 +371,11 @@ def multiplier_change():
         try:
             team = Team.find_by_id(form.team_id.data)
             team.multiplier = Multiplier(
-                CostMultiplier(team.weight_class, form.cost.data),
-                MassMultiplier(team.weight_class, form.mass.data),
-                VolumeMultiplier(team.weight_class,
-                    VolumeUnit(SIZE_NAME_MAPPING[form.size.data])
-                )
+                #CostMultiplier(team.weight_class, form.cost.data),
+                MassMultiplier(team.weight_class, form.mass.data)
+                #VolumeMultiplier(team.weight_class,
+                #    VolumeUnit(SIZE_NAME_MAPPING[form.size.data])
+                #)
             )
             team.save()
         except:

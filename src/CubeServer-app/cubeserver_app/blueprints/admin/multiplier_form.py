@@ -17,8 +17,8 @@ class MultiplierForm(FlaskForm):
     """Defines the form used to enter multiplier information"""
 
     team_id = HiddenField("Team _id")
-    cost   = FloatField('Additional Cost ($)')
-    size   = SelectField(
-        'Size', choices=SIZE_NAME_MAPPING.keys())
+    #cost   = FloatField('Additional Cost ($)')
+    #size   = SelectField(
+    #    'Size', choices=SIZE_NAME_MAPPING.keys())
     mass   = FloatField('Total Mass (g)')
     submit = SubmitField('Save changes')

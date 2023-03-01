@@ -104,43 +104,41 @@ class VolumeMultiplier(IndivMultiplier, amt_codec=EnumCodec(VolumeUnit, int)):
         )
 
 class Multiplier(Encodable):
-    """Describes the total multiplier of a team"""
+    """Describes the total multiplier of a team
+    Created so that multiple multiplier factors may exist."""
 
     def __init__(
         self,
-        cost_mult: CostMultiplier,
-        mass_mult: MassMultiplier,
-        vol_mult: VolumeMultiplier
+        mass_mult: MassMultiplier
     ):
         super().__init__()
-        self.cost_mult = cost_mult
         self.mass_mult = mass_mult
-        self.vol_mult = vol_mult
 
     @property
     def amount(self):
         """Calculates the product multiplier"""
-        product = self.cost_mult.value * self.mass_mult.value * self.vol_mult.value
+        #product = self.cost_mult.value * self.mass_mult.value * self.vol_mult.value
+        product = self.mass_mult.value
         return product
 
     def encode(self) -> dict:
         return {
-            "cost": self.cost_mult.encode(),
-            "mass": self.mass_mult.encode(),
-            "vol":  self.vol_mult.encode()
+            #"cost": self.cost_mult.encode(),
+            "mass": self.mass_mult.encode()
+            #"vol":  self.vol_mult.encode()
         }
 
     @classmethod
     def decode(cls, value: dict):
         mult = cls(
-            CostMultiplier.decode(value['cost']),
-            MassMultiplier.decode(value['mass']),
-            VolumeMultiplier.decode(value['vol'])
+            #CostMultiplier.decode(value['cost']),
+            MassMultiplier.decode(value['mass'])
+            #VolumeMultiplier.decode(value['vol'])
         )
         return mult
 
 DEFAULT_MULTIPLIER = Multiplier(
-            CostMultiplier(TeamLevel.JUNIOR_VARSITY, 0.0),
+#            CostMultiplier(TeamLevel.JUNIOR_VARSITY, 0.0),
             MassMultiplier(TeamLevel.JUNIOR_VARSITY, 0.0),
-            VolumeMultiplier(TeamLevel.JUNIOR_VARSITY, VolumeUnit.M)
+#            VolumeMultiplier(TeamLevel.JUNIOR_VARSITY, VolumeUnit.M)
         )
