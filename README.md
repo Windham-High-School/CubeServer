@@ -21,7 +21,7 @@ A live instance of this may or may not be available at https://whsproject.club/.
 This project uses Semantic Versioning in the format major.minor.patch
 Versions 0.0.0 until 1.0.0 are development releases.
 Version 1.0.0 will be the first production release.
-A new major or minor version may indicate database incompatibility unless otherwise noted, however patch versions should maintain database compatibility.
+A new major or minor version may indicate database incompatibility unless otherwise noted, however patch versions should maintain database compatibility. See [CONTRIBUTING.md](./CONTRIBUTING.md) for more info.
 
 | Version | Notes |
 | ------- | ----- |
