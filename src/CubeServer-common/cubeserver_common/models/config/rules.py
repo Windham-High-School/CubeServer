@@ -108,15 +108,15 @@ class Rules(PyMongoModel):
                 )
             }
         },
-        # absolute error, not % error:
+        # % error expressed as a decimal, no longer absolute error
         accuracy_tolerance: Mapping[TeamLevel, Mapping[DataClass, float]] = {
             TeamLevel.JUNIOR_VARSITY: {
-                DataClass.PRESSURE: 0.2,
-                DataClass.TEMPERATURE: 1.0
+                DataClass.PRESSURE: 0.10,
+                DataClass.TEMPERATURE: 0.10
             },
             TeamLevel.VARSITY: {
-                DataClass.PRESSURE: 0.1,
-                DataClass.TEMPERATURE: 0.5
+                DataClass.PRESSURE: 0.10,
+                DataClass.TEMPERATURE: 0.10
             }
         },
         reference_window: int = 30,
@@ -209,7 +209,8 @@ class Rules(PyMongoModel):
             tol = self.accuracy_tolerance[team, datapoint.category]
             points_possible = self.point_menu[team.weight_class][datapoint.category]
             reference = ReferenceStation.get_window_point(self.reference_window)
-            if abs(reference.of(datapoint.category).value - datapoint.value) <= tol:
+            reference_val = reference.of(datapoint.category).value
+            if abs((reference_val - datapoint.value) / reference_val) <= tol:
                 datapoint.rawscore = points_possible
             else:
                 datapoint.rawscore = 0.0
