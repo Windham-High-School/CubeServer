@@ -60,13 +60,13 @@ class MassMultiplier(IndivMultiplier):
     def __init__(self, level: TeamLevel, mass: float):
         """Calculates the multiplier based on the cube mass as follows:
             For J.V:
-                +0.05 per gram below 400g
+                +0.01 per gram below 400g
             For Varsity:
-                +0.05 per gram below 300g
+                +0.01 per gram below 400g
         """
-        baseline = 400 if (level == TeamLevel.JUNIOR_VARSITY) else 300
+        baseline = 400 #if (level == TeamLevel.JUNIOR_VARSITY) else 400
         super().__init__(
-            0.05*(baseline-mass) if (mass < baseline) else 1.0,
+            0.01*(baseline-mass) if (mass < baseline) else 1.0,
             mass
         )
 
