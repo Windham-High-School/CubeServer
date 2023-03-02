@@ -109,6 +109,10 @@ class TeamHealth(Encodable):
         self.last_score = self.score
         self.score += amt
 
+    def reset(self):
+        """Resets the score to 0"""
+        self.change(-1 * self.score)
+
     def encode(self) -> dict:  # TODO: Replaced by AutoEncodable when written
         return {
             "score": self.score,
@@ -315,6 +319,7 @@ class Team(PyMongoModel):
         This can be risky.
         """
         from cubeserver_common.models.datapoint import DataPoint
-        self.health = TeamHealth(multiplier=self.multiplier.amount)
+        self.health.reset()
         for data in DataPoint.find_by_team(self):
             data.recalculate_score(0)
+        self.save()
