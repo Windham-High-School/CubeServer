@@ -32,8 +32,8 @@ A new major or minor version may indicate database incompatibility unless otherw
 | v0.3.0-alpha | preconfigured library improvements |
 | v0.4.0-beta  | partially functional; basics working |
 | v0.5.0-beta  | **First Deployable Release** |
-| _v1.0.0-beta_  | [Fully-functional Beta Release Milestone](https://github.com/snorklerjoe/CubeServer/milestone/2) |
-| _v1.0.0_  | [Fully-functional Production Release Milestone](https://github.com/snorklerjoe/CubeServer/milestone/3) |
+| _v1.0.0_  | [Version 1.0.0](https://github.com/snorklerjoe/CubeServer/milestone/2) |
+| _v1.?.?_  | [Fully-functional Production Release Milestone](https://github.com/snorklerjoe/CubeServer/milestone/3) |
 
 ## Building/running:
 
