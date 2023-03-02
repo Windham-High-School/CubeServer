@@ -4,7 +4,7 @@ from typing import List
 from flask_table import Table, Col
 
 from cubeserver_common.models.datapoint import DataPoint, DataClass
-from cubeserver_app.tables.columns import OptionsCol, EnumCol
+from cubeserver_app.tables.columns import OptionsCol, EnumCol, TextEditCol
 
 __all__ = ['AdminDataTable', 'LeaderboardDataTable']
 
@@ -20,7 +20,7 @@ class AdminDataTable(Table):
     team_str          = Col('Team')
     category          = EnumCol('Category')
     value_with_unit   = Col('Value')
-    rawscore          = Col('Point Value')
+    rawscore          = TextEditCol('Raw Point Value', model_type="DataPoint")
     score             = Col('Score')
     id                = OptionsCol('Options', model_type="DataPoint")
 

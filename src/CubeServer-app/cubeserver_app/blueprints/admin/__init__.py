@@ -156,7 +156,7 @@ def manual_scoring(teamid, dataclass_str):
         dataclass,
         value
     )
-    if Rules.retrieve_instance().post_data(team, data_point):
+    if Rules.retrieve_instance().post_data(data_point):
         return "OK"
     return abort(500, message="Something went wrong.")
 
@@ -194,6 +194,10 @@ def table_endpoint(table, identifier, field):
     if request.method == 'POST':
         if field == "score_increment" and model_class == Team:
             cast(Team, model_obj).health.change(float(request.form.get('item')))
+        elif field == "score_recomputation" and model_class == Team:
+            cast(Team, model_obj).recompute_score()
+        elif field == "score_recomputation" and model_class == DataPoint:
+            cast(DataPoint, model_obj).recalculate_score()
         else:
             model_obj.set_attr_from_string(field, request.form.get('item'))
         model_obj.save()

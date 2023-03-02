@@ -295,7 +295,7 @@ class Team(PyMongoModel):
             name=config.BEACON_TEAM_NAME,
             weight_class=TeamLevel.REFERENCE,
             status=TeamStatus.INTERNAL,
-            multiplier=Multiplier(0,0,0)
+            multiplier=Multiplier(0)
         )
         beacon.save()
         return beacon
@@ -309,3 +309,12 @@ class Team(PyMongoModel):
                 "name": {"$nin": config.BEACON_TEAM_NAME}
             }
         )
+
+    def recompute_score(self):
+        """Completely recompute the score for this team.
+        This can be risky.
+        """
+        from cubeserver_common.models.datapoint import DataPoint
+        self.health = TeamHealth(multiplier=self.multiplier.amount)
+        for data in DataPoint.find_by_team(self):
+            data.recalculate_score(0)

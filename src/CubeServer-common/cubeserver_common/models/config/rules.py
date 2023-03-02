@@ -169,10 +169,15 @@ class Rules(PyMongoModel):
             )
         )
 
-    def post_data(self, team: Team, datapoint: DataPoint) -> bool:
+    def post_data(self, datapoint: DataPoint, _force: bool = False) -> bool:
         """This is executed whenever a team sends in some data
         If this returns true, it sends an OK response to the client"""
 
+        # Prevent double-dipping on points:
+        if not _force and datapoint.rawscore > 0.0:
+            raise ValueError("This datapoint has already been scored!")
+
+        team = Team.find_by_id(datapoint.team_reference)
         try:
             # If they didn't miss the window, give 'em some points:
             window = self.times[team.weight_class][datapoint.category]
@@ -208,6 +213,7 @@ class Rules(PyMongoModel):
            datapoint.category in DataClass.manual or \
            datapoint.category not in DataClass.measurable:
             return
+        datapoint.multiplier = team.multiplier.amount
         try:
             tol = self.accuracy_tolerance[team, datapoint.category]
             points_possible = self.point_menu[team.weight_class][datapoint.category]
@@ -222,7 +228,7 @@ class Rules(PyMongoModel):
 
     # The initial instance is created in cubeserver_common/__init__.py
     @staticmethod
-    def retrieve_instance() -> PyMongoModel:
+    def retrieve_instance() -> 'Rules':
         """Retrieves the current ruleset"""
         return Rules.find_one({'selected': True})
 
