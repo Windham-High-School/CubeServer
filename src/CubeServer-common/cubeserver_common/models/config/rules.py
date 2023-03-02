@@ -40,10 +40,10 @@ class RegularOccurrence(Encodable):
         """Determines if a given datetime follows this pattern
         (tolerance is in seconds)"""
         seconds_since_hour = moment.minute * 60 + moment.second
-        for offset in self.offsets:
-            if abs(seconds_since_hour - offset) <= self.tolerance:
-                return True
-        return False            
+        return any(
+            (abs(seconds_since_hour - offset) <= self.tolerance)
+            for offset in self.offsets
+        )
 
     def encode(self) -> dict:
         """Encodes an Encodable object into a plain old, bson-able
