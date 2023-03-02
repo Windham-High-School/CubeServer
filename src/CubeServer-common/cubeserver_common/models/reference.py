@@ -1,10 +1,12 @@
 """Handles the reference data
 This is the data that is used to score team data"""
 
+import statistics
 from datetime import datetime
 import logging
 from typing import Mapping, List, Optional
 
+from cubeserver_common.models.team import Team
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 from cubeserver_common.models.utils.modelutils import PyMongoModel
 
@@ -69,6 +71,12 @@ class ReferenceStation:
     def collect(cls) -> ReferencePoint:
         """Collects a reference point and stores it to the database.
         This should be run periodically."""
+        
+        #temps = []
+        #pressures = []
+        #for reference_cube in Team.find_references():
+        #    data = 
+
         ref_pt = ReferencePoint(
             DataPoint(
                 category=DataClass.TEMPERATURE,
@@ -81,6 +89,14 @@ class ReferenceStation:
         )
         ref_pt.save()
         return ref_pt
+    
+    @classmethod
+    def trimmed_mean(cls, values: List[int|float]) -> float:
+        """Calculates a trimmed mean (of sorts) of a set of values.
+        The furthest from the median is trimmed, and the average of remaining values is returned.
+        """
+        median = statistics.median(values)
+        return sum(values) - max(value - median for value in values) + median
 
     @classmethod
     def get_window_point(cls, window: int) -> ReferencePoint:
