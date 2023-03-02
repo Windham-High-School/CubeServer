@@ -1,5 +1,6 @@
 """Models teams of participants"""
 
+import logging
 from enum import Enum, unique
 from typing import List, Optional, Any
 from math import ceil
@@ -108,6 +109,12 @@ class TeamHealth(Encodable):
         """Changes the score by a given amount"""
         self.last_score = self.score
         self.score += amt
+        logging.debug(f"Set score from {self.last_score} to {self.score}")
+
+    def reset(self):
+        """Resets the score to 0"""
+        logging.debug("Resetting score")
+        self.change(-1 * self.score)
 
     def encode(self) -> dict:  # TODO: Replaced by AutoEncodable when written
         return {
@@ -295,7 +302,7 @@ class Team(PyMongoModel):
             name=config.BEACON_TEAM_NAME,
             weight_class=TeamLevel.REFERENCE,
             status=TeamStatus.INTERNAL,
-            multiplier=Multiplier(0,0,0)
+            multiplier=DEFAULT_MULTIPLIER
         )
         beacon.save()
         return beacon
@@ -309,3 +316,14 @@ class Team(PyMongoModel):
                 "name": {"$nin": config.BEACON_TEAM_NAME}
             }
         )
+
+    def recompute_score(self):
+        """Completely recompute the score for this team.
+        This can be risky.
+        """
+        from cubeserver_common.models.datapoint import DataPoint
+        logging.debug(f"Re-evaluating team score.")
+        self.health.reset()
+        self.save()
+        for data in DataPoint.find_by_team(self):
+            data.recalculate_score(0)

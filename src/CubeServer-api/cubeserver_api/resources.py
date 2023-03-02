@@ -58,7 +58,7 @@ class Data(Resource):
         )
         logging.debug(f"DataPoint object: {point}")
         logging.info("Posting data")
-        if Rules.retrieve_instance().post_data(team, point):
+        if Rules.retrieve_instance().post_data(point):
             logging.info("Success!")
             return request.form, 201
         logging.info("Something happened suboptimally.")

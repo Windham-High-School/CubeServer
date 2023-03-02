@@ -1,7 +1,8 @@
 """Defines & registers the error handlers for this application"""
 
 import logging
-from flask import render_template
+from random import randint
+from flask import render_template, flash
 
 from cubeserver_app import app
 
@@ -27,9 +28,13 @@ def forbidden(_):
 
 
 @app.errorhandler(500)
-def server_error(_, message=""):
+def server_error(e, message=""):
     """500 handler"""
+    reference = randint(10000, 99999)  # A reference number with which to grep the logs
+    logging.error(f"ERROR 500: Internal server error: {e}")
+    logging.error(f"REFERENCE #{reference}")
     logging.info(f"Rendering ERROR 500: {message}")
+    flash(f"Your reference number is #{reference}")
     return render_template('errorpages/500.html.jinja2', message=message), 500
 
 

@@ -40,10 +40,13 @@ class RegularOccurrence(Encodable):
         """Determines if a given datetime follows this pattern
         (tolerance is in seconds)"""
         seconds_since_hour = moment.minute * 60 + moment.second
-        for offset in self.offsets:
-            if abs(seconds_since_hour - offset) <= self.tolerance:
-                return True
-        return False            
+        return any(
+            (abs(seconds_since_hour - offset) <= self.tolerance)
+            for offset in self.offsets
+        ) or any(
+            (abs((seconds_since_hour - 60) - offset) <= self.tolerance)
+            for offset in self.offsets
+        )
 
     def encode(self) -> dict:
         """Encodes an Encodable object into a plain old, bson-able
@@ -166,23 +169,37 @@ class Rules(PyMongoModel):
             )
         )
 
-    def post_data(self, team: Team, datapoint: DataPoint) -> bool:
+    def post_data(self, datapoint: DataPoint, _force: bool = False) -> bool:
         """This is executed whenever a team sends in some data
         If this returns true, it sends an OK response to the client"""
 
-        try:
-            # If they didn't miss the window, give 'em some points:
-            window = self.times[team.weight_class][datapoint.category]
-            logging.debug(f"Window: {window}")
-            if window.follows(datapoint.moment):
-                # Get some reference data:
-                self._score(team, datapoint)
-                logging.debug("Window met.")
+        # Prevent double-dipping on points:
+        if not _force and datapoint.rawscore > 0.0:
+            raise ValueError("This datapoint has already been scored!")
+
+        team = Team.find_by_id(datapoint.team_reference)
+
+        # TODO: Make this more Pythonic
+        if datapoint.category in DataClass.manual \
+           and datapoint.category in DataClass.measurable:
+            if bool(datapoint.value):
+                datapoint.rawscore = self.point_menu[team.weight_class][datapoint.category]
             else:
-                logging.debug("Window missed.")
-        except KeyError:  # If this type of datapoint doesn't get scored:
-            logging.debug("Not a scored data category for this weight class.")
-            datapoint.rawscore = 0
+                datapoint.rawscore = 0.0
+        else:
+            try:
+                # If they didn't miss the window, give 'em some points:
+                window = self.times[team.weight_class][datapoint.category]
+                logging.debug(f"Window: {window}")
+                if window.follows(datapoint.moment):
+                    # Get some reference data:
+                    self._score(team, datapoint)
+                    logging.debug("Window met.")
+                else:
+                    logging.debug("Window missed.")
+            except KeyError:  # If this type of datapoint doesn't get scored:
+                logging.debug("Not a scored data category for this weight class.")
+                datapoint.rawscore = 0
         
         # Score the datapoint:
         team.health.change(datapoint.score)
@@ -205,6 +222,7 @@ class Rules(PyMongoModel):
            datapoint.category in DataClass.manual or \
            datapoint.category not in DataClass.measurable:
             return
+        datapoint.multiplier = team.multiplier.amount
         try:
             tol = self.accuracy_tolerance[team, datapoint.category]
             points_possible = self.point_menu[team.weight_class][datapoint.category]
@@ -219,7 +237,7 @@ class Rules(PyMongoModel):
 
     # The initial instance is created in cubeserver_common/__init__.py
     @staticmethod
-    def retrieve_instance() -> PyMongoModel:
+    def retrieve_instance() -> 'Rules':
         """Retrieves the current ruleset"""
         return Rules.find_one({'selected': True})
 
