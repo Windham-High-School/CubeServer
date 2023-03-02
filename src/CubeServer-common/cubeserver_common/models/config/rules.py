@@ -178,19 +178,28 @@ class Rules(PyMongoModel):
             raise ValueError("This datapoint has already been scored!")
 
         team = Team.find_by_id(datapoint.team_reference)
-        try:
-            # If they didn't miss the window, give 'em some points:
-            window = self.times[team.weight_class][datapoint.category]
-            logging.debug(f"Window: {window}")
-            if window.follows(datapoint.moment):
-                # Get some reference data:
-                self._score(team, datapoint)
-                logging.debug("Window met.")
+
+        # TODO: Make this more Pythonic
+        if datapoint.category in DataClass.manual \
+           and datapoint.category in DataClass.measurable:
+            if bool(datapoint.value):
+                datapoint.rawscore = self.point_menu[team.weight_class][datapoint.category]
             else:
-                logging.debug("Window missed.")
-        except KeyError:  # If this type of datapoint doesn't get scored:
-            logging.debug("Not a scored data category for this weight class.")
-            datapoint.rawscore = 0
+                datapoint.rawscore = 0.0
+        else:
+            try:
+                # If they didn't miss the window, give 'em some points:
+                window = self.times[team.weight_class][datapoint.category]
+                logging.debug(f"Window: {window}")
+                if window.follows(datapoint.moment):
+                    # Get some reference data:
+                    self._score(team, datapoint)
+                    logging.debug("Window met.")
+                else:
+                    logging.debug("Window missed.")
+            except KeyError:  # If this type of datapoint doesn't get scored:
+                logging.debug("Not a scored data category for this weight class.")
+                datapoint.rawscore = 0
         
         # Score the datapoint:
         team.health.change(datapoint.score)
