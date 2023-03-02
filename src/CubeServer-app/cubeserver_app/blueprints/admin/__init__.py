@@ -196,8 +196,10 @@ def table_endpoint(table, identifier, field):
             cast(Team, model_obj).health.change(float(request.form.get('item')))
         elif field == "score_recomputation" and model_class == Team:
             cast(Team, model_obj).recompute_score()
+            return render_template('redirect_back.html.jinja2')
         elif field == "score_recomputation" and model_class == DataPoint:
             cast(DataPoint, model_obj).recalculate_score()
+            return render_template('redirect_back.html.jinja2')
         else:
             if field == "rawscore" and model_class == DataPoint:  # Manually setting dp point value
                 team = Team.find_by_id(cast(DataPoint, model_obj).team_reference)
@@ -207,7 +209,7 @@ def table_endpoint(table, identifier, field):
             model_obj.set_attr_from_string(field, request.form.get('item'))
 
             if field == "rawscore" and model_class == DataPoint:  # Manually setting dp point value
-                team.health.change(cast(DataPoint, model_obj).rawscore - init_rawscore)
+                team.health.change(cast(DataPoint, model_obj).multiplier * (cast(DataPoint, model_obj).rawscore - init_rawscore))
                 team.save()
         model_obj.save()
         return render_template('redirect_back.html.jinja2')

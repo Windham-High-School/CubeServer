@@ -88,7 +88,10 @@ class DataPoint(PyMongoModel):
             self.moment = datetime.now()
         self.is_reference = is_reference
         self.rawscore = 0.0
-        self.multiplier = 1.0
+    
+    @property
+    def multiplier(self) -> float:
+        return Team.find_by_id(self.team_reference).multiplier.amount
 
     @property
     def value_with_unit(self):
@@ -126,5 +129,3 @@ class DataPoint(PyMongoModel):
             team.health.change(-1 * _init_contrib_score)
         team.save()
         Rules.retrieve_instance().post_data(self, _force=True)
-        self.save()
-        

@@ -340,6 +340,10 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
         """Finds a document from the collection
         Arguments are the same as those for PyMongo's find_one()."""
         return cls.decode(cls.collection.find_one(*args, **kwargs))
+    
+    def find_self(self):
+        """Returns the database's version of self"""
+        return self.find_by_id(self.id)
 
     @classmethod
     def find_by_id(cls, identifier):
@@ -358,3 +362,7 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
                 field_name,
                 type(self.__getattribute__(field_name))(value)
             )
+
+    @classmethod
+    def find_safe(cls, *args, **kwargs):
+        return cls.collection.find(*args, **kwargs)
