@@ -230,7 +230,7 @@ class TextEditCol(Col):
         attr_name = attr_list[0]
         return _render_form(
             form_instance,
-            action=f"table_endpoint/{self.model_type}/{identifier}/{attr_name}",
+            action=f"/admin/table_endpoint/{self.model_type}/{identifier}/{attr_name}",
         )
 
     def td_contents(self, item, attr_list):
@@ -287,6 +287,11 @@ class OptionsCol(HTMLCol):
                         f"onclick=\"verify('{self.model_type}', '{{{{id}}}}')\" "
                         "class=\"btn btn-info\">Force Verify</button>\n"
                     ) if self.model_type == "User" else "")
+                    +((
+                        "<button title=\"Force-recompute the score value\" "
+                        f"onclick=\"recompute_score('{self.model_type}', '{{{{id}}}}')\" "
+                        "class=\"btn btn-warning\">Rescore</button>\n"
+                    ) if self.model_type == "DataPoint" else "")
                 ) +
                 "</div>\n"
             ),

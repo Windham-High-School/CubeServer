@@ -4,7 +4,7 @@
 {% block header %}
     <h3>{{team.name}}-</h3>
     <p>{{team.status.value}} <b>{{team.weight_class.value}}</b></p>
-    <p class="px-2 alert alert-primary">{{team.members_str}}
+    <p class="px-2 border border-info">{{team.members_str}}
         <a href={{ url_for('admin.email', recipients=emails) }} class="btn">Email this team</a>
     </p>
 {% endblock %}
@@ -14,6 +14,11 @@
         <p><b>Multiplier:</b> [Mass {{team.multiplier.mass_mult.__str__()}}]
         <hr>
         <b>{{team.multiplier.amount}}</b>
+        </p>
+        <p class="alert border border-danger">
+            Note that changing the multiplier will only affect future datapoints.<br>
+            Manually re-evaluating prior datapoints after changing this may result in a <b>compromised</b> team score.<br>
+            Such an issue may <b>only</b> be remedied via a full-recomputation of the team's score.
         </p>
         {{ mult_form.hidden_tag() }}
         {{ wtf.form_errors(mult_form, hiddens="only") }}
@@ -25,6 +30,7 @@
     </form>
 
     <h2>Score: {{team.score}}</h2>
+    <button class="btn btn-danger bg-warning" onclick="recompute_score('Team', '{{ team.id }}')">Force-Recompute Score</button>
 
     <hr>
     <h4>Score Tally:</h4>

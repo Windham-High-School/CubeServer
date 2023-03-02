@@ -4,7 +4,7 @@
  */
 
 
-// TODO: Rewrite to have less repetition:
+// TODO: Rewrite to have less repeated code:
 
 // For restoring scroll position after changes:
 document.addEventListener("DOMContentLoaded", function(event) { 
@@ -32,6 +32,37 @@ Are you ABSOLUTELY CERTAIN?`;
             },
             fail: function(result) {
                 alert("Uh... There was an issue...\nIt probably didn't work");
+                localStorage.setItem('scrollpos', window.scrollY);
+                location.reload();
+            }
+        });
+    } else {
+        alert("Action Canceled.");
+    }
+}
+
+function recompute_score(item, id) {
+    // TODO: Replace confirm() and alert() with a nice-looking Bootstrap modal
+    var confirmationMessage = `Are you certain you wish to RECOMPUTE team #${id}'s score?\n
+All datapoints will be re-evaluated under the current scoring rules and multiplier.\n
+All manual score increments will be lost.\n
+This action is PERMANANT and CANNOT BE UNDONE!` ? (item == "Team") : `Are you certain you wish to RECOMPUTE datapoint #${id}'s score contribution?\n
+This datapoint will be re-evaluated under the current scoring rules and multiplier.\n
+This action is PERMANANT and CANNOT BE UNDONE!`;
+//var comment = prompt("Please comment on this change.");  // TODO: Add comment in case of deleted objects also
+    var secondConfirmationMessage = `FINAL CHANCE-- There's no going back after this!\n
+Are you ABSOLUTELY CERTAIN?`;
+    if (confirm(confirmationMessage) && confirm(secondConfirmationMessage)) {
+        $.ajax({  // TODO: Generate these URLs better so stuff is less likely to break:
+            url: `/admin/table_endpoint/${item}/${id}/score_recomputation`,
+            type: 'POST',
+            success: function(result) {
+                alert("Score recomputed.");
+                localStorage.setItem('scrollpos', window.scrollY);
+                location.reload();
+            },
+            fail: function(result) {
+                alert("Uh... There was an issue...\nIt probably didn't work...\n:/");
                 localStorage.setItem('scrollpos', window.scrollY);
                 location.reload();
             }

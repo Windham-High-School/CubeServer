@@ -1,5 +1,6 @@
 """Models users, teams, and privilege data"""
 
+import logging
 from enum import Enum, unique
 from typing import Any, Optional
 from datetime import datetime
@@ -66,9 +67,9 @@ class DataClass(Enum):
 class DataPoint(PyMongoModel):
     """Models a datapoint"""
 
-    def __init__(self, team_identifier: Optional[ObjectId] = None,
-                 category: Optional[DataClass] = DataClass.COMMENT,
-                 value: Optional[Any] = None,
+    def __init__(self, team_identifier: ObjectId = ObjectId(),
+                 category: DataClass = DataClass.COMMENT,
+                 value: Any = "",
                  date: Optional[datetime] = None,
                  is_reference: bool = False):
         """Creates a DataPoint object from a category and value
@@ -98,7 +99,7 @@ class DataPoint(PyMongoModel):
         return self.value_with_unit
 
     @classmethod
-    def find_by_team(cls, team):
+    def find_by_team(cls, team: 'Team'):
         """Returns a list of datapoints by a team"""
         return cls.find({'team_reference': ObjectId(team.id)})
 
@@ -113,3 +114,14 @@ class DataPoint(PyMongoModel):
     @property
     def score(self):
         return self.rawscore * self.multiplier
+
+    def recalculate_score(self, _init_contrib_score: Optional[float | int] = ...):
+        from cubeserver_common.models.config.rules import Rules
+        logging.debug("Recalculating points...")
+        logging.debug(f"Original rawscore: {self.rawscore}")
+        team: Team = Team.find_by_id(self.team_reference)
+        if _init_contrib_score is ...:
+            team.health.change(-1 * self.score)
+        else:
+            team.health.change(-1 * _init_contrib_score)
+        Rules.retrieve_instance().post_data(self, _force=True)
