@@ -43,12 +43,10 @@ Are you ABSOLUTELY CERTAIN?`;
 
 function recompute_score(item, id) {
     // TODO: Replace confirm() and alert() with a nice-looking Bootstrap modal
-    var confirmationMessage = `Are you certain you wish to RECOMPUTE team #${id}'s score?\n
-All datapoints will be re-evaluated under the current scoring rules and multiplier.\n
-All manual score increments will be lost.\n
-This action is PERMANANT and CANNOT BE UNDONE!` ? (item == "Team") : `Are you certain you wish to RECOMPUTE datapoint #${id}'s score contribution?\n
-This datapoint will be re-evaluated under the current scoring rules and multiplier.\n
-This action is PERMANANT and CANNOT BE UNDONE!`;
+    var confirmationMessage = `Are you certain you wish to RECOMPUTE object #${id}'s score?\n
+All/the datapoint(s) will be re-evaluated under the current scoring rules and multiplier.\n
+All manual score increments on this object will be lost.\n
+This action is PERMANANT and CANNOT BE UNDONE!`
 //var comment = prompt("Please comment on this change.");  // TODO: Add comment in case of deleted objects also
     var secondConfirmationMessage = `FINAL CHANCE-- There's no going back after this!\n
 Are you ABSOLUTELY CERTAIN?`;
