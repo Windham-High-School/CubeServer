@@ -11,7 +11,7 @@ with open("cubeserver_app/_version.py", "r", encoding="utf-8") as version_file:
 VERSION: str = __version__
 """Version string"""
 
-AUTHORS: str = "Joseph R. Freeston, Greg Kindrat, Heather Brayer, Julia Miller, Ryan Burbo"
+AUTHORS: str = "Original Architect: Joseph R. Freeston. Maintained by The CubeServer Authors"
 """A comma-separated list of contributors"""
 
 GITHUB_URL: str = "https://github.com/snorklerjoe/CubeServer"

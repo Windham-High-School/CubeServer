@@ -45,6 +45,9 @@ class Data(Resource):
         if data_str is None:
             data_str = loads(request.form['data'])
         data_class = DataClass(data_str['type'])
+        if not Conf.retrieve_instance().competition_on and data_class in DataClass.measurable:
+            logging.info("Data submission rejected; competition is not running.")
+            return request.form, 423
         if data_class in DataClass.manual:
             logging.debug("Manually-determined- Rejecting")
             return request.form, 400  # If this should be manually-determined..
