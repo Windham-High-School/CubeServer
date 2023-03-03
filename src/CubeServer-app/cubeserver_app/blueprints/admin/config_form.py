@@ -1,8 +1,10 @@
 """Outlines the form used to change basic configuration"""
 
+from markupsafe import Markup
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, BooleanField, IntegerField
 from wtforms.validators import DataRequired, NumberRange
+from wtforms.widgets.core import html_params, escape
 from wtforms.widgets import TextArea
 
 from cubeserver_common.models.config.conf import Conf
@@ -11,6 +13,7 @@ class ConfigurationForm(FlaskForm):
     """Defines the form used to register a new user
     from the admin panel"""
 
+    competition_on = BooleanField("Competition begun?")
     registration_open = BooleanField("Team registration open?")
     notify_teams = BooleanField("Notify teams of changes to their status/score/etc?")
     email_domain = StringField("Forced Email Domain")
