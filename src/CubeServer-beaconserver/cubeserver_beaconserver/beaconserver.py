@@ -56,7 +56,7 @@ class BeaconServer:
             # Socket is closed upon this method's return
             return
 
-    def send_cmd(self, message: BeaconCommand) -> True:
+    def send_cmd(self, message: BeaconCommand) -> bool:
         """Sends a command to the beacon.
         Returns True on success
         """

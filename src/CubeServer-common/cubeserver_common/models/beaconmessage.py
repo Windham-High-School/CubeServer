@@ -1,6 +1,7 @@
 """Handling messages sent and to be sent by the beacon
 """
 
+import logging
 from enum import Enum, unique
 from typing import Optional, Union, Mapping
 from datetime import datetime
@@ -21,6 +22,15 @@ class OutputDestination(Enum):
     """IR or RED"""
     IR  = "Infrared"
     RED = "Visible"
+
+@unique
+class SentStatus(Enum):
+    """Updated by the beacon server"""
+    QUEUED      = "Queued"
+    SCHEDULED   = "Scheduled"
+    TRANSMITTED = "Transmitted"
+    MISSED      = "Missed"
+    FAILED      = "Failed"
 
 @unique
 class BeaconMessageEncoding(Enum):
@@ -92,7 +102,8 @@ class BeaconMessage(PyMongoModel):
         destination: OutputDestination = OutputDestination.IR,
         intensity: int = 255,
         past: bool = False,
-        misfire_grace: int = 30
+        misfire_grace: int = 30,
+        status: Optional[SentStatus] = None
     ):
         """
         Args:
@@ -125,7 +136,23 @@ class BeaconMessage(PyMongoModel):
 
         self.full_message_bytes_stored = self.full_message_bytes
 
+        self.status = status
+        if self.status is None:
+            self.set_untransmitted()
+
         #self.register_field('full_message_bytes_stored', self.full_message_bytes)
+
+    def set_untransmitted(self):
+        """Automatically determines if this message has been missed"""
+        logging.debug("Setting message as untransmitted...")
+        self.status = SentStatus.MISSED \
+                        if (
+                            datetime.now() > self.send_at and
+                            (datetime.now()-self.send_at).seconds > self.misfire_grace
+                        ) \
+                            else SentStatus.QUEUED
+        logging.debug(f"+Now: {datetime.now()}; Scheduled for: {self.send_at}")
+        logging.debug(f"+-> Status: {self.status}")
 
     @property
     def message_bytes(self) -> bytes:
@@ -184,17 +211,11 @@ class BeaconMessage(PyMongoModel):
             sum += int(byte) ^ (i*8)
         return sum % 255
 
-    @classmethod
-    def find_unsent(cls):
-        """Returns all yet-unsent beacon packets"""
-        return cls.find({'past': False})
-
     @property
     def str_status(self):
-        if self.past:
-            return "Transmitted"
-        if (
-            datetime.now().timestamp() - self.send_at.timestamp()
-        ) > self.misfire_grace:
-            return "Missed"
-        return "Queued"
+        return self.status.value
+
+    @classmethod
+    def find_by_status(cls, status: SentStatus) -> 'BeaconMessage':
+        """Returns all messages that have a given status"""
+        return cls.find({'status': status.value})
