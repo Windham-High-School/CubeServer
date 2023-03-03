@@ -29,7 +29,8 @@ class Conf(PyMongoModel):
         team_email_quota: int = DEFAULT_EMAIL_QUOTA,
         quota_reset_hour: int = 10,
         banner_message: str = "",
-        beacon_polling_period: int = DEFAULT_BEACON_POLLING_PERIOD
+        beacon_polling_period: int = DEFAULT_BEACON_POLLING_PERIOD,
+        competition_on: bool = False
     ):
         super().__init__()
         self.notify_teams = notify_teams
@@ -44,6 +45,7 @@ class Conf(PyMongoModel):
         self.quota_reset_hour = quota_reset_hour
         self.banner_message = banner_message,
         self.beacon_polling_period = beacon_polling_period
+        self.competition_on = competition_on
 
     # The initial instance is created in cubeserver_common/__init__.py
     @staticmethod
