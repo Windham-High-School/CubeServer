@@ -81,6 +81,10 @@
                 <form method="POST" action="configchange" class="form">
                     {{ config_form.hidden_tag() }}
                     <h4>General Settings:</h4>
+                    <div class="form-group">
+                        {{ config_form.competition_on.label }}
+                        {{ config_form.competition_on(class_="form-control") }}
+                    </div>
                     {{ wtf.form_field(config_form.registration_open) }}
                     {{ wtf.form_field(config_form.notify_teams) }}
                     {{ wtf.form_field(config_form.banner_message) }}

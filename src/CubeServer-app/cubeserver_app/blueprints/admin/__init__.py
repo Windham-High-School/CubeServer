@@ -76,6 +76,7 @@ def admin_home():
     # Populate configuration form:
     conf_form = ConfigurationForm()
     db_conf = Conf.retrieve_instance()
+    conf_form.competition_on.data = db_conf.competition_on
     conf_form.registration_open.data = db_conf.registration_open
     conf_form.home_description.data = db_conf.home_description
     conf_form.smtp_credentials.data = f"{db_conf.smtp_user}:{db_conf.smtp_pass}"
@@ -255,6 +256,7 @@ def conf_change():
     if form.validate_on_submit():
         # Update database from form:
         db_conf: Conf = Conf.retrieve_instance()
+        db_conf.competition_on = form.competition_on.data
         db_conf.registration_open = form.registration_open.data
         db_conf.home_description = form.home_description.data
         db_conf.smtp_server = form.smtp_server.data
