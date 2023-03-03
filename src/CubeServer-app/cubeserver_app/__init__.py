@@ -12,6 +12,7 @@ from flask_apscheduler import APScheduler
 from cubeserver_common import config, init_logging, configure_db
 from cubeserver_common.models import PyMongoModel
 from cubeserver_common.gensecret import check_secrets
+from cubeserver_common.config import LOGGING_LEVEL
 
 from ._version import *
 
@@ -58,6 +59,9 @@ else:
 
     logging.debug("Initializing APScheduler")
     scheduler = APScheduler()
+    # Make APScheduler a little quieter:
+    logging.getLogger('apscheduler.executors.default').setLevel(LOGGING_LEVEL + 10)
+
     scheduler.add_job(func=_update_conf, args=[app], trigger='interval', id='configsync', seconds=30)
     scheduler.add_job(func=clear_bad_attempts, trigger='interval', id='clearbadattempts', seconds=30)
     scheduler.start()
