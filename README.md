@@ -81,11 +81,15 @@ Containers are built on Docker Hub for arm64 and amd64 linux (moving forward)
 docker buildx bake -f docker-compose.yml -f .env --set *.platform=linux/arm64,linux/amd64
 ```
 
-Thus, the latest version can also be installed for arm64 ([**Only ARMv8.2A or later!**](https://www.mongodb.com/docs/manual/administration/production-notes/#arm64)) and amd64:
+Thus, the latest version can also be installed for arm64 and amd64:
 ```bash
 ./configure
 docker compose pull
 ```
+
+_Note:_ This relies upon MongoDB, which no longer officially supports binaries for ARM architectures below 8.2.
+Thus, for arm64v8 systems, a [community build of MongoDB](https://hub.docker.com/r/arm64v8/mongo) is substituted.
+See #60 for more information
 
 ## Topology & Docker Containers
 CubeServer is built upon the containerization platform Docker. As described in docker-compose.yml, CubeServer is essentially comprised of the following parts as Docker containers:

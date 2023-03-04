@@ -113,7 +113,7 @@ services:
   # Database container:
   mongodb:
     container_name: ${PROJECT_NAME}-mongodb
-    image: mongo:4.4
+    image: ${MONGO_CONTAINER}:4.4
     volumes: # Corresponds with volume at the bottom
       - mongodb-data:/data/db
     restart: unless-stopped
