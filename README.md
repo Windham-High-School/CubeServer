@@ -35,6 +35,13 @@ A new major or minor version may indicate database incompatibility unless otherw
 | _v1.0.0_  | [Version 1.0.0](https://github.com/snorklerjoe/CubeServer/milestone/2) |
 | _v1.?.?_  | [Fully-functional Production Release Milestone](https://github.com/snorklerjoe/CubeServer/milestone/3) |
 
+
+### Version suffices
+| Ending | Meaning |
+| ------ | ------- |
+| -dev   | Tracks the development of that release |
+| -beta  | Prerelease version |
+
 ## Building/running:
 
 ### The Easy Way-
