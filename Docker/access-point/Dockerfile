@@ -1,7 +1,9 @@
-FROM alpine
+FROM alpine:3.17
+# See https://hub.docker.com/_/alpine/tags for the latest versions
 
 # Install required packages:
 RUN apk update && apk add hostapd iw dhcp iptables gettext moreutils dnsmasq
+# TODO: Pin package versions ^^^
 
 # Configure Hostapd for open ap
 ADD Docker/access-point/hostapd.conf /etc/hostapd/hostapd.conf
