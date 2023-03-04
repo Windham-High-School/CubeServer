@@ -12,7 +12,7 @@ function getarch {
         ;;
 
     aarch64)
-        target_line=$(grep -m1 ^"architecture" /proc/cpuinfo)
+        target_line=$(grep -m1 ^"CPU architecture" /proc/cpuinfo)
         ARM_VERSION=${target_line##*: }
         echo -e "arm64v${ARM_VERSION}"
         ;;
