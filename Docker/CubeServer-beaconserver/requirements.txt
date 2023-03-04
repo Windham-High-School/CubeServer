@@ -1,1 +1,1 @@
-apscheduler>=3.9.1,<4.0  # For scheduling beacon tx's
+apscheduler==3.10.0  # For scheduling beacon tx's
