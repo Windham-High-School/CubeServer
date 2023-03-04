@@ -4,8 +4,6 @@ from multiprocessing import cpu_count
 
 # gunicorn configuration
 
-loglevel = "info"
-
 workers = cpu_count()
 threads = 2
 
@@ -17,3 +15,11 @@ threads = 2
 
 # Bind:
 bind = ['0.0.0.0:80']
+
+# Logging:
+accesslog = '-'  # Access log to stdout
+
+# Reduce crashing on lower-power servers:
+preload_app = True
+timeout = 120
+graceful_timeout = 90

@@ -2,8 +2,6 @@ from multiprocessing import cpu_count
 
 # gunicorn configuration
 
-loglevel = "info"
-
 workers = cpu_count()
 
 # HTTPS:
@@ -13,3 +11,11 @@ ssl_version = "TLS"
 
 # Bind:
 bind = ['0.0.0.0:443']
+
+# Logging:
+accesslog = '-'  # Access log to stdout
+
+# Reduce crashing on lower-power servers:
+preload_app = True
+timeout = 120
+graceful_timeout = 90
