@@ -14,4 +14,4 @@ echo "Generating SHA256 Fingerprint for client constants code generation..."
 openssl x509 -in /api_cert/api.pem -fingerprint -sha256 -noout | cut -d "=" -f2 > /api_cert/sha256_fingerprint.txt
 
 export PYTHONUNBUFFERED=TRUE  # Log Python output
-gunicorn --chdir /app/ cubeserver_app.main:app -c /gunicorn.conf.py
+gunicorn --chdir /app/ cubeserver_app.main:app --log-level $LOGLEVEL -c /gunicorn.conf.py
