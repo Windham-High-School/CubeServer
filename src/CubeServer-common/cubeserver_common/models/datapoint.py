@@ -4,6 +4,7 @@ import logging
 from enum import Enum, unique
 from typing import Any, Optional
 from datetime import datetime
+from better_profanity import profanity
 
 from pymongo import DESCENDING
 from bson.objectid import ObjectId
@@ -129,3 +130,9 @@ class DataPoint(PyMongoModel):
             team.health.change(-1 * _init_contrib_score)
         team.save()
         Rules.retrieve_instance().post_data(self, _force=True)
+
+    def censor(self):
+        """Removes bad words.
+        """
+        if isinstance(self.value, str):
+            self.value = profanity.censor(self.value)
