@@ -4,3 +4,4 @@ Flask-RESTful==0.3.9
 Flask-HTTPAuth==4.7.0
 jsonpickle==3.0.1
 Flask-APScheduler==1.12.4
+better-profanity==0.7.0    # Profanity checking/filtering

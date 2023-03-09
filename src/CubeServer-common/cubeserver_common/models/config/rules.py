@@ -8,6 +8,7 @@ from datetime import datetime
 import json
 from bson import ObjectId
 
+from cubeserver_common.config import COMMENT_FILTER_PROFANITY
 from cubeserver_common.models import PyMongoModel, Encodable
 from cubeserver_common.models.team import Team, TeamLevel
 from cubeserver_common.models.datapoint import DataPoint, DataClass
@@ -178,6 +179,10 @@ class Rules(PyMongoModel):
             raise ValueError("This datapoint has already been scored!")
 
         team = Team.find_by_id(datapoint.team_reference)
+
+        # Profanity check:
+        if COMMENT_FILTER_PROFANITY:
+            datapoint.censor()
 
         # TODO: Make this more Pythonic
         if datapoint.category in DataClass.manual \
