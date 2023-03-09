@@ -15,7 +15,7 @@ cd $WORKING_DIR
 git clone $1
 cd "$(basename "$1" .git)"
 rm -r .git
-cp ../"$(basename "$2")" ./
+cp ../"$(basename "$2")" ./lib/ || cp ../"$(basename "$2")" ./
 mv "$(bash package.sh | tail -n1)" "$3"
 cd /tmp
 rm -r $WORKING_DIR
