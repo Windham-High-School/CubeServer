@@ -20,10 +20,10 @@
 Joseph R. Freeston:
 # OSS role within the project:
   role: |-
-    Primary Maintainer
+    CubeServer Architect
 # Short multi-line list of contributions:
   contributions: |-
-    CubeServer Architect
+    Primary CubeServer Developer
     Lead software developer 2022-present
 # Link to a personal website, profile, etc.
   link: https://github.com/snorklerjoe
