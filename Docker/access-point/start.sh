@@ -23,6 +23,7 @@ cleanup () {
 }
 
 trap 'sigterm_handler' TERM INT
+mkdir -p /run/dhcp/
 if [ -f "/run/dhcp/dhcpd.pid" ]; then
 rm /run/dhcp/dhcpd.pid  # Delete PID file in case there is one
 fi
