@@ -142,6 +142,7 @@ services:
       AP_SSID: ${AP_SSID}
       API_ADDR: ${API_ADDR}
       API_PORT: ${API_PORT}
+      BEACON_PORT: ${BEACON_PORT}
       AP_CHANNEL: ${AP_CHANNEL}
       # DHCPD params:
       DHCP_SUBNET: ${DHCP_SUBNET}
