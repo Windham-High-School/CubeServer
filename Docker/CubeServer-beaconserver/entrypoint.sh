@@ -13,7 +13,7 @@ echo "Copying generated SSL cert from build-time into persistent storage."
 echo "If this breaks server host key verification, there is a backup folder!"
 mkdir -p /ect/ssl/beacon_cert_backup
 cp -r /etc/ssl/beacon_cert /ect/ssl/beacon_cert_backup
-/gen_ssl_cert.sh ${CERT_SUBJ} ${CERT_SUBJALTNAME} ${CERT_EXP_DAYS} beacon
+/gen_ssl_cert.sh "${CERT_SUBJ}" "${CERT_SUBJALTNAME}" "${CERT_EXP_DAYS}" beacon
 cp /etc/ssl/build_api_cert/* /etc/ssl/beacon_cert/
 fi
 
