@@ -6,6 +6,7 @@ from random import randint
 from subprocess import call
 from os import environ, mkdir, chdir
 from shutil import rmtree
+from random import random
 
 from flask import Blueprint, render_template, session, make_response
 
@@ -24,7 +25,7 @@ with open("/api_cert/server.pem", "r", encoding="utf-8") as fh:
 @bp.route('/')
 def index():
     """Renders the main page for this blueprint"""
-    return render_template('index.html.jinja2')
+    return render_template('index.html.jinja2', rand=random())
 
 @bp.route('/client_config.h')
 def header_file():
