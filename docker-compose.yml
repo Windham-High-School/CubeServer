@@ -159,6 +159,15 @@ services:
       - NET_ADMIN
     network_mode: host
 
+  cloudflared:
+    image: "cloudflare/cloudflared:latest"
+    command: tunnel --no-autoupdate run
+    env_file: ./tunnel.env
+    restart: unless-stopped
+    depends_on:
+      - accesspoint
+      - app
+
 # IP Camera:
 #  cam:
 #    container_name: ${PROJECT_NAME}-kerberos
