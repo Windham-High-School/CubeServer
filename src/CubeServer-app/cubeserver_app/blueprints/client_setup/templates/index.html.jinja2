@@ -31,7 +31,7 @@
 
     <ul>
         <li>
-            <a href={{ url_for('config.package_circuitpython_lib') }} download><h6>CircuitPython .ZIP Library</h6></a>
+            <a href={{ url_for('config.package_circuitpython_lib') }}?nocache={{rand}} download><h6>CircuitPython .ZIP Library</h6></a>
             <p>
                 Choose this option if you are programming with CircuitPython.
             </p>
@@ -41,7 +41,7 @@
             </p>
         </li>
         <li>
-            <a href={{ url_for('config.package_arduino_lib') }} download><h6>Arduino .ZIP Library</h6></a>
+            <a href={{ url_for('config.package_arduino_lib') }}?nocache={{rand}} download><h6>Arduino .ZIP Library</h6></a>
             <p>
                 Choose this option if you are programming with the Arduino IDE.
             </p>
@@ -66,13 +66,13 @@
 
     <ul>
         <li>
-            <a href={{ url_for('config.py_file') }} download><h6>Python Constants File</h6></a>
+            <a href={{ url_for('config.py_file') }}?nocache={{rand}} download><h6>Python Constants File</h6></a>
             <p>
                 Choose this option if you are programming in Python (CircuitPython, Micropython, or regular Python).
             </p>
         </li>
         <li>
-            <a href={{ url_for('config.header_file') }} download><h6>Arduino C/C++ Header File</h6></a>
+            <a href={{ url_for('config.header_file') }}?nocache={{rand}} download><h6>Arduino C/C++ Header File</h6></a>
             <p>
                 Choose this option if you are programming in Arduino C/C++ (with Arduino IDE or Platformio).
             </p>
