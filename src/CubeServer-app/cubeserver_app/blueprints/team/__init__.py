@@ -4,6 +4,7 @@ from flask import Blueprint, session, redirect, render_template, url_for
 from flask import current_app, request, abort, flash
 from better_profanity import profanity
 from flask_login import current_user
+from hmac import compare_digest
 
 from cubeserver_common import config
 from cubeserver_common.models.mail import Message
@@ -155,7 +156,7 @@ def success():
 def update():
     """Allows teams to update the code on their cubes"""
     team: Team = Team.find_by_name(session['team_name'])
-    if session['team_secret'] != team.secret:
+    if not compare_digest(session['team_secret'], team.secret):
         return abort(401)
     
     if request.method == "POST":
