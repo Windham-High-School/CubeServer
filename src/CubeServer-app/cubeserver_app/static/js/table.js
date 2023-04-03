@@ -26,7 +26,7 @@ $(document).ready( function () {
 
     // Leaderboard:
     $('.leaderboardtable').DataTable( {
-        order: [[3, 'desc'], [4, 'asc']],
+        order: [[1, 'desc'], [2, 'desc']],
         dom: 'Bfrtilp',
         buttons: [
             'colvis', 'csv', 'print'
