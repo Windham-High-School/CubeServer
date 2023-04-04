@@ -4,10 +4,13 @@
 # Arnold Schwarzenegger looked at this code and called it "one ugly motha*****".
 
 import logging
+import csv
+import os
 from datetime import timedelta
 from math import floor
 from bson.objectid import ObjectId
-from flask import abort, Blueprint, render_template, request, url_for, current_app, flash, session, send_file
+from flask import abort, Blueprint, render_template, request, url_for, current_app, flash, session, send_file, redirect
+from werkzeug.utils import secure_filename
 from flask_login import current_user, login_required
 from typing import cast, List
 from uptime import uptime
@@ -30,7 +33,7 @@ from cubeserver_common.models.multiplier import Multiplier, MassMultiplier, Volu
 from cubeserver_common.models.mail import Message
 from cubeserver_common.models.beaconmessage import BeaconMessage, BeaconMessageEncoding
 from cubeserver_common.models.reference import ReferencePoint
-from cubeserver_common.config import FROM_NAME, FROM_ADDR, INTERNAL_SECRET_LENGTH
+from cubeserver_common.config import FROM_NAME, FROM_ADDR, INTERNAL_SECRET_LENGTH, TEMP_PATH
 
 from flask_table import Table
 from cubeserver_app.tables.columns import PreCol, OptionsCol
@@ -119,6 +122,49 @@ def admin_home():
         }.items(),
         reserved_names=reserved_links
     )
+
+@bp.route('/csv-endpoint', methods=['POST'])
+@login_required
+def beacon_csv():
+    """CSV beacon packet bulk-upload"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    if 'file' not in request.files:
+        flash("No file uploaded.")
+        return redirect(url_for('.admin_home'))
+    file = request.files['file']
+    if file.filename == '':
+        flash('No file uploaded.')
+        return redirect(url_for('.admin_home'))
+    if file and file.filename.lower().endswith('.csv'):
+        logging.debug("Reading CSV of BeaconMessage objects")
+        file_path = os.path.join(TEMP_PATH, secure_filename(file.filename))
+        file.save(file_path)
+        file.close()
+        reopened = open(file_path, 'r')
+        try:
+            csv_reader = csv.DictReader(reopened)
+            for row in csv_reader:
+                BeaconMessage(
+                    instant=datetime.fromisoformat(row['time']),
+                    division=TeamLevel(row['division']),
+                    message=row['body'],
+                    destination=OutputDestination(row['output']),
+                    encoding=BeaconMessageEncoding(row['encoding']),
+                    misfire_grace=int(row['misfire grace time'])
+                ).save()
+        except:
+            flash("There was a problem processing your CSV")
+            tb = traceback.format_exc()
+            logging.error(tb) # TODO: Allow the finally clause to run!
+            return render_template('errorpages/500.html.jinja2', message=tb)
+        finally:
+            reopened.close()
+        return redirect(url_for('.beacon_table'))
+    else:
+        flash('You didn\'t upload a CSV file, bro!')
+        return redirect(url_for('.admin_home'))
 
 @bp.route('/users')
 @login_required
