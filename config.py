@@ -160,6 +160,9 @@ CRYPTO_HASH_ALGORITHM: str = "sha3_512"
 """Which algorithm to use for crypto purposes as far as authenticating the teams' data.
 This *MUST* be present in hashlib.algorithms_available or things will break!"""
 
+TEMP_PATH: str = "/tmp/"
+"""A path to a temporary directory that will not be persistent"""
+
 
 
 ########################

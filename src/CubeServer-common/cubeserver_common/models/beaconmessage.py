@@ -94,8 +94,6 @@ class BeaconMessage(PyMongoModel):
         instant: datetime = datetime.now(),
         division: TeamLevel = TeamLevel.PSYCHO_KILLER,
         message: Union[bytes, str] = b'',
-        prefix: bytes = b'================INCOMING=MESSAGE================',
-        suffix: bytes = b'===================END===MESSAGE================',
         line_term: bytes = b'\r\n',
         additional_headers: Mapping[str, str] = {},
         encoding: Optional[BeaconMessageEncoding] = BeaconMessageEncoding.ASCII,
@@ -123,8 +121,6 @@ class BeaconMessage(PyMongoModel):
 
         self.send_at = instant
         self.division = division
-        self.prefix = prefix
-        self.suffix = suffix
         self.message = message
         self.message_encoding = encoding
         self.line_term = line_term
@@ -189,13 +185,11 @@ class BeaconMessage(PyMongoModel):
         if self._id:  # If this came from the database, don't regen
             return self.full_message_bytes_stored
         return self.line_term.join([
-            self.prefix,
             b'CSMSG/1.0',
             self.headers_bytes,
             self.line_term,
             self.message_bytes,
-            self.line_term,
-            self.suffix
+            self.line_term
         ])
     
     @property

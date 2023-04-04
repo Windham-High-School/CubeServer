@@ -66,6 +66,16 @@
                     {{ wtf.form_field(beacon_form.submit) }}
                 </form>
 
+                <hr>
+
+                <p>
+                    Bulk upload CSV packets:
+                </p>
+                <form method="POST" enctype="multipart/form-data" action="{{ url_for('admin.beacon_csv') }}">
+                    <input type="file" name="file" class="btn">
+                    <input type="submit" value="Upload" class="btn btn-submit btn-danger">
+                </form>
+
             {{macros.endbox()}}
 
         </div>
