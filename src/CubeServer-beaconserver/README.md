@@ -1,5 +1,5 @@
 # CubeServer-beaconserver
-This package contains the code for the beacon server
+This package contains the code for the beacon server and the reference communication server
 
 ## Components
 - Scheduler
@@ -19,3 +19,7 @@ Please fix it without breaking something.
 :)
 
 -Joseph R. Freeston
+
+```
+TODO: Refactor to have separate packages for beacon and reference stuff
+```
