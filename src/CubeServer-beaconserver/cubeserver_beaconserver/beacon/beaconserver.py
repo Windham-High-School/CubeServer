@@ -46,7 +46,7 @@ class BeaconServer:
                     self.sock.setblocking(False)
                     self.sock.send(b'Keep-Alive\x00\x00\x00')
                     self.sock.setblocking(True)
-                    if self.rx_bytes(1) != BeaconStatus.ACK.value:
+                    if self.socketserver.rx_bytes(1) != BeaconStatus.ACK.value:
                         return
                     # Connection is still alive!
                     time.sleep(5)
@@ -67,15 +67,15 @@ class BeaconServer:
         for _ in range(self.repeat_attempts):
             logging.debug("\tANOTHER ATTEMPT TO SEND CMD")
             # Send message over:
-            self.tx_bytes(message.serialize())
+            self.socketserver.tx_bytes(message.serialize())
             # Check for ACK:
-            response = self.rx_bytes(1)
+            response = self.socketserver.rx_bytes(1)
             if response[0:1] != BeaconStatus.ACK.value:
                 logging.debug("No ACK; Resending message")
                 continue
             logging.debug("Got beacon ACK")
             # Wait for end of transmission:
-            check = self.rx_bytes(2)
+            check = self.socketserver.rx_bytes(2)
             logging.debug("Rx'd okay bytes")
             logging.debug(check[0])
             logging.debug(len(message.message) % 255)
@@ -92,41 +92,3 @@ class BeaconServer:
         """A blocking method that never returns
         Runs the server"""
         self.socketserver.run_server()
-
-    def tx_bytes(self, stuff: bytes) -> int:
-        """Sends some stuff to the beacon and returns an int return code"""
-        logging.debug(f"Sending stuff:\n{stuff}")
-        if self.sock is None:
-            return ConnectionError("Connection from the beacon not established")
-        logging.debug(f"Writing {stuff}")
-        #while sent < len(stuff):
-        #    sent += self.sock.send(stuff[sent:])
-        #    if self.v:
-        #        print(f"Sent {sent}/{len(stuff)} bytes")
-        # #self.sock.flush()
-        self.sock.sendall(stuff)
-
-    def rx_bytes(self, size: int, chunkby: int = 256) -> bytes:
-        """Receives a given number of bytes from the beacon"""
-        logging.debug(f"Blocking read for {size} bytes...")
-        if self.sock is None:
-            return ConnectionError("Connection from the beacon not established")
-        self.sock.setblocking(True)
-        response = b""
-        while True:
-            buf = bytearray(min(size-len(response), chunkby))
-            try:
-                recvd = self.sock.recv_into(buf, min(size-len(response), chunkby))
-            except OSError as e:
-                if e.errno == EAGAIN:
-                    recvd = -1
-                else:
-                    raise
-            response += buf
-            del buf
-            logging.debug(f"Received {recvd} bytes")
-            if recvd == 0:
-                del recvd
-                break
-        logging.debug(f"Received stuff:\n{response}")
-        return response

@@ -3,6 +3,7 @@
 The beacon will connect to this server (with proper auth)
 """
 
+from errno import EAGAIN
 import socket
 import ssl
 import logging
@@ -84,3 +85,36 @@ class SSLSocketServer:
         if self.connect_hook is not None:
             raise ValueError("A connect hook has already been registered!")
         self.connect_hook = decorated_method
+
+    def rx_bytes(self, size: int, chunkby: int = 256) -> bytes:
+        """Receives a given number of bytes from the station"""
+        if self.sock is None:
+            return ConnectionError("Connection from the station not established")
+        self.sock.setblocking(True)
+        response = b""
+        while True:
+            buf = bytearray(min(size-len(response), chunkby))
+            try:
+                recvd = self.sock.recv_into(buf, min(size-len(response), chunkby))
+            except OSError as e:
+                if e.errno == EAGAIN:
+                    recvd = -1
+                else:
+                    raise
+            response += buf
+            del buf
+            if recvd == 0:
+                del recvd
+                break
+        return response
+
+    def tx_bytes(self, stuff: bytes) -> int:
+        """Sends some stuff and returns an int return code"""
+        if self.sock is None:
+            return ConnectionError("Connection not established")
+        #while sent < len(stuff):
+        #    sent += self.sock.send(stuff[sent:])
+        #    if self.v:
+        #        print(f"Sent {sent}/{len(stuff)} bytes")
+        # #self.sock.flush()
+        self.sock.sendall(stuff)
