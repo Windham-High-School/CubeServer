@@ -1,25 +1,30 @@
-"""A server for sending stuff to the reference cubes' connections
+"""A server for sending stuff to the beacon
+
+The protocol is as follows (B is beacon, S is server):
+    B->S    Establish persistent encrypted socket connection
+    ...
+    S->B    Send command in the form of a byte array
+            <Version Byte> <Destination Byte> <Intensity Byte> <Message Length MSB> <Message Length LSB> <8 Reserved Bytes> <Message Bytes> <NULL>
+    B->S    Upon receipt of the command, one byte (ACK or NAK)
+            At this point, the beacon will transmit the message.
+    B->S    Upon completion of the transmission, a byte containing
+            the remainder of the length of the message / 255,
+            and a NULL byte 
+    ...
 """
 
 import logging
-import struct
 from errno import EAGAIN
 import time
 from ssl import SSLEOFError
 
-from cubeserver_common.models.team import Team, TeamLevel
+from ..generic.sslsocketserver import *
+from .beaconmessage import BeaconStatus, BeaconDestination, BeaconCommand
 
-from .sslsocketserver import *
-from .referencereq import ReferenceStatus, MeasurementType, ReferenceCommand
-
-class ReferenceServer:
+class BeaconServer:
     """A server for dealing with the server-beacon communications"""
-    def __init__(self, reference_team: Team, timeout=10, repeat_attempts=10, **kwargs):
-        if reference_team.weight_class != TeamLevel.REFERENCE:
-            raise ValueError("The provided team is not a reference team")
-        self.team = reference_team
-        tcp_port = reference_team.reference_port
-        self.socketserver = SSLSocketServer(port=tcp_port, **kwargs)
+    def __init__(self, timeout=10, repeat_attempts=10, **kwargs):
+        self.socketserver = SSLSocketServer(**kwargs)
         self.repeat_attempts = repeat_attempts
         self.sock = None
         self.timeout = timeout
@@ -27,7 +32,7 @@ class ReferenceServer:
 
         @self.socketserver.on_connect
         def connect_hook(client_ssl_socket):
-            """Runs on connect from station"""
+            """Runs on connect from beacon"""
             self.sock = client_ssl_socket
             self.sock.settimeout(self.timeout)
 
@@ -41,7 +46,7 @@ class ReferenceServer:
                     self.sock.setblocking(False)
                     self.sock.send(b'Keep-Alive\x00\x00\x00')
                     self.sock.setblocking(True)
-                    if self.rx_bytes(1) != ReferenceStatus.ACK.value:
+                    if self.rx_bytes(1) != BeaconStatus.ACK.value:
                         return
                     # Connection is still alive!
                     time.sleep(5)
@@ -51,42 +56,43 @@ class ReferenceServer:
             # Socket is closed upon this method's return
             return
 
-    def send_cmd(self, cmd: ReferenceCommand) -> any:
-        """Sends a command to a reference; returns the response
+    def send_cmd(self, message: BeaconCommand) -> bool:
+        """Sends a command to the beacon.
+        Returns True on success
         """
         logging.debug("\n\n")
-        logging.debug(f"send_cmd {cmd}")
+        logging.debug(f"send_cmd {message}")
         self.busy = True
         success = False
         for _ in range(self.repeat_attempts):
             logging.debug("\tANOTHER ATTEMPT TO SEND CMD")
             # Send message over:
-            self.tx_bytes(cmd.serialize())
+            self.tx_bytes(message.serialize())
             # Check for ACK:
             response = self.rx_bytes(1)
-            if response[0:1] != ReferenceStatus.ACK.value:
+            if response[0:1] != BeaconStatus.ACK.value:
                 logging.debug("No ACK; Resending message")
                 continue
-            logging.debug("Got reference ACK")
-            # Get and unpack response- <n bytes><struct type><byte 1><byte 2>...<byte n>
-            # Example response:  b'\x04fy\xe9\xf6B' => 4-byte float: 123.456
-            response_length = int(self.rx_bytes(1)[0])
-            response_type = str(self.rx_bytes(1))
-            bin_val = self.rx_bytes(response_length)
-            actual_val = struct.unpack(response_type, bin_val)
-            logging.debug("Rx'd response:")
-            logging.debug(actual_val)            
-            return actual_val
+            logging.debug("Got beacon ACK")
+            # Wait for end of transmission:
+            check = self.rx_bytes(2)
+            logging.debug("Rx'd okay bytes")
+            logging.debug(check[0])
+            logging.debug(len(message.message) % 255)
+            if check[0] != (len(message.message) % 255):
+                continue
+            logging.debug("Good length checksum")
+            
+            success = True
+            break
         self.busy = False
-        return None
+        return success
 
     def run(self):
         """A blocking method that never returns
         Runs the server"""
         self.socketserver.run_server()
 
-
-# TODO: Avoid repeated code from beaconserver.py
     def tx_bytes(self, stuff: bytes) -> int:
         """Sends some stuff to the beacon and returns an int return code"""
         logging.debug(f"Sending stuff:\n{stuff}")
@@ -101,10 +107,10 @@ class ReferenceServer:
         self.sock.sendall(stuff)
 
     def rx_bytes(self, size: int, chunkby: int = 256) -> bytes:
-        """Receives a given number of bytes from the station"""
+        """Receives a given number of bytes from the beacon"""
         logging.debug(f"Blocking read for {size} bytes...")
         if self.sock is None:
-            return ConnectionError("Connection from the station not established")
+            return ConnectionError("Connection from the beacon not established")
         self.sock.setblocking(True)
         response = b""
         while True:

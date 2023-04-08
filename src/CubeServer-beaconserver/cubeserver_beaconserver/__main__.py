@@ -3,15 +3,16 @@
 
 import logging
 import atexit
+import threading
 from typing import List
 from sys import argv
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from cubeserver_common.models.beaconmessage import BeaconMessage, SentStatus
 from cubeserver_common.models.config.conf import Conf
-from cubeserver_common.config import LOGGING_LEVEL
+from cubeserver_common.config import LOGGING_LEVEL, BEACONSERVER_PORT
 
-from .beaconserver import BeaconServer, BeaconCommand
+from .beacon.beaconserver import BeaconServer, BeaconCommand
 
 
 def mark_unscheduled():
