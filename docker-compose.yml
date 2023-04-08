@@ -35,8 +35,8 @@ services:
       - SERVER_NAME=${DOMAIN}
       # Logging Level for GUnicorn:
       - LOGLEVEL=${LOGLEVEL}
-#    ports: # Bind the port for the web server
-#      - "${WEBAPP_PORT}:80"
+    ports: # Bind the port for the web server
+      - ${DEVMODE+$WEBAPP_PORT}:80  # But only in dev mode
     depends_on:
       - mongodb
       - api
