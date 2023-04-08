@@ -667,7 +667,8 @@ def gen_reserved(name: str = ""):
         name=name,
         weight_class=TeamLevel.REFERENCE,
         status=TeamStatus.INTERNAL,
-        _secret_length=INTERNAL_SECRET_LENGTH
+        _secret_length=INTERNAL_SECRET_LENGTH,
+        _find_new_reference_port=True
     )
     team.save()
     flash(f"Successfully created reserved team {name} ({team.id})", category='success')

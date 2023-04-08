@@ -156,7 +156,8 @@ class Team(PyMongoModel):
                  emails_sent_today: int = 0,
                  code_update: bytes = b'',
                  code_update_taken: bool = False,
-                 _secret_length: int = config.TEAM_SECRET_LENGTH):
+                 _secret_length: int = config.TEAM_SECRET_LENGTH,
+                 _find_new_reference_port: bool = False):
         super().__init__()
         self.name = name
         self.weight_class = weight_class
@@ -168,6 +169,8 @@ class Team(PyMongoModel):
         self.emails_sent = emails_sent_today
         self._code_update = code_update
         self.code_update_taken = code_update_taken
+        if _find_new_reference_port:
+            self.reference_port = self.find_unused_port()
 
     def add_member(self, member: User):
         """Adds a member (a User object) to the team"""
@@ -316,6 +319,24 @@ class Team(PyMongoModel):
                 "name": {"$nin": config.BEACON_TEAM_NAME}
             }
         )
+
+    @classmethod
+    def find_unused_port(cls) -> int:
+        """Returns a port within the range specified in the configuration"""
+        port_range = range(
+            config.REFERENCE_PORT_RANGE[0],
+            config.REFERENCE_PORT_RANGE[1]+1
+        )
+        all_references = cls.find_references()
+        for potential_port in port_range:
+            unused = True
+            for reference in all_references:
+                if hasattr(reference, 'reference_port'):
+                    unused &= reference.reference_port != potential_port
+            if unused:
+                return potential_port
+        raise ValueError("The entire reserved port range for reference servers has already been assigned.")
+
 
     def recompute_score(self):
         """Completely recompute the score for this team.
