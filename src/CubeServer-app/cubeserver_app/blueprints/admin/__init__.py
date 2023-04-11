@@ -8,8 +8,10 @@ import csv
 import os
 from datetime import timedelta
 from math import floor
+from random import randint
+import subprocess
 from bson.objectid import ObjectId
-from flask import abort, Blueprint, render_template, request, url_for, current_app, flash, session, send_file, redirect
+from flask import abort, Blueprint, make_response, render_template, request, url_for, current_app, flash, session, send_file, redirect
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_required
 from typing import cast, List
@@ -672,3 +674,38 @@ def gen_reserved(name: str = ""):
     team.save()
     flash(f"Successfully created reserved team {name} ({team.id})", category='success')
     return render_template('redirect_back.html.jinja2')
+
+@bp.route('/beacon_code.zip')
+def package_beacon_code():
+    """Packages and downloads the a ZIP file containing the beacon code"""
+    logging.info(f"Packing beacon code ZIP")
+    working_dir = f"/tmp/beacon_pack_{str(randint(100,999))}"
+    os.mkdir(working_dir)
+    os.chdir(working_dir)
+    output_path = f"{working_dir}/download.zip"
+    with open(f'{working_dir}/beacon.pem', 'w') as fh:
+        fh.write(beacon_pem())
+    with open(f'{working_dir}/beacon.key', 'w') as fh:
+        fh.write(beacon_key())
+    with open(f'{working_dir}/cert.pem', 'w') as fh:
+        from ..client_setup import api_cert
+        fh.write(api_cert())
+    subprocess.call([
+        "/package_internal.sh",
+        os.environ['BEACON_CODE_GIT_URL'],
+        output_path
+    ])
+    # TODO: avoid RAM overhead of loading file into memory?
+    output_raw = bytes()
+    with open(output_path, 'rb') as fh:
+        output_raw = fh.read()
+    # Clean up:
+    os.rmtree(working_dir)
+    # Formulate response:
+    response = make_response(output_raw)
+    response.headers.set('Content-Type', 'application/zip')
+    response.headers.set(
+        'Content-Disposition', 'attachment'
+    )
+    return response
+

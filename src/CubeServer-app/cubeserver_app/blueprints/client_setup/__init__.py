@@ -129,6 +129,7 @@ def package_circuitpython_lib():
         filename=environ['API_WRAPPER_ZIP_FILENAME_CIRCUITPYTHON'])
     return response
 
+# This is more important than you think. Don't remove it. :)
 @bp.route('/api_cert.pem')
 def api_cert():
     """Downloads the pem file for the cert of the api
