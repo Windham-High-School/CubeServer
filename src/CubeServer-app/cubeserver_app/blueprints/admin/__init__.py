@@ -101,13 +101,16 @@ def admin_home():
         else:
             reserved_links += [(name, url_for('.gen_reserved', name=name))]
 
+    beacon_form = ImmediateBeaconForm()
+    beacon_form.instant.data = datetime.now()
+
     # Render the template:
     return render_template(
         'console.html.jinja2',
         teams_table = teams_table.__html__(),
         user_form = InvitationForm(),
         config_form = conf_form,
-        beacon_form = ImmediateBeaconForm(),
+        beacon_form = beacon_form,
         email_groups = {
             TeamLevel.JUNIOR_VARSITY.value: base64.urlsafe_b64encode(',  '.join([
                 ', '.join(team.emails) for team in
