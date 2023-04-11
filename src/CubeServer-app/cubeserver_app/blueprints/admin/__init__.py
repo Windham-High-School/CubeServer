@@ -122,7 +122,8 @@ def admin_home():
                     Team.find()
             ]).encode())
         }.items(),
-        reserved_names=reserved_links
+        reserved_names=reserved_links,
+        rand=randint(0, 1000000)
     )
 
 @bp.route('/csv-endpoint', methods=['POST'])
