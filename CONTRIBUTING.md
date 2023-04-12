@@ -88,3 +88,5 @@ Please run `./clean` before each commit and/or pull request. If the repository i
 After every release, the `develop` branch's `version.txt` should be bumped to the next version + `-dev`, and `./clean` should be run to update this across packages.
 
 Before every release, the `-dev` should be taken away if appropriate, but **not in the `develop`** branch- this should be done in the **`release-X.Y.Z` branch** which will be merged into `main`.
+
+To create a new release, run `./tools/bump.sh` from the root of the repo.
