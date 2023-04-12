@@ -17,3 +17,4 @@ git push
 
 echo PR a merge from release-${RELEASE} to main
 
+echo then create a tag v${RELEASE} and publish a version with it
