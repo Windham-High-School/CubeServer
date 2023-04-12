@@ -8,13 +8,16 @@
 
 WORKING_DIR=/tmp/INTERNAL-BUILD-$(echo $RANDOM | md5sum | head -c 16)/
 mkdir -p $WORKING_DIR
-cp $2 $WORKING_DIR/
+cp ./*.pem $WORKING_DIR/
+cp ./*.key $WORKING_DIR/
 
 cd $WORKING_DIR
 
 git clone $1
 cd "$(basename "$1" .git)"
-rm -r .git
+
+cp ../*.pem ../*.key ./
+
 mv "$(bash package.sh | tail -n1)" "$2"
 cd /tmp
 rm -r $WORKING_DIR

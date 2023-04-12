@@ -1,6 +1,6 @@
 FROM python:3.10-slim-bullseye
 
-RUN apt-get update && apt-get install -y git zip
+RUN apt-get update && apt-get install -y git zip wget
 
 COPY Docker/CubeServer-app/requirements.txt /tmp/
 RUN pip3 install -r /tmp/requirements.txt

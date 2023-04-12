@@ -5,6 +5,7 @@
 
 import logging
 import csv
+import shutil
 import os
 from datetime import timedelta
 from math import floor
@@ -687,13 +688,11 @@ def package_beacon_code():
     os.mkdir(working_dir)
     os.chdir(working_dir)
     output_path = f"{working_dir}/download.zip"
-    with open(f'{working_dir}/beacon.pem', 'w') as fh:
-        fh.write(beacon_pem())
-    with open(f'{working_dir}/beacon.key', 'w') as fh:
-        fh.write(beacon_key())
+    shutil.copyfile("/api_cert/beacon.pem", f"{working_dir}/beacon.pem")
+    shutil.copyfile("/api_cert/beacon.key", f"{working_dir}/beacon.key")
     with open(f'{working_dir}/cert.pem', 'w') as fh:
-        from ..client_setup import api_cert
-        fh.write(api_cert())
+        from ..client_setup import pem_cert
+        fh.write(pem_cert)
     subprocess.call([
         "/package_internal.sh",
         os.environ['BEACON_CODE_GIT_URL'],
@@ -704,7 +703,7 @@ def package_beacon_code():
     with open(output_path, 'rb') as fh:
         output_raw = fh.read()
     # Clean up:
-    os.rmtree(working_dir)
+    shutil.rmtree(working_dir)
     # Formulate response:
     response = make_response(output_raw)
     response.headers.set('Content-Type', 'application/zip')
