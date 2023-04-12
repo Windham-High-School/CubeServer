@@ -11,11 +11,11 @@ git merge develop
 echo ${RELEASE} > version.txt
 ./clean
 git commit -am "bumped version"
-git push -u origin release-${VERSION}
+git push -u origin release-${RELEASE}
 
 git checkout develop
 git pull
-git merge release-${VERSION}
+git merge release-${RELEASE}
 git push
 
 echo PR a merge from release-${RELEASE} to main
