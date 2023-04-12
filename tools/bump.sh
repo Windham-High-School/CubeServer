@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 # Bumps the version to the semver specified in the first argument.
 
+sleep 1
 RELEASE=$1
+git checkout develop
+git pull
 git branch release-${RELEASE}
 git checkout release-${RELEASE}
 git merge develop
