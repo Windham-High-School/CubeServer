@@ -47,7 +47,7 @@
             {{macros.endbox()}}
 
             {{macros.startbox("Beacon", "col")}}
-                <a href={{ url_for('admin.beacon_table') }} class="btn">See All Scheduled Messages</a>
+                <a href={{ url_for('admin.beacon_table') }} class="btn">Manage Message Queue</a>
                 <hr>
                 <p>
                     Schedule a message now:
@@ -136,6 +136,11 @@
                     <li>API Server Certificate <a href={{url_for('config.api_cert')}}>cert.pem</a></li>
                 </ul>
 
+                <b>Latest Internal Code Downloads: </b> <i> (Built from latest source on github (origin/main)) </i>
+                <ul>
+                    <li>Beacon Code <a href={{url_for('admin.package_beacon_code')}}?nocache={{rand}}>Packaged ZIP File</a></li>
+                </ul>
+
             {{macros.endbox()}}
             {{macros.startbox("System", "col")}}
                 <b>Uptime: </b>
@@ -145,8 +150,8 @@
 
                 <b>Database Repair: </b>
                 <p>
-                    There is an emergency database repair tool available.
-                    Please consult documentation.
+                    This version of CubeServer is equipped with an emergency database repair tool.
+                    Please consult documentation for more information.
                 </p>
             {{macros.endbox()}}
 <div style="display:none">
