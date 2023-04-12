@@ -159,7 +159,8 @@ def beacon_csv():
                     message=row['body'],
                     destination=OutputDestination(row['output']),
                     encoding=BeaconMessageEncoding(row['encoding']),
-                    misfire_grace=int(row['misfire grace time'])
+                    misfire_grace=int(row['misfire grace time']),
+                    intensity=int(row['intensity'])
                 ).save()
         except:
             flash("There was a problem processing your CSV")
@@ -521,7 +522,8 @@ def beacon_tx():
                 message=form.message.data,
                 destination=OutputDestination(form.destination.data),
                 encoding=BeaconMessageEncoding(form.msg_format.data),
-                misfire_grace=form.misfire_grace.data
+                misfire_grace=form.misfire_grace.data,
+                intensity=form.intensity.data
             )
             msg.save()
         except:
