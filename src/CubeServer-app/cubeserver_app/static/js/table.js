@@ -5,7 +5,7 @@
 
 // Render nice-looking tables with DataTables:
 $(document).ready( function () {
-    $('.datatable:not(.leaderboardtable):not(.datapoints-table)').DataTable( {
+    $('.datatable:not(.leaderboardtable):not(.datapoints-table):not(.beacontable)').DataTable( {
         buttons: [
             'colvis', 'copy', 'csv', 'pdf', 'print'
         ],
@@ -66,4 +66,23 @@ $(document).ready( function () {
         stateSave: true
     } );
 
+    $('.beacontable').DataTable( {
+        buttons: [
+            'colvis', 'copy', 'csv', 'pdf', 'print'
+        ],
+        order: [[0, 'desc']],
+        dom: 'Bfrtilp',
+        responsive: true,
+        lengthMenu: [ [5, 10, 25, 50, -1], [5, 10, 25, 50, "All"] ],
+        scrollY: true,
+        scrollCollapse: true,
+        scrollX: true,
+        autoWidth : true,
+        //fixedColumns:   {
+        //    "leftColumns": 1
+        //},
+        //fixedHeader: true,
+        keepConditions: true,
+        stateSave: true
+    } );
 });
