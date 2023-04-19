@@ -116,6 +116,7 @@ class Status(Resource):
         return {
             "datetime": datetime.now().isoformat(),
             "unix_time": int(time()),
+            "2020_time": int(time() - 1577836800),
             "status": {"score": team.score},
             "CubeServer_version": VERSION
         }, 200
