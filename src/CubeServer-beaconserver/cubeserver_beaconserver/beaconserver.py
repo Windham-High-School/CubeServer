@@ -21,9 +21,12 @@ import logging
 from errno import EAGAIN
 import time
 from ssl import SSLEOFError
+import socket
 
 from .sslsocketserver import *
 from .beaconmessage import BeaconStatus, BeaconDestination, BeaconCommand
+
+socket.setdefaulttimeout(10.0)
 
 class BeaconServer:
     """A server for dealing with the server-beacon communications"""
@@ -32,7 +35,9 @@ class BeaconServer:
         self.repeat_attempts = repeat_attempts
         self.sock = None
         self.timeout = timeout
+        self.keepalivetime = time.time() + timeout
         self.lock = Lock()
+        self.running = False
         self.connection_present = Event()
 
         @self.socketserver.on_connect
@@ -40,12 +45,14 @@ class BeaconServer:
             """Runs on connect from beacon"""
             self.connection_present.set()
 
+            self.keepalivetime = time.time()
+
             self.sock = client_ssl_socket
             self.sock.settimeout(self.timeout)
 
             try:
                 while True:
-                    if self.connection_present.is_clear():
+                    if not self.connection_present.is_set():
                         break
                     with self.lock: # Lock to prevent multiple threads from sending at once
                         logging.debug("Sending keepalive...")
@@ -53,7 +60,9 @@ class BeaconServer:
                         self.sock.send(b'Keep-Alive\x00\x00\x00')
                         self.sock.setblocking(True)
                         if self.rx_bytes(1) != BeaconStatus.ACK.value:
+                            self.connection_present.clear()
                             return
+                        self.keepalivetime = time.time()
                         # Connection is still alive!
                     time.sleep(5)  # Send keepalive every 5 seconds
             except SSLEOFError:
@@ -61,8 +70,15 @@ class BeaconServer:
             finally:
                 self.sock = None
                 self.connection_present.clear()
+
+            self.keepalivetime = time.time()
+
             # Socket is closed upon this method's return
             return
+
+    @property
+    def is_stale(self) -> bool:
+        return time.time() - self.keepalivetime > self.timeout
 
     def send_cmd(self, message: BeaconCommand) -> bool:
         """Sends a command to the beacon.
@@ -84,8 +100,8 @@ class BeaconServer:
             logging.debug("Got beacon ACK")
 
             # Wait for transmission to finish:
-            buf = bytearray(1)
-            while buf != BeaconStatus.TXG.value:
+            buf = self.rx_bytes(1)
+            while buf == BeaconStatus.TXG.value:
                 logging.debug("Awaiting TXG...")
                 buf = self.rx_bytes(1)
             if buf != BeaconStatus.ACK.value:
@@ -106,12 +122,14 @@ class BeaconServer:
     def run(self):
         """A blocking method that never returns
         Runs the server"""
+        self.running = True
         self.socketserver.run_server()
 
     def tx_bytes(self, stuff: bytes) -> int:
         """Sends some stuff to the beacon and returns an int return code"""
         if self.sock is None:
             return ConnectionError("Connection from the beacon not established")
+        self.keepalivetime = time.time()
         self.sock.sendall(stuff)
         logging.debug(f"Sent stuff: \"{stuff}\"")
 
@@ -119,6 +137,7 @@ class BeaconServer:
         """Receives a given number of bytes from the beacon"""
         if self.sock is None:
             return ConnectionError("Connection from the beacon not established")
+        self.keepalivetime = time.time()
         self.sock.setblocking(True)
         response = b""
         while True:
