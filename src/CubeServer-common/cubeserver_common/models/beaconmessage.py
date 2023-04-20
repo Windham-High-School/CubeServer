@@ -26,11 +26,12 @@ class OutputDestination(Enum):
 @unique
 class SentStatus(Enum):
     """Updated by the beacon server"""
-    QUEUED      = "Queued"
-    SCHEDULED   = "Scheduled"
-    TRANSMITTED = "Transmitted"
-    MISSED      = "Missed"
-    FAILED      = "Failed"
+    QUEUED       = "Queued"
+    SCHEDULED    = "Scheduled"
+    TRANSMITTED  = "Transmitted"
+    TRANSMITTING = "Transmitting..."
+    MISSED       = "Missed"
+    FAILED       = "Failed"
 
 @unique
 class BeaconMessageEncoding(Enum):

@@ -4,7 +4,7 @@
 import logging
 import atexit
 from typing import List
-from sys import argv
+from sys import argv, exit
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from cubeserver_common.models.beaconmessage import BeaconMessage, SentStatus
@@ -39,6 +39,8 @@ def transmit_message(message: BeaconMessage) -> bool:
         logging.warning("Tried to transmit already-sent message.")
         return False
     logging.info("Transmitting message...")
+    message.status = SentStatus.TRANSMITTING
+    message.save()
     if server.send_cmd(BeaconCommand.from_BeaconMessage(message)):
         message.status = SentStatus.TRANSMITTED
         message.save()
@@ -49,8 +51,21 @@ def transmit_message(message: BeaconMessage) -> bool:
     message.save()
     return False
 
+@atexit.register
+def shutdown_hook():
+    """Runs before closing..."""
+    logging.info("Preparing for exit...")
+    logging.debug("Shutting down scheduler")
+    scheduler.shutdown()
+    mark_unscheduled()
+    logging.info("Ready for exit.")
+
 def load_packets_from_db():
     """Loads the current database into the jobs"""
+    if server.is_stale:
+        logging.warning("Connection is stale!")
+        shutdown_hook()
+        exit(1)
     logging.debug("Polling scheduled jobs...")
     scheduled = [job.name for job in scheduler.get_jobs()]
     logging.debug(scheduled)
@@ -69,19 +84,7 @@ def load_packets_from_db():
             job.status = SentStatus.SCHEDULED
             job.save()
 
-@atexit.register
-def shutdown_hook():
-    """Runs before closing..."""
-    logging.info("Preparing for exit...")
-    logging.debug("Shutting down scheduler")
-    scheduler.shutdown()
-    mark_unscheduled()
-    logging.info("Ready for exit.")
-
 load_packets_from_db()
-
-logging.debug("Starting scheduler")
-scheduler.start()
 
 # Poll to get new packets
 scheduler.add_job(
@@ -90,6 +93,18 @@ scheduler.add_job(
     seconds=Conf.retrieve_instance().beacon_polling_period,
     name='db_updater'
 )
+
+logging.debug("Starting scheduler")
+scheduler.start()
+
+def check_connection():
+    """Checks if the connection is still alive"""
+    if server.is_stale:
+        logging.warning("Connection is stale!")
+        mark_unscheduled()
+        server.run()
+    else:
+        logging.debug("Connection is alive.")
 
 logging.info("Starting beacon server")
 server.run()

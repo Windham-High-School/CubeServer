@@ -8,9 +8,10 @@ BEACONCOM_VERSION = b'\x01'
 
 @unique
 class BeaconStatus(Enum):
-    ACK = b'\x06'
-    NAK = b'\x15'
-    NUL = b'\x00'
+    ACK = b'\x06'  # Acknowledged
+    NAK = b'\x15'  # Not Acknowledged
+    NUL = b'\x00'  # Null
+    TXG = b'\x01'  # Transmitting
 
 @unique
 class BeaconDestination(Enum):
