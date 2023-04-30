@@ -165,23 +165,28 @@ services:
     command: tunnel --no-autoupdate run
     env_file: ./tunnel.env
     restart: unless-stopped
+    volumes:
+      - ./tunnel.yml:/etc/cloudflared/config.yml
     depends_on:
       - app
     networks:
       - frontend
 
 # IP Camera:
-#  cam:
-#    container_name: ${PROJECT_NAME}-kerberos
-#    image: kerberos/kerberos:latest
-#    restart: unless-stopped
-#    ports:
-#      - 8889:8889
-#      - 81:80
-#    devices:
-#      - ${VIDEO_DEV}
-#    networks:
-#      - frontend
+  ipcam:
+    container_name: ${PROJECT_NAME}-ipcam
+    image: snorklerjoe/rtsp-simple-server:${VERSION_TAG}
+    restart: unless-stopped
+    env_file: ./.env
+    build:
+      context: .
+      dockerfile: Docker/ipcam/Dockerfile
+    ports:
+      - ${VIDEO_RTSP_PORT}:${VIDEO_RTSP_PORT}
+    devices:
+      - ${VIDEO_DEV}
+    networks:
+      - frontend
 
 networks:
   frontend:

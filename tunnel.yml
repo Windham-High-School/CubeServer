@@ -1,0 +1,6 @@
+ingress:
+  - hostname: dev.whsproject.club
+    service: http://app
+  - hostname: ipcam.whsproject.club
+    service: https://ipcam
+  - service: http_status:404
