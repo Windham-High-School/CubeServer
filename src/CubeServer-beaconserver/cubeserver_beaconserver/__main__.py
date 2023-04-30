@@ -64,8 +64,10 @@ def load_packets_from_db():
     """Loads the current database into the jobs"""
     if server.is_stale:
         logging.warning("Connection is stale!")
-        shutdown_hook()
-        exit(1)
+        try:
+            mark_unscheduled()
+        finally:
+            exit(1)
     logging.debug("Polling scheduled jobs...")
     scheduled = [job.name for job in scheduler.get_jobs()]
     logging.debug(scheduled)
