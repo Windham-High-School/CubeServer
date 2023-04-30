@@ -45,8 +45,8 @@ class LeaderboardDataTable(Table):
     moment            = Col('Datetime')
     category          = EnumCol('Category')
     value_with_unit   = Col('Value')
-    rawscore          = Col('Point Value')
-    score             = Col('Score')
+    rawscore          = FloatCol('Point Value')
+    score             = FloatCol('Score')
 
     def __init__(self, items: List[DataPoint], **kwargs):
         """Initializes the table"""
