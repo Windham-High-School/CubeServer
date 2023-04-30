@@ -26,11 +26,12 @@ class OutputDestination(Enum):
 @unique
 class SentStatus(Enum):
     """Updated by the beacon server"""
-    QUEUED      = "Queued"
-    SCHEDULED   = "Scheduled"
-    TRANSMITTED = "Transmitted"
-    MISSED      = "Missed"
-    FAILED      = "Failed"
+    QUEUED       = "Queued"
+    SCHEDULED    = "Scheduled"
+    TRANSMITTED  = "Transmitted"
+    TRANSMITTING = "Transmitting..."
+    MISSED       = "Missed"
+    FAILED       = "Failed"
 
 @unique
 class BeaconMessageEncoding(Enum):
@@ -101,7 +102,7 @@ class BeaconMessage(PyMongoModel):
         past: bool = False,
         misfire_grace: int = 30,
         status: Optional[SentStatus] = None,
-        prefix: bytes = b'\x07\x07\x07\x07'
+        prefix: bytes = b''
     ):
         """
         Args:
