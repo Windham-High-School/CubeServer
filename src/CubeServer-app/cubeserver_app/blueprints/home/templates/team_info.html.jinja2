@@ -7,10 +7,10 @@
     <p class="px-2">{{team.members_names_str}}</p>
     <br>
 
-    <h3 class=""text-info>Score: <span style="color: #A0A0A0;">{{team.score}}</span></h3>
+    <h3 class=""text-info>Score: <span style="color: #A0A0A0;">{{"%.2f" | format(team.score | float)}}</span></h3>
 
     <p class="px-2">
-        Multiplier: [x {{team.multiplier.mass_mult}}]
+        Multiplier: [x {{"%.2f" | format(team.multiplier.mass_mult | float)}}]<br>
     </p>
 
     <hr>

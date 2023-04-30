@@ -97,7 +97,11 @@ class DataPoint(PyMongoModel):
     @property
     def value_with_unit(self):
         """Returns a string with the value and unit"""
-        return str(self.value) + self.category.unit
+        return (
+            f"{self.value:0.2f}{self.category.unit}"
+        ) if isinstance(self.value, float) else (
+            f"{self.value}{self.category.unit}"
+        )
 
     def __str__(self) -> str:
         return self.value_with_unit
