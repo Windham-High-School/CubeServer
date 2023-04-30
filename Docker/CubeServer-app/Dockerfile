@@ -2,6 +2,8 @@ FROM python:3.10-slim-bullseye
 
 RUN apt-get update && apt-get install -y git zip wget
 
+#RUN apt-get install -y python3-opencv
+
 COPY Docker/CubeServer-app/requirements.txt /tmp/
 RUN pip3 install -r /tmp/requirements.txt
 
