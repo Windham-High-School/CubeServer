@@ -5,7 +5,7 @@ from flask import redirect, request
 from flask_login import login_url
 
 from cubeserver_app import app, login_manager
-from cubeserver_app.blueprints import home, admin, team, about, client_setup
+from cubeserver_app.blueprints import home, admin, team, about, client_setup, ipcam
 from cubeserver_common.models.user import User
 
 
@@ -16,6 +16,7 @@ app.register_blueprint(admin.bp)
 app.register_blueprint(team.bp)
 app.register_blueprint(about.bp)
 app.register_blueprint(client_setup.bp)
+app.register_blueprint(ipcam.bp)
 
 
 # Configure flask-login:

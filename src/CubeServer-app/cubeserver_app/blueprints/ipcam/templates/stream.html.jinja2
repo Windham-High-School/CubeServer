@@ -1,0 +1,11 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Video Stream{% endblock %}
+
+{% block header %}
+    <h4 class="glow text-light">Video Stream</h4>
+    <pre class="px-1 text-warning">...</pre>
+{% endblock %}
+
+{% block content %}
+    <img src="{{ url_for('.video_feed') }}">
+{% endblock %}
