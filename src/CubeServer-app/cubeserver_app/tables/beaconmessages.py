@@ -12,7 +12,7 @@ class BeaconMessageTable(Table):
     """Allows a group of BeaconMessage objects to be displayed in an HTML table"""
 
     allow_sort = False  # Let's avoid flask-table's built-in sorting
-    classes = ["table", "table-striped", "datatable", "display", "bg-dark"]
+    classes = ["table", "table-striped", "datatable", "display", "bg-dark", "beacontable"]
     thead_classes = ["thead-dark"]
     border = True
 
