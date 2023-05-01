@@ -81,6 +81,7 @@ class SSLSocketServer:
                 finally:
                     logging.info("Closing socket.")
                     client_ssl_socket.close()
+                break
             except socket.timeout:
                 logging.info("Socket timed out!")
                 continue
