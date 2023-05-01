@@ -3,6 +3,7 @@
 
 import logging
 import atexit
+import threading
 from typing import List
 from sys import argv, exit
 
@@ -17,7 +18,10 @@ from .beaconserver import BeaconServer, BeaconCommand
 def mark_unscheduled():
     """Marks all messages as not yet scheduled"""
     logging.debug("Marking all messages as not yet scheduled")
-    for msg in BeaconMessage.find_by_status(SentStatus.SCHEDULED):
+    for msg in (
+          BeaconMessage.find_by_status(SentStatus.SCHEDULED)
+        + BeaconMessage.find_by_status(SentStatus.TRANSMITTING)
+    ):
         msg.set_untransmitted()
         msg.save()
 
@@ -60,12 +64,17 @@ def shutdown_hook():
     mark_unscheduled()
     logging.info("Ready for exit.")
 
+
+quit_signal = threading.Event()
+
 def load_packets_from_db():
     """Loads the current database into the jobs"""
-    if server.is_stale:
+    if server.is_stale and server.running:
         logging.warning("Connection is stale!")
-        shutdown_hook()
-        exit(1)
+        try:
+            mark_unscheduled()
+        finally:
+            quit_signal.set()
     logging.debug("Polling scheduled jobs...")
     scheduled = [job.name for job in scheduler.get_jobs()]
     logging.debug(scheduled)
@@ -97,14 +106,20 @@ scheduler.add_job(
 logging.debug("Starting scheduler")
 scheduler.start()
 
-def check_connection():
-    """Checks if the connection is still alive"""
-    if server.is_stale:
-        logging.warning("Connection is stale!")
-        mark_unscheduled()
+def server_target():
+    """Runs the server"""
+    logging.debug("Starting server")
+    try:
         server.run()
-    else:
-        logging.debug("Connection is alive.")
+    except Exception as e:
+        logging.exception(e)
+    finally:
+        quit_signal.set()
 
-logging.info("Starting beacon server")
-server.run()
+server_thread = threading.Thread(target=server_target, daemon=True)
+server_thread.start()
+
+quit_signal.wait()
+logging.info("Preparing for exit...")
+shutdown_hook()
+exit()
