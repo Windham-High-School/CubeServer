@@ -5,11 +5,14 @@
 
 import logging
 import csv
+import shutil
 import os
 from datetime import timedelta
 from math import floor
+from random import randint
+import subprocess
 from bson.objectid import ObjectId
-from flask import abort, Blueprint, render_template, request, url_for, current_app, flash, session, send_file, redirect
+from flask import abort, Blueprint, make_response, render_template, request, url_for, current_app, flash, session, send_file, redirect
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_required
 from typing import cast, List
@@ -99,13 +102,16 @@ def admin_home():
         else:
             reserved_links += [(name, url_for('.gen_reserved', name=name))]
 
+    beacon_form = ImmediateBeaconForm()
+    beacon_form.instant.data = datetime.now()
+
     # Render the template:
     return render_template(
         'console.html.jinja2',
         teams_table = teams_table.__html__(),
         user_form = InvitationForm(),
         config_form = conf_form,
-        beacon_form = ImmediateBeaconForm(),
+        beacon_form = beacon_form,
         email_groups = {
             TeamLevel.JUNIOR_VARSITY.value: base64.urlsafe_b64encode(',  '.join([
                 ', '.join(team.emails) for team in
@@ -120,7 +126,8 @@ def admin_home():
                     Team.find()
             ]).encode())
         }.items(),
-        reserved_names=reserved_links
+        reserved_names=reserved_links,
+        rand=randint(0, 1000000)
     )
 
 @bp.route('/csv-endpoint', methods=['POST'])
@@ -152,7 +159,8 @@ def beacon_csv():
                     message=row['body'],
                     destination=OutputDestination(row['output']),
                     encoding=BeaconMessageEncoding(row['encoding']),
-                    misfire_grace=int(row['misfire grace time'])
+                    misfire_grace=int(row['misfire grace time']),
+                    intensity=int(row['intensity'])
                 ).save()
         except:
             flash("There was a problem processing your CSV")
@@ -514,7 +522,8 @@ def beacon_tx():
                 message=form.message.data,
                 destination=OutputDestination(form.destination.data),
                 encoding=BeaconMessageEncoding(form.msg_format.data),
-                misfire_grace=form.misfire_grace.data
+                misfire_grace=form.misfire_grace.data,
+                intensity=form.intensity.data
             )
             msg.save()
         except:
@@ -673,3 +682,36 @@ def gen_reserved(name: str = ""):
     team.save()
     flash(f"Successfully created reserved team {name} ({team.id})", category='success')
     return render_template('redirect_back.html.jinja2')
+
+@bp.route('/beacon_code.zip')
+def package_beacon_code():
+    """Packages and downloads the a ZIP file containing the beacon code"""
+    logging.info(f"Packing beacon code ZIP")
+    working_dir = f"/tmp/beacon_pack_{str(randint(100,999))}"
+    os.mkdir(working_dir)
+    os.chdir(working_dir)
+    output_path = f"{working_dir}/download.zip"
+    shutil.copyfile("/api_cert/beacon.pem", f"{working_dir}/beacon.pem")
+    shutil.copyfile("/api_cert/beacon.key", f"{working_dir}/beacon.key")
+    with open(f'{working_dir}/cert.pem', 'w') as fh:
+        from ..client_setup import pem_cert
+        fh.write(pem_cert)
+    subprocess.call([
+        "/package_internal.sh",
+        os.environ['BEACON_CODE_GIT_URL'],
+        output_path
+    ])
+    # TODO: avoid RAM overhead of loading file into memory?
+    output_raw = bytes()
+    with open(output_path, 'rb') as fh:
+        output_raw = fh.read()
+    # Clean up:
+    shutil.rmtree(working_dir)
+    # Formulate response:
+    response = make_response(output_raw)
+    response.headers.set('Content-Type', 'application/zip')
+    response.headers.set(
+        'Content-Disposition', 'attachment'
+    )
+    return response
+

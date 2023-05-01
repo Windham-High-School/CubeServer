@@ -1,12 +1,13 @@
 FROM python:3.10-slim-bullseye
 
-RUN apt-get update && apt-get install -y git zip
+RUN apt-get update && apt-get install -y git zip wget
 
 COPY Docker/CubeServer-app/requirements.txt /tmp/
 RUN pip3 install -r /tmp/requirements.txt
 
+COPY Docker/CubeServer-app/package_internal.sh /
 COPY Docker/CubeServer-app/package_lib.sh /
-RUN chmod +x /package_lib.sh
+RUN chmod +x /package_lib.sh && chmod +x /package_internal.sh
 
 # Entrypoint:
 COPY Docker/CubeServer-app/gunicorn.conf.py /

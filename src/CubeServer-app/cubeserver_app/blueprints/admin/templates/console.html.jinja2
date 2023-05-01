@@ -6,14 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="btn-group" role="group">
-        <a href={{ url_for('admin.email') }} class="btn">Send Custom Email</a>
-        {% for group, mailing_list in email_groups %}
-            <a href={{ url_for('admin.email', recipients=mailing_list) }} class="btn">Email {{ group }}</a>
-        {% endfor %}
-        <a href={{ url_for('admin.sent_email') }} class="btn bg-info">Review Sent Mail</a>
-    </div>
-    <br><br>
+    <h3>Data:</h3>
     <div class="btn-group" role="group">
         <a href={{ url_for('admin.data_table') }} class="btn bg-info">See All Logged Data</a>
         <a href={{ url_for('admin.reference_data_table') }} class="btn bg-info">Browse Reference Data</a>
@@ -29,7 +22,8 @@
 {{ super() }}
     <div class="justify-content-md-center container container-fluid text-center">
         <div class="row">
-            {{macros.startbox("Users", "col")}}
+            <div class="col">
+            {{macros.startbox("Users")}}
                 <p>
                     <a href={{ url_for('admin.edit_users') }} class="btn">Edit/delete users</a>
                 </p>
@@ -46,8 +40,21 @@
                 </form>
             {{macros.endbox()}}
 
+            {{macros.startbox("Email")}}
+                <a href={{ url_for('admin.email') }} class="btn">Send Custom Email</a>
+                <br>
+                <div class="btn-group" role="group">
+                    {% for group, mailing_list in email_groups %}
+                        <a href={{ url_for('admin.email', recipients=mailing_list) }} class="btn">Email {{ group }}</a>
+                    {% endfor %}
+                </div>
+                <br>
+                <a href={{ url_for('admin.sent_email') }} class="btn bg-info">Review Sent Mail</a>
+            {{macros.endbox()}}
+            </div>
+
             {{macros.startbox("Beacon", "col")}}
-                <a href={{ url_for('admin.beacon_table') }} class="btn">See All Scheduled Messages</a>
+                <a href={{ url_for('admin.beacon_table') }} class="btn">Manage Message Queue</a>
                 <hr>
                 <p>
                     Schedule a message now:
@@ -65,17 +72,6 @@
                     {{ wtf.form_field(beacon_form.misfire_grace) }}
                     {{ wtf.form_field(beacon_form.submit) }}
                 </form>
-
-                <hr>
-
-                <p>
-                    Bulk upload CSV packets:
-                </p>
-                <form method="POST" enctype="multipart/form-data" action="{{ url_for('admin.beacon_csv') }}">
-                    <input type="file" name="file" class="btn">
-                    <input type="submit" value="Upload" class="btn btn-submit btn-danger">
-                </form>
-
             {{macros.endbox()}}
 
         </div>
@@ -136,6 +132,11 @@
                     <li>API Server Certificate <a href={{url_for('config.api_cert')}}>cert.pem</a></li>
                 </ul>
 
+                <b>Latest Internal Code Downloads: </b> <i> (Built from latest source on github (origin/main)) </i>
+                <ul>
+                    <li>Beacon Code <a href={{url_for('admin.package_beacon_code')}}?nocache={{rand}}>Packaged ZIP File</a></li>
+                </ul>
+
             {{macros.endbox()}}
             {{macros.startbox("System", "col")}}
                 <b>Uptime: </b>
@@ -145,8 +146,8 @@
 
                 <b>Database Repair: </b>
                 <p>
-                    There is an emergency database repair tool available.
-                    Please consult documentation.
+                    This version of CubeServer is equipped with an emergency database repair tool.
+                    Please consult documentation for more information.
                 </p>
             {{macros.endbox()}}
 <div style="display:none">

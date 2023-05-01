@@ -26,11 +26,12 @@ class OutputDestination(Enum):
 @unique
 class SentStatus(Enum):
     """Updated by the beacon server"""
-    QUEUED      = "Queued"
-    SCHEDULED   = "Scheduled"
-    TRANSMITTED = "Transmitted"
-    MISSED      = "Missed"
-    FAILED      = "Failed"
+    QUEUED       = "Queued"
+    SCHEDULED    = "Scheduled"
+    TRANSMITTED  = "Transmitted"
+    TRANSMITTING = "Transmitting..."
+    MISSED       = "Missed"
+    FAILED       = "Failed"
 
 @unique
 class BeaconMessageEncoding(Enum):
@@ -73,7 +74,7 @@ class BeaconMessage(PyMongoModel):
     
     Example message (byte string transmitted by the beacon; "\\r\\n" line terminator):
     ```
-    ================INCOMING=MESSAGE================
+    \\x07\\x07\\x07\\x07
     CSMSG/1.0
     Division: Lumen
     Server: CubeServer/0.5.3
@@ -83,7 +84,6 @@ class BeaconMessage(PyMongoModel):
     Hello World!
     This is a test message!
 
-    ===================END===MESSAGE================
     ```
     
     The protocol used is modeled after HTTP server responses.
@@ -101,7 +101,8 @@ class BeaconMessage(PyMongoModel):
         intensity: int = 255,
         past: bool = False,
         misfire_grace: int = 30,
-        status: Optional[SentStatus] = None
+        status: Optional[SentStatus] = None,
+        prefix: bytes = b''
     ):
         """
         Args:
@@ -121,6 +122,8 @@ class BeaconMessage(PyMongoModel):
 
         self.send_at = instant
         self.division = division
+
+        self.prefix = prefix
         self.message = message
         self.message_encoding = encoding
         self.line_term = line_term
@@ -185,6 +188,7 @@ class BeaconMessage(PyMongoModel):
         if self._id:  # If this came from the database, don't regen
             return self.full_message_bytes_stored
         return self.line_term.join([
+            self.prefix,
             b'CSMSG/1.0',
             self.headers_bytes,
             self.line_term,
