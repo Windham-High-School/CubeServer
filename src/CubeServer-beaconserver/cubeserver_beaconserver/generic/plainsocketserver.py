@@ -1,16 +1,16 @@
-"""A simple SSL socket server for the beacon
+"""A simple socket server for the beacon
 
-The beacon will connect to this server (with proper auth)
+This is heavily based on SSLSocketServer.py, with the SSL stuff stripped out
 """
 
 from errno import EAGAIN
 import socket
-import ssl
 import logging
 
 class PlainSocketServer:
     def __init__(
         self,
+        timeout: int = 10,
         host = "localhost",
         port = 8888
     ):
@@ -21,11 +21,20 @@ class PlainSocketServer:
         :type host: str
         :param port: The port number to bind the server to.
         :type port: int
+        :param certfile: The path to the certificate file used by the server for SSL.
+        :type certfile: str
+        :param keyfile: The path to the key file used by the server for SSL.
+        :type keyfile: str
+        :param ca_certs: The path to a file containing a set of concatenated CA certificates in PEM format.
+        :type ca_certs: str
+        :param client_cert_reqs: The certificate requirements for client authentication. Can be either ssl.CERT_NONE, ssl.CERT_OPTIONAL or ssl.CERT_REQUIRED.
+        :type client_cert_reqs: int (one of ssl.CERT_NONE, ssl.CERT_OPTIONAL, ssl.CERT_REQUIRED)
         """
         self.host = host
         self.port = port
         self.server_socket = None
         self.connect_hook = None
+        self.timeout = timeout
 
     def run_server(self):
         self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -33,20 +42,30 @@ class PlainSocketServer:
         self.server_socket.listen()
         logging.info("Listening on {host}:{port}...".format(host=self.host, port=self.port))
 
-        while True:
-            logging.info("Listening...")
-            client_socket, client_address = self.server_socket.accept()
-            self.sock = client_socket
-            logging.info(f"Accepted connection from {client_address}!")
+        self.server_socket.settimeout(self.timeout)
 
-            if self.connect_hook is not None:
-                logging.debug("Executing connect hook...")
-                self.connect_hook(client_socket)
-            else:
-                logging.debug("Sending test message...")
-                client_socket.send(b"Connection Established!")
-            logging.info("Closing socket.")
-            client_socket.close()
+        while True:
+            try:
+                logging.info("Listening...")
+                client_socket, client_address = self.server_socket.accept()
+                logging.info(f"Accepted connection from {client_address}!")
+
+                try:
+                    if self.connect_hook is not None:
+                        logging.debug("Executing connect hook...")
+                        self.connect_hook(client_socket)
+                    else:
+                        logging.debug("Sending test message...")
+                        client_socket.send(b"Connection Established!")
+                except Exception as e:
+                    logging.error(f"Error in connect hook: {e}")
+                finally:
+                    logging.info("Closing socket.")
+                    client_socket.close()
+                break
+            except socket.timeout:
+                logging.info("Socket timed out!")
+                continue
 
     def on_connect(self, decorated_method):
         """A decorator for a method of the following declaration:
