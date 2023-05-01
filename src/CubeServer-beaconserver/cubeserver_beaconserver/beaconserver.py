@@ -63,7 +63,7 @@ class BeaconServer:
                             return
                         self.keepalivetime = time.time()
                         # Connection is still alive!
-                    time.sleep(5)  # Send keepalive every 5 seconds
+                    time.sleep(2.5)  # Send keepalive every 5 seconds
             except SSLEOFError:
                 pass
             finally:
