@@ -30,7 +30,7 @@ class MeasurementType(Enum):
     
     def to_DataClass(self):
         """Returns the equivalent DataClass"""
-        return {v: k for k, v in cls._dc_map.items()}[self]
+        return {v: k for k, v in self._dc_map.items()}[self]
 
 class ReferenceCommand:
     """Describes a command sent to the reference station-
