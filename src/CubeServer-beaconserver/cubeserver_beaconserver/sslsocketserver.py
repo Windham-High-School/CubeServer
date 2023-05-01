@@ -10,6 +10,7 @@ import logging
 class SSLSocketServer:
     def __init__(
         self,
+        timeout: int = 10,
         host = "localhost",
         port = 8888,
         certfile = "/etc/ssl/beacon_cert/server.pem",
@@ -41,6 +42,7 @@ class SSLSocketServer:
         self.client_cert_reqs = client_cert_reqs
         self.server_socket = None
         self.connect_hook = None
+        self.timeout = timeout
 
         self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         self.context.check_hostname = False
@@ -55,25 +57,33 @@ class SSLSocketServer:
         self.server_socket.listen()
         logging.info("Listening on {host}:{port}...".format(host=self.host, port=self.port))
 
+        self.server_socket.settimeout(self.timeout)
+
         while True:
-            logging.info("Listening...")
-            client_socket, client_address = self.server_socket.accept()
-            logging.info(f"Accepted connection from {client_address}!")
-            client_ssl_socket = self.context.wrap_socket(client_socket,
-#                                                certfile=self.certfile,
-#                                                keyfile=self.keyfile,
-                                                server_side=True)
+            try:
+                logging.info("Listening...")
+                client_socket, client_address = self.server_socket.accept()
+                logging.info(f"Accepted connection from {client_address}!")
+                client_ssl_socket = self.context.wrap_socket(client_socket,
+                                                    server_side=True)
 
-            #client_cert = client_ssl_socket.getpeercert(True)
+                #client_cert = client_ssl_socket.getpeercert(True)
 
-            if self.connect_hook is not None:
-                logging.debug("Executing connect hook...")
-                self.connect_hook(client_ssl_socket)
-            else:
-                logging.debug("Sending test message...")
-                client_ssl_socket.send(b"Connection Established!")
-            logging.info("Closing socket.")
-            client_ssl_socket.close()
+                try:
+                    if self.connect_hook is not None:
+                        logging.debug("Executing connect hook...")
+                        self.connect_hook(client_ssl_socket)
+                    else:
+                        logging.debug("Sending test message...")
+                        client_ssl_socket.send(b"Connection Established!")
+                except Exception as e:
+                    logging.error(f"Error in connect hook: {e}")
+                finally:
+                    logging.info("Closing socket.")
+                    client_ssl_socket.close()
+            except socket.timeout:
+                logging.info("Socket timed out!")
+                continue
 
     def on_connect(self, decorated_method):
         """A decorator for a method of the following declaration:
