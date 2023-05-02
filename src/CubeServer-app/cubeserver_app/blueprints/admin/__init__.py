@@ -37,6 +37,8 @@ from cubeserver_common.models.mail import Message
 from cubeserver_common.models.beaconmessage import BeaconMessage, BeaconMessageEncoding
 from cubeserver_common.models.reference import ReferencePoint
 from cubeserver_common.config import FROM_NAME, FROM_ADDR, INTERNAL_SECRET_LENGTH, TEMP_PATH
+from cubeserver_common.reference_api import protocol as ref_protocol
+from cubeserver_common.reference_api import DispatcherClient
 
 from flask_table import Table
 from cubeserver_app.tables.columns import PreCol, OptionsCol
@@ -715,3 +717,23 @@ def package_beacon_code():
     )
     return response
 
+@bp.route('/referencetest')
+@login_required
+def referencetest():
+    """Tests reference stations"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    request = ref_protocol.ReferenceRequest(
+        id = b'0x00',
+        signal=ref_protocol.ReferenceSignal.ENQ,
+        command=ref_protocol.ReferenceCommand.MEAS,
+        param=ref_protocol.MeasurementType.TEMP
+    )
+    with DispatcherClient() as client:
+        response = client.request(request)
+    return render_template(
+        'reference_test.html.jinja2',
+        request_pre = pformat(request.dump(), indent=4),
+        response_pre = pformat(response.dump(), indent=4)
+    )

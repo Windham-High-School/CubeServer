@@ -1,0 +1,31 @@
+{% extends "base.html.jinja2" %}
+{% block title %}Reference Response{% endblock %}
+
+{% block header %}
+    <h4>Response from reference </h4>
+{% endblock %}
+
+{% block content %}
+    <div>
+        <p>
+            Sending the following message:
+            <pre>
+{{ request_pre }}
+            </pre>
+        </p>
+
+        <hr>
+
+        <p>
+            Received the following response:
+            <pre>
+{{ response_pre }}
+            </pre>
+        </p>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+    <script src="{{ url_for('static', filename='/js/admin.js') }}"></script>
+{% endblock %}
