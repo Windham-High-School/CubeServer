@@ -15,6 +15,10 @@ from cubeserver_common.models.datapoint import DataClass, DataPoint
 
 REFERENCECOM_VERSION = b'\x01'
 
+class ProtocolError(Exception):
+    """Raised when the protocol is violated"""
+    pass
+
 @enum.unique
 class MeasurementType(enum.Enum):
     TEMP      = b'\x01'
@@ -49,7 +53,8 @@ class ReferenceCommand(enum.Enum):
 
 @dataclasses.dataclass
 class ReferenceRequest:
-    """A command to be sent to a reference station
+    """A 5-byte command to be sent to a reference station
+    <version><id><signal><cmd><param><EOT>
     """
     id:      bytes            = bytes(1)
     signal:  ReferenceSignal  = ReferenceSignal.NUL
@@ -60,19 +65,24 @@ class ReferenceRequest:
     def from_bytes(cls, data: bytes) -> 'ReferenceRequest':
         """Generates request object from byte string"""
         if data[-1] != ReferenceSignal.EOT.value:
-            raise ValueError("Invalid request - missing EOT")
+            raise ProtocolError("Invalid request - missing EOT")
         if data[0] != REFERENCECOM_VERSION:
-            raise ValueError("Invalid request - wrong version")
+            raise ProtocolError("Invalid request - wrong version")
         return cls(
             id      = data[1],
             signal  = ReferenceSignal(data[2]),
             command = ReferenceCommand(data[3]),
             param   = data[4:-1]
         )
+    
+    @property
+    def routing_id(self):
+        """Returns the routing ID for the request"""
+        return self.id
 
     def dump(self) -> bytes:
         """Dumps the request to a byte string"""
-        return b''.join([
+        dumped_bytes = b''.join([
             REFERENCECOM_VERSION,
             self.id,
             self.signal.value,
@@ -80,10 +90,14 @@ class ReferenceRequest:
             self.param,
             ReferenceSignal.EOT
         ])
+        if len(dumped_bytes) != 6:
+            raise ProtocolError("Invalid request - wrong length")
+        return dumped_bytes
 
 @dataclasses.dataclass
 class ReferenceResponse:
     """A response from the reference station
+    <version><signal><length><struct_type><response><EOT>
     """
     signal:      ReferenceSignal = ReferenceSignal.NUL
     length:      bytes           = bytes(1)
@@ -94,9 +108,9 @@ class ReferenceResponse:
     def from_bytes(cls, data: bytes) -> 'ReferenceResponse':
         """Generates response object from byte string"""
         if data[-1] != ReferenceSignal.EOT.value:
-            raise ValueError("Invalid response - missing EOT")
+            raise ProtocolError("Invalid response - missing EOT")
         if data[0] != REFERENCECOM_VERSION:
-            raise ValueError("Invalid response - wrong version")
+            raise ProtocolError("Invalid response - wrong version")
         return cls(
             signal      = ReferenceSignal(data[1]),
             length      = data[2],
