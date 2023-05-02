@@ -316,7 +316,7 @@ class Team(PyMongoModel):
         return cls.find(
             {
                 "status": TeamStatus.INTERNAL.value,
-                "name": {"$nin": config.BEACON_TEAM_NAME}
+                "name": {"$nin": [config.BEACON_TEAM_NAME]}
             }
         )
 
@@ -326,6 +326,16 @@ class Team(PyMongoModel):
         if self.weight_class != TeamLevel.REFERENCE:
             raise AttributeError("This team is not a reference team.")
         return int(self.name.split('-')[-1])
+    
+    @property
+    def reference_port(self) -> int:
+        """Returns the port that the appropriate reference server is listening on"""
+        if self.weight_class != TeamLevel.REFERENCE:
+            raise AttributeError("This team is not a reference team.")
+        port: int = config.REFERENCE_PORT_RANGE[0] + self.reference_id
+        if port > config.REFERENCE_PORT_RANGE[1]:
+            raise ValueError("Reference port is out of range.")
+        return port
 
     # TODO: Remove obsolete reference port stuff
     @classmethod

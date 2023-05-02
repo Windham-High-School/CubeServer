@@ -1,17 +1,18 @@
 """A server to redirect request to reference stations via ReferenceServer instances"""
 
 from ssl import SSLEOFError
-import time
+from typing import Mapping
 
 from cubeserver_common.reference_api import protocol
 from cubeserver_common.models.team import Team, TeamLevel
+from cubeserver_common.config import REFERENCE_COMMAND_PORT
 
 from ..generic.plainsocketserver import *
 from .referenceserver import ReferenceServer
 
 class ReferenceDispatcherServer:
     """A server for dealing with the server-beacon communications"""
-    def __init__(self, routing_id_map: map[int,ReferenceServer], listen_port: int, timeout: int, **kwargs):
+    def __init__(self, routing_id_map: Mapping[int,ReferenceServer], listen_port: int = REFERENCE_COMMAND_PORT, timeout: int = 10, **kwargs):
         self.socketserver = PlainSocketServer(port=listen_port, **kwargs)
         self.timeout = timeout
 

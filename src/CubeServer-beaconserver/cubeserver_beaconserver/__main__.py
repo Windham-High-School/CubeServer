@@ -144,7 +144,7 @@ def reference_dispatcher_target():
     """Runs the dispatcher"""
     logging.debug("Starting dispatcher")
     try:
-        ReferenceDispatcherServer()
+        ReferenceDispatcherServer(reference_routing_table).run()
     except Exception as e:
         logging.exception(e)
     finally:

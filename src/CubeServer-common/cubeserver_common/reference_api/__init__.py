@@ -6,13 +6,13 @@ See CubeServer-beaconserver.reference
 import logging
 import socket
 
-from cubeserver_common.config import DISPATCHER_PORT
-import protocol
+from cubeserver_common.config import REFERENCE_COMMAND_PORT
+from . import protocol
 
 class DispatcherClient:
     """A class for sending requests to the reference server"""
 
-    def __init__(self, timeout: int=10, host='beaconserver', port=DISPATCHER_PORT):
+    def __init__(self, timeout: int=10, host='beaconserver', port=REFERENCE_COMMAND_PORT):
         """Connects to the reference dispatcher server via a tcpip socket"""
         self.timeout = timeout
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
