@@ -34,30 +34,7 @@ class ReferenceDispatcherServer:
                     routing_id_map[req.routing_id].tx_bytes(req.dump())
 
                     # Wait for response from reference server
-                    # <version><signal><length><struct_type><response><EOT>
-                    version = self.rx_bytes(1)
-                    if version != protocol.REFERENCECOM_VERSION:
-                        self.sock.send(protocol.ReferenceSignal.NACK.value)
-                        return
-                    signal = self.rx_bytes(1)
-                    if signal != protocol.ReferenceSignal.ACK.value:
-                        self.sock.send(protocol.ReferenceSignal.NACK.value)
-                        return
-                    length = int.from_bytes(self.rx_bytes(1), 'big')
-                    struct_type = self.rx_bytes(1)
-                    response = self.rx_bytes(length)
-                    eot = self.rx_bytes(1)
-                    if eot != protocol.ReferenceSignal.EOT.value:
-                        self.sock.send(protocol.ReferenceSignal.NACK.value)
-                        return
-                    
-                    # Package response
-                    response = protocol.ReferenceResponse(
-                        signal=signal,
-                        length=length,
-                        struct_type=struct_type,
-                        response=response
-                    )
+                    response = protocol.ReferenceResponse.from_socket(routing_id_map[req.routing_id].sock)
 
                     # Send response to internal api
                     self.sock.send(response.dump())

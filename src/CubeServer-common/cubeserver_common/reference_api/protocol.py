@@ -7,6 +7,7 @@ Request:
 
 import dataclasses
 import enum
+import socket
 import struct
 
 
@@ -143,3 +144,31 @@ class ReferenceResponse:
             value
         )
         self.struct_type = format
+
+    @classmethod
+    def from_socket(self, socket: socket.socket) -> 'ReferenceResponse':
+        """Reads a response from the given socket"""
+        # <version><signal><length><struct_type><response><EOT>
+        version = self.rx_bytes(1)
+        if version != REFERENCECOM_VERSION:
+            self.sock.send(ReferenceSignal.NACK.value)
+            return
+        signal = self.rx_bytes(1)
+        if signal != ReferenceSignal.ACK.value:
+            self.sock.send(ReferenceSignal.NACK.value)
+            return
+        length = int.from_bytes(self.rx_bytes(1), 'big')
+        struct_type = self.rx_bytes(1)
+        response = self.rx_bytes(length)
+        eot = self.rx_bytes(1)
+        if eot != ReferenceSignal.EOT.value:
+            self.sock.send(ReferenceSignal.NACK.value)
+            return
+        
+        # Package response
+        return ReferenceResponse(
+            signal=signal,
+            length=length,
+            struct_type=struct_type,
+            response=response
+        )
