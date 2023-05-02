@@ -1,12 +1,38 @@
-"""Describes a command to be sent to a reference station
+"""Describes the protocol to be used when contacting a reference station
 
-The communication scheme will occur as follows:
+Request:
+    <Version Byte> <id> <signal> <cmd> <param> <EOT>
+
 """
 
 import dataclasses
 import enum
 import struct
 
+
+from cubeserver_common.models.datapoint import DataClass, DataPoint
+
+
+REFERENCECOM_VERSION = b'\x01'
+
+@enum.unique
+class MeasurementType(enum.Enum):
+    TEMP      = b'\x01'
+    PRES      = b'\x02'
+
+    _dc_map = {
+            DataClass.TEMPERATURE: TEMP,
+            DataClass.PRESSURE: PRES
+        }
+
+    @classmethod
+    def from_DataClass(cls, od: DataClass):
+        """Converts from DataClass to MeasurementType"""
+        return cls._dc_map[od]
+    
+    def to_DataClass(self):
+        """Returns the equivalent DataClass"""
+        return {v: k for k, v in self._dc_map.items()}[self]
 
 class ReferenceSignal(enum.Enum):
     NUL  = b'\x00'
@@ -30,9 +56,24 @@ class ReferenceRequest:
     command: ReferenceCommand = ReferenceCommand.NULL
     param:   bytes            = bytes(1)
 
+    @classmethod
+    def from_bytes(cls, data: bytes) -> 'ReferenceRequest':
+        """Generates request object from byte string"""
+        if data[-1] != ReferenceSignal.EOT.value:
+            raise ValueError("Invalid request - missing EOT")
+        if data[0] != REFERENCECOM_VERSION:
+            raise ValueError("Invalid request - wrong version")
+        return cls(
+            id      = data[1],
+            signal  = ReferenceSignal(data[2]),
+            command = ReferenceCommand(data[3]),
+            param   = data[4:-1]
+        )
+
     def dump(self) -> bytes:
         """Dumps the request to a byte string"""
         return b''.join([
+            REFERENCECOM_VERSION,
             self.id,
             self.signal.value,
             self.command.value,
@@ -49,9 +90,24 @@ class ReferenceResponse:
     struct_type: bytes           = bytes(1)
     response:    bytes           = bytes(0)
 
+    @classmethod
+    def from_bytes(cls, data: bytes) -> 'ReferenceResponse':
+        """Generates response object from byte string"""
+        if data[-1] != ReferenceSignal.EOT.value:
+            raise ValueError("Invalid response - missing EOT")
+        if data[0] != REFERENCECOM_VERSION:
+            raise ValueError("Invalid response - wrong version")
+        return cls(
+            signal      = ReferenceSignal(data[1]),
+            length      = data[2],
+            struct_type = data[3],
+            response    = data[4:-1]
+        )
+
     def dump(self) -> bytes:
         """Dumps the response to a byte string"""
         return b''.join([
+            REFERENCECOM_VERSION,
             self.signal.value,
             self.length,
             self.struct_type,
