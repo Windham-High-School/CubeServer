@@ -149,6 +149,9 @@ class ReferenceServer:
             buf = bytearray(min(size-len(response), chunkby))
             try:
                 recvd = self.sock.recv_into(buf, min(size-len(response), chunkby))
+                if buf.rfind(bytearray(protocol.ReferenceSignal.EOT.value)) >= 0:
+                    recvd -= 1
+                    break
             except OSError as e:
                 if e.errno == EAGAIN:
                     recvd = -1
