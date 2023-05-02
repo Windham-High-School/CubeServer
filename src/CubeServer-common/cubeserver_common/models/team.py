@@ -320,6 +320,14 @@ class Team(PyMongoModel):
             }
         )
 
+    # TODO: Document that reference names must end in -<int>
+    @property
+    def reference_id(self) -> int:
+        if self.weight_class != TeamLevel.REFERENCE:
+            raise AttributeError("This team is not a reference team.")
+        return int(self.name.split('-')[-1])
+
+    # TODO: Remove obsolete reference port stuff
     @classmethod
     def find_unused_port(cls) -> int:
         """Returns a port within the range specified in the configuration"""
