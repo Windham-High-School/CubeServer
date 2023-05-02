@@ -2,6 +2,8 @@
 
 Request:
     <Version Byte> <id> <signal> <cmd> <param> <EOT>
+Response:
+    <Version Byte> <signal> <length> <struct_type> <response bytes> <EOT>
 
 """
 
