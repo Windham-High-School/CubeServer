@@ -10,7 +10,7 @@ from sys import argv, exit
 from apscheduler.schedulers.background import BackgroundScheduler
 from cubeserver_common.models.beaconmessage import BeaconMessage, SentStatus
 from cubeserver_common.models.config.conf import Conf
-from cubeserver_common.config import LOGGING_LEVEL, BEACONSERVER_PORT
+from cubeserver_common.config import LOGGING_LEVEL
 
 from .beacon.beaconserver import BeaconServer, BeaconCommand
 

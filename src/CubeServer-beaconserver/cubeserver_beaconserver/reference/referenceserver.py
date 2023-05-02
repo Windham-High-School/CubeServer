@@ -22,9 +22,9 @@ from ssl import SSLEOFError
 import socket
 
 from cubeserver_common.models.team import Team, TeamLevel
+from cubeserver_common.reference_api import protocol
 
 from ..generic.sslsocketserver import *
-from .referencereq import ReferenceStatus, ReferenceCommand
 
 socket.setdefaulttimeout(10.0)
 
@@ -63,7 +63,7 @@ class ReferenceServer:
                         logging.debug("Sending keepalive...")
                         self.sock.setblocking(True)
                         self.sock.send(b'Keep-Alive\x00\x00\x00')
-                        if self.rx_bytes(1) != ReferenceStatus.ACK.value:
+                        if self.rx_bytes(1) != protocol.ReferenceSignal.ACK.value:
                             self.connection_present.clear()
                             return
                         self.keepalivetime = time.time()
@@ -85,44 +85,44 @@ class ReferenceServer:
         """Returns True if the connection is stale"""
         return self.connection_present.is_set() and time.time() - self.keepalivetime > self.timeout
 
-    def send_cmd(self, message: BeaconCommand) -> bool:
-        """Sends a command to the beacon.
-        Returns True on success
-        """
-        logging.debug("\n\n")
-        logging.info(f"send_cmd {message}")
-        self.connection_present.wait()
-        with self.lock:  # Lock to prevent multiple threads from sending at once
-            success = False
-            # Send message over:
-            self.tx_bytes(message.serialize())
+    # def send_cmd(self, message: BeaconCommand) -> bool:
+    #     """Sends a command to the beacon.
+    #     Returns True on success
+    #     """
+    #     logging.debug("\n\n")
+    #     logging.info(f"send_cmd {message}")
+    #     self.connection_present.wait()
+    #     with self.lock:  # Lock to prevent multiple threads from sending at once
+    #         success = False
+    #         # Send message over:
+    #         self.tx_bytes(message.serialize())
 
-            # Check for ACK:
-            response = self.rx_bytes(1)
-            if response[0:1] != BeaconStatus.ACK.value:
-                logging.debug("No ACK; aborting")
-                return False
-            logging.debug("Got beacon ACK")
+    #         # Check for ACK:
+    #         response = self.rx_bytes(1)
+    #         if response[0:1] != BeaconStatus.ACK.value:
+    #             logging.debug("No ACK; aborting")
+    #             return False
+    #         logging.debug("Got beacon ACK")
 
-            # Wait for transmission to finish:
-            buf = self.rx_bytes(1)
-            while buf == BeaconStatus.TXG.value:
-                buf = self.rx_bytes(1)
-                logging.debug("Got TXG")
-            if buf != BeaconStatus.ACK.value:
-                return False
-            del buf
+    #         # Wait for transmission to finish:
+    #         buf = self.rx_bytes(1)
+    #         while buf == BeaconStatus.TXG.value:
+    #             buf = self.rx_bytes(1)
+    #             logging.debug("Got TXG")
+    #         if buf != BeaconStatus.ACK.value:
+    #             return False
+    #         del buf
 
-            # Wait for end of transmission:
-            check = self.rx_bytes(2)
-            logging.debug("Rx'd okay bytes")
-            logging.debug(check[0])
-            logging.debug(len(message.message) % 255)
-            if check[0] != (len(message.message) % 255):
-                logging.debug("Bad checksum")
-                return False
-            logging.debug("Good length checksum")
-            return True
+    #         # Wait for end of transmission:
+    #         check = self.rx_bytes(2)
+    #         logging.debug("Rx'd okay bytes")
+    #         logging.debug(check[0])
+    #         logging.debug(len(message.message) % 255)
+    #         if check[0] != (len(message.message) % 255):
+    #             logging.debug("Bad checksum")
+    #             return False
+    #         logging.debug("Good length checksum")
+    #         return True
 
     def run(self):
         """A blocking method that never returns
@@ -131,17 +131,17 @@ class ReferenceServer:
         self.socketserver.run_server()
 
     def tx_bytes(self, stuff: bytes) -> int:
-        """Sends some stuff to the beacon and returns an int return code"""
+        """Sends some stuff to the reference station and returns an int return code"""
         if self.sock is None:
-            return ConnectionError("Connection from the beacon not established")
+            return ConnectionError("Connection from the station not established")
         self.keepalivetime = time.time()
         self.sock.sendall(stuff)
         logging.debug(f"Sent stuff: \"{stuff}\"")
 
     def rx_bytes(self, size: int, chunkby: int = 256) -> bytes:
-        """Receives a given number of bytes from the beacon"""
+        """Receives a given number of bytes from the reference station and returns them"""
         if self.sock is None:
-            return ConnectionError("Connection from the beacon not established")
+            return ConnectionError("Connection from the station not established")
         self.keepalivetime = time.time()
         self.sock.setblocking(True)
         response = b""
