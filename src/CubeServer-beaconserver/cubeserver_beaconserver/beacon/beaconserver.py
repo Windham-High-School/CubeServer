@@ -23,8 +23,8 @@ import time
 from ssl import SSLEOFError
 import socket
 
-from .sslsocketserver import *
-from .beaconmessage import BeaconStatus, BeaconDestination, BeaconCommand
+from ..generic.sslsocketserver import *
+from .beaconmessage import BeaconStatus, BeaconCommand
 
 socket.setdefaulttimeout(10.0)
 

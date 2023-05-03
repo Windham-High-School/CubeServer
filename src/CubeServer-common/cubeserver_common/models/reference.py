@@ -64,11 +64,11 @@ class ReferencePoint(PyMongoModel):
             raise ValueError(f"No reference of type {data_type}")
         
 
-class ReferenceStation:
-    """Manages the reference station"""
+class Reference:
+    """Manages the reference stations"""
 
     @classmethod
-    def collect(cls) -> ReferencePoint:
+    def collect(cls, team: Team) -> ReferencePoint:
         """Collects a reference point and stores it to the database.
         This should be run periodically."""
         
@@ -89,7 +89,7 @@ class ReferenceStation:
         )
         ref_pt.save()
         return ref_pt
-    
+
     @classmethod
     def trimmed_mean(cls, values: List[int|float]) -> float:
         """Calculates a trimmed mean (of sorts) of a set of values.
@@ -97,6 +97,16 @@ class ReferenceStation:
         """
         median = statistics.median(values)
         return sum(values) - max(value - median for value in values) + median
+    
+    @classmethod
+    def collect_avg(cls) -> ReferencePoint:
+        """Collects the trimmed mean reference point as discussed earlier"""
+        for station in Team.find_references():
+            ref = cls.collect(station)
+        return ReferencePoint(
+            cls.trimmed_mean(),
+            cls.trimmed_mean()
+        )
 
     @classmethod
     def get_window_point(cls, window: int) -> ReferencePoint:
@@ -107,5 +117,5 @@ class ReferenceStation:
         elapsed = datetime.now() - most_recent.moment
         if elapsed.total_seconds() <= window:
             return most_recent
-        return cls.collect()  # If it's too old, grab a new point
+        return cls.collect_avg()  # If it's too old, grab a new point
 

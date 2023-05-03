@@ -10,9 +10,13 @@ from sys import argv, exit
 from apscheduler.schedulers.background import BackgroundScheduler
 from cubeserver_common.models.beaconmessage import BeaconMessage, SentStatus
 from cubeserver_common.models.config.conf import Conf
+from cubeserver_common.models.team import Team
 from cubeserver_common.config import LOGGING_LEVEL
 
-from .beaconserver import BeaconServer, BeaconCommand
+from .beacon.beaconserver import BeaconServer, BeaconCommand
+
+from .reference.referencedispatcher import ReferenceDispatcherServer
+from .reference.referenceserver import ReferenceServer
 
 
 def mark_unscheduled():
@@ -106,7 +110,8 @@ scheduler.add_job(
 logging.debug("Starting scheduler")
 scheduler.start()
 
-def server_target():
+# Start the beacon server:
+def beacon_server_target():
     """Runs the server"""
     logging.debug("Starting server")
     try:
@@ -116,8 +121,37 @@ def server_target():
     finally:
         quit_signal.set()
 
-server_thread = threading.Thread(target=server_target, daemon=True)
-server_thread.start()
+beacon_server_thread = threading.Thread(target=beacon_server_target, daemon=True)
+beacon_server_thread.start()
+
+# Generate the reference server dispatching table:
+reference_teams = Team.find_references()
+logging.debug(f"Reference teams: {reference_teams}")
+
+reference_routing_table = {}
+for team in reference_teams:
+    logging.debug(f"Creating reference server for {team.name}")
+    reference_routing_table[team.reference_id] = ReferenceServer(team, host=argv[1])
+
+# Start the reference servers:
+for reference_id, reference_server in reference_routing_table.items():
+    logging.debug(f"Starting reference server for #{reference_id}")
+    reference_server_thread = threading.Thread(target=reference_server.run, daemon=True)
+    reference_server_thread.start()
+
+# Start the reference dispatcher:
+def reference_dispatcher_target():
+    """Runs the dispatcher"""
+    logging.debug("Starting dispatcher")
+    try:
+        ReferenceDispatcherServer(reference_routing_table, host=argv[1]).run()
+    except Exception as e:
+        logging.exception(e)
+    finally:
+        quit_signal.set()
+
+reference_dispatcher_thread = threading.Thread(target=reference_dispatcher_target, daemon=True)
+reference_dispatcher_thread.start()
 
 quit_signal.wait()
 logging.info("Preparing for exit...")
