@@ -131,7 +131,7 @@ logging.debug(f"Reference teams: {reference_teams}")
 reference_routing_table = {}
 for team in reference_teams:
     logging.debug(f"Creating reference server for {team.name}")
-    reference_routing_table[team.reference_id] = ReferenceServer(team)
+    reference_routing_table[team.reference_id] = ReferenceServer(team, host=argv[1])
 
 # Start the reference servers:
 for reference_id, reference_server in reference_routing_table.items():
@@ -144,7 +144,7 @@ def reference_dispatcher_target():
     """Runs the dispatcher"""
     logging.debug("Starting dispatcher")
     try:
-        ReferenceDispatcherServer(reference_routing_table).run()
+        ReferenceDispatcherServer(reference_routing_table, host=argv[1]).run()
     except Exception as e:
         logging.exception(e)
     finally:

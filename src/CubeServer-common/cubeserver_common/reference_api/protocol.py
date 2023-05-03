@@ -16,7 +16,8 @@ import struct
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 
 
-REFERENCECOM_VERSION = b'\x01'
+REFERENCECOM_VERSION: bytes = b'\x01'
+"""A single-byte version number on both the reference and client devices"""
 
 class ProtocolError(Exception):
     """Raised when the protocol is violated"""

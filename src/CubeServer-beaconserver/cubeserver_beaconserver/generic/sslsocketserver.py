@@ -63,6 +63,7 @@ class SSLSocketServer:
         logging.info("Listening...")
         while True:
             try:
+                logging.debug(f"Listening on {self.host}:{self.port}...")
                 client_socket, client_address = self.server_socket.accept()
                 logging.info(f"Accepted connection from {client_address}!")
                 client_ssl_socket = self.context.wrap_socket(client_socket,
@@ -84,6 +85,7 @@ class SSLSocketServer:
                     client_ssl_socket.close()
                 break
             except socket.timeout:
+                logging.debug("Socket timeout")
                 continue
 
     def on_connect(self, decorated_method):

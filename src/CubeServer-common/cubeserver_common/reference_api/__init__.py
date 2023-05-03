@@ -12,7 +12,7 @@ from . import protocol
 class DispatcherClient:
     """A class for sending requests to the reference server"""
 
-    def __init__(self, timeout: int=10, host='beaconserver', port=REFERENCE_COMMAND_PORT):
+    def __init__(self, timeout: int=10, host='127.0.0.1', port=REFERENCE_COMMAND_PORT):
         """Connects to the reference dispatcher server via a tcpip socket"""
         self.timeout = timeout
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

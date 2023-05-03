@@ -104,6 +104,7 @@ services:
       - MONGODB_PASSWORD=${MONGODB_PWD}
     ports: # Bind the port for the web server
       - "${BEACON_PORT}:8888"
+      - "32769-32800:32769-32800"
     depends_on:
       - mongodb
       - accesspoint

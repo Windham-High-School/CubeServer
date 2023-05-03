@@ -60,9 +60,9 @@ class ReferenceServer:
                     if not self.connection_present.is_set():
                         break
                     with self.lock: # Lock to prevent multiple threads from sending at once
-                        logging.debug("Sending keepalive...")
+                        logging.debug(f"Sending keepalive to reference station @ {tcp_port}")
                         self.sock.setblocking(True)
-                        self.sock.send(b'Keep-Alive\x00\x00\x00')
+                        self.sock.send(b'KeepAl')
                         if self.rx_bytes(1) != protocol.ReferenceSignal.ACK.value:
                             self.connection_present.clear()
                             return

@@ -46,7 +46,6 @@ class PlainSocketServer:
 
         while True:
             try:
-                logging.info("Listening...")
                 client_socket, client_address = self.server_socket.accept()
                 logging.info(f"Accepted connection from {client_address}!")
 
@@ -64,7 +63,6 @@ class PlainSocketServer:
                     client_socket.close()
                 break
             except socket.timeout:
-                logging.info("Socket timed out!")
                 continue
 
     def on_connect(self, decorated_method):

@@ -728,7 +728,7 @@ def referencetest():
         id = b'0x00',
         signal=ref_protocol.ReferenceSignal.ENQ,
         command=ref_protocol.ReferenceCommand.MEAS,
-        param=ref_protocol.MeasurementType.TEMP
+        param=ref_protocol.MeasurementType.TEMP.value
     )
     with DispatcherClient() as client:
         response = client.request(request)
