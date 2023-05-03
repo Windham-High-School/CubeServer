@@ -4,7 +4,7 @@ from typing import List
 from flask_table import Table, Col
 
 from cubeserver_common.models.team import Team, TeamLevel, TeamStatus
-from cubeserver_app.tables.columns import CustomLinkCol, DropDownEnumCol, EnumCol, OptionsCol, TeamNameCol, AdminTeamNameCol, ManualScoring, ScoreDeltaCol, TextEditCol
+from cubeserver_app.tables.columns import CustomLinkCol, DropDownEnumCol, EnumCol, OptionsCol, TeamNameCol, AdminTeamNameCol, ManualScoring, ScoreDeltaCol, TextEditCol, FloatCol
 
 __all__ = ['AdminTeamTable', 'LeaderboardTeamTable']
 
@@ -22,7 +22,7 @@ class AdminTeamTable(Table):
                                       exclude_option=TeamLevel.PSYCHO_KILLER)
     status          = DropDownEnumCol('Status', TeamStatus)
     members_str     = Col('Members')  # TODO: Perhaps employ a nested table to list members of a group
-    score           = Col('Score')
+    score           = FloatCol('Score')
     secret          = Col('Secret')
     id              = OptionsCol('Options')
     id_2            = ManualScoring('Manual Scoring')
@@ -52,7 +52,7 @@ class LeaderboardTeamTable(Table):
     border = True
 
     name            = TeamNameCol('Team Name')
-    score           = Col('Score')
+    score           = FloatCol('Score')
     score_delta     = ScoreDeltaCol('Score Delta')
 
     #_id             = Col('Identifier')

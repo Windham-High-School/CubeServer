@@ -57,10 +57,16 @@ class EnumCol(Col):
             return content.value
         return ""
 
+class FloatCol(Col):
+    """A column for rendering floats"""
+    def td_format(self, content):
+        return f"{content:.2f}"
+
 class TeamNameCol(Col):
     """A column for team names"""
     def td_format(self, content):
         return f"<b><a href='{url_for('home.team_info', team_name=content)}'>{content}</a></b>"
+
 class AdminTeamNameCol(Col):
     """A column for team names"""
     def td_format(self, content):
@@ -336,7 +342,7 @@ class ScoreDeltaCol(HTMLCol):
         prefix = '+' if number >= 0 else '-'
         return (
                 f"<span class=\"{text_class}\">\n",
-                f"{prefix} {abs(content)}\n",
+                f"{prefix} {abs(content):.2f}\n",
                 "</span>\n"
         )
 

@@ -48,6 +48,7 @@ echo -e "\n# Automatically generated:"                  >> ../.env
 echo -e "VERSION_TAG=\"${VERSION_STR}\"\n"              >> ../.env
 echo -e "LOGLEVEL=\"${LOGLEVEL_STR}\"\n"                >> ../.env
 echo -e "MONGO_CONTAINER=\"${MONGO_CONTAINER_STR}\"\n"  >> ../.env
-
 echo -e "\n${LGREEN}Finished Configuring.${RESTORE}"
 echo -e "\nReady to run ${CYAN}docker compose build${RESTORE} or ${CYAN}docker compose pull${RESTORE}\n"
+
+grep ../config.env -e ^DEVMODE=* -q && echo -e "${RED}Warning: DEVMODE is enabled.${RESTORE}"

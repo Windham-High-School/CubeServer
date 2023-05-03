@@ -23,15 +23,15 @@ import time
 from ssl import SSLEOFError
 import socket
 
-from .sslsocketserver import *
-from .beaconmessage import BeaconStatus, BeaconDestination, BeaconCommand
+from ..generic.sslsocketserver import *
+from .beaconmessage import BeaconStatus, BeaconCommand
 
 socket.setdefaulttimeout(10.0)
 
 class BeaconServer:
     """A server for dealing with the server-beacon communications"""
     def __init__(self, timeout=10, repeat_attempts=10, **kwargs):
-        self.socketserver = SSLSocketServer(**kwargs)
+        self.socketserver = SSLSocketServer(timeout, **kwargs)
         self.repeat_attempts = repeat_attempts
         self.sock = None
         self.timeout = timeout
@@ -56,15 +56,14 @@ class BeaconServer:
                         break
                     with self.lock: # Lock to prevent multiple threads from sending at once
                         logging.debug("Sending keepalive...")
-                        self.sock.setblocking(False)
-                        self.sock.send(b'Keep-Alive\x00\x00\x00')
                         self.sock.setblocking(True)
+                        self.sock.send(b'Keep-Alive\x00\x00\x00')
                         if self.rx_bytes(1) != BeaconStatus.ACK.value:
                             self.connection_present.clear()
                             return
                         self.keepalivetime = time.time()
                         # Connection is still alive!
-                    time.sleep(5)  # Send keepalive every 5 seconds
+                    time.sleep(2.5)  # Send keepalive every 5 seconds
             except SSLEOFError:
                 pass
             finally:
@@ -77,8 +76,9 @@ class BeaconServer:
             return
 
     @property
-    def is_stale(self) -> bool:
-        return time.time() - self.keepalivetime > self.timeout
+    def is_stale(self) -> bool:  # Don't worry about stale connection if there never was one-
+        """Returns True if the connection is stale"""
+        return self.connection_present.is_set() and time.time() - self.keepalivetime > self.timeout
 
     def send_cmd(self, message: BeaconCommand) -> bool:
         """Sends a command to the beacon.
@@ -102,8 +102,8 @@ class BeaconServer:
             # Wait for transmission to finish:
             buf = self.rx_bytes(1)
             while buf == BeaconStatus.TXG.value:
-                logging.debug("Awaiting TXG...")
                 buf = self.rx_bytes(1)
+                logging.debug("Got TXG")
             if buf != BeaconStatus.ACK.value:
                 return False
             del buf

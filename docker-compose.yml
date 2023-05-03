@@ -37,7 +37,7 @@ services:
       # Logging Level for GUnicorn:
       - LOGLEVEL=${LOGLEVEL}
     ports: # Bind the port for the web server
-      - "${WEBAPP_PORT}:80"
+      - ${DEVMODE+$WEBAPP_PORT}:80  # But only in dev mode
     depends_on:
       - mongodb
       - api
@@ -104,6 +104,7 @@ services:
       - MONGODB_PASSWORD=${MONGODB_PWD}
     ports: # Bind the port for the web server
       - "${BEACON_PORT}:8888"
+      - "32769-32800:32769-32800"
     depends_on:
       - mongodb
       - accesspoint

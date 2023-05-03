@@ -12,7 +12,7 @@ from cubeserver_common.config import COMMENT_FILTER_PROFANITY
 from cubeserver_common.models import PyMongoModel, Encodable
 from cubeserver_common.models.team import Team, TeamLevel
 from cubeserver_common.models.datapoint import DataPoint, DataClass
-from cubeserver_common.models.reference import ReferencePoint, ReferenceStation
+from cubeserver_common.models.reference import ReferencePoint, Reference
 from cubeserver_common.models.utils import ComplexDictCodec, EnumCodec, EncodableCodec, DummyCodec
 
 
@@ -231,7 +231,7 @@ class Rules(PyMongoModel):
         try:
             tol = self.accuracy_tolerance[team, datapoint.category]
             points_possible = self.point_menu[team.weight_class][datapoint.category]
-            reference = ReferenceStation.get_window_point(self.reference_window)
+            reference = Reference.get_window_point(self.reference_window)
             reference_val = reference.of(datapoint.category).value
             if abs((reference_val - datapoint.value) / reference_val) <= tol:
                 datapoint.rawscore = points_possible

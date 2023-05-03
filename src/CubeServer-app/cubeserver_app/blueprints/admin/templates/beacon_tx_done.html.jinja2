@@ -1,4 +1,10 @@
 {% extends "base.html.jinja2" %}
+
+{% block head %}
+{{ super() }}
+    <meta http-equiv="refresh" content="2;url={{ url_for('.beacon_table') }}" />
+{% endblock %}
+
 {% block title %}Beacon Tx{% endblock %}
 
 {% block header %}

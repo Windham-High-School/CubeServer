@@ -3,6 +3,7 @@
 The beacon will connect to this server (with proper auth)
 """
 
+from errno import EAGAIN
 import socket
 import ssl
 import logging
@@ -10,6 +11,7 @@ import logging
 class SSLSocketServer:
     def __init__(
         self,
+        timeout: int = 10,
         host = "localhost",
         port = 8888,
         certfile = "/etc/ssl/beacon_cert/server.pem",
@@ -41,6 +43,7 @@ class SSLSocketServer:
         self.client_cert_reqs = client_cert_reqs
         self.server_socket = None
         self.connect_hook = None
+        self.timeout = timeout
 
         self.context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         self.context.check_hostname = False
@@ -55,25 +58,35 @@ class SSLSocketServer:
         self.server_socket.listen()
         logging.info("Listening on {host}:{port}...".format(host=self.host, port=self.port))
 
+        self.server_socket.settimeout(self.timeout)
+
+        logging.info("Listening...")
         while True:
-            logging.info("Listening...")
-            client_socket, client_address = self.server_socket.accept()
-            logging.info(f"Accepted connection from {client_address}!")
-            client_ssl_socket = self.context.wrap_socket(client_socket,
-#                                                certfile=self.certfile,
-#                                                keyfile=self.keyfile,
-                                                server_side=True)
+            try:
+                logging.debug(f"Listening on {self.host}:{self.port}...")
+                client_socket, client_address = self.server_socket.accept()
+                logging.info(f"Accepted connection from {client_address}!")
+                client_ssl_socket = self.context.wrap_socket(client_socket,
+                                                    server_side=True)
 
-            #client_cert = client_ssl_socket.getpeercert(True)
+                #client_cert = client_ssl_socket.getpeercert(True)
 
-            if self.connect_hook is not None:
-                logging.debug("Executing connect hook...")
-                self.connect_hook(client_ssl_socket)
-            else:
-                logging.debug("Sending test message...")
-                client_ssl_socket.send(b"Connection Established!")
-            logging.info("Closing socket.")
-            client_ssl_socket.close()
+                try:
+                    if self.connect_hook is not None:
+                        logging.debug("Executing connect hook...")
+                        self.connect_hook(client_ssl_socket)
+                    else:
+                        logging.debug("Sending test message...")
+                        client_ssl_socket.send(b"Connection Established!")
+                except Exception as e:
+                    logging.error(f"Error in connect hook: {e}")
+                finally:
+                    logging.info("Closing socket.")
+                    client_ssl_socket.close()
+                break
+            except socket.timeout:
+                logging.debug("Socket timeout")
+                continue
 
     def on_connect(self, decorated_method):
         """A decorator for a method of the following declaration:
@@ -84,3 +97,36 @@ class SSLSocketServer:
         if self.connect_hook is not None:
             raise ValueError("A connect hook has already been registered!")
         self.connect_hook = decorated_method
+
+    def rx_bytes(self, size: int, chunkby: int = 256) -> bytes:
+        """Receives a given number of bytes from the station"""
+        if self.sock is None:
+            return ConnectionError("Connection from the station not established")
+        self.sock.setblocking(True)
+        response = b""
+        while True:
+            buf = bytearray(min(size-len(response), chunkby))
+            try:
+                recvd = self.sock.recv_into(buf, min(size-len(response), chunkby))
+            except OSError as e:
+                if e.errno == EAGAIN:
+                    recvd = -1
+                else:
+                    raise
+            response += buf
+            del buf
+            if recvd == 0:
+                del recvd
+                break
+        return response
+
+    def tx_bytes(self, stuff: bytes) -> int:
+        """Sends some stuff and returns an int return code"""
+        if self.sock is None:
+            return ConnectionError("Connection not established")
+        #while sent < len(stuff):
+        #    sent += self.sock.send(stuff[sent:])
+        #    if self.v:
+        #        print(f"Sent {sent}/{len(stuff)} bytes")
+        # #self.sock.flush()
+        self.sock.sendall(stuff)
