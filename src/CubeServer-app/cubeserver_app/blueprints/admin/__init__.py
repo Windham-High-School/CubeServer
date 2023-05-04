@@ -155,6 +155,8 @@ def beacon_csv():
         try:
             csv_reader = csv.DictReader(reopened)
             for row in csv_reader:
+                if row['time'] == '' or row['body'] == '' or row['output'] == '' or row['encoding'] == '' or row['misfire grace time'] == '' or row['intensity'] == '':
+                    continue
                 BeaconMessage(
                     instant=datetime.fromisoformat(row['time']),
                     division=TeamLevel(row['division']),
