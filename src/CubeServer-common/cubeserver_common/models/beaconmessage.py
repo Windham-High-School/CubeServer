@@ -187,13 +187,13 @@ class BeaconMessage(PyMongoModel):
         """
         if self._id:  # If this came from the database, don't regen
             return self.full_message_bytes_stored
-        return self.prefix + self.line_term.join([
-            b'CSMSG/1.0',
-            self.headers_bytes,
-            self.line_term,
-            self.message_bytes,
-            self.line_term
-        ])
+        return self.prefix + b'CSMSG/1.0' + \
+            self.line_term.join([
+                self.headers_bytes,
+                self.line_term,
+                self.message_bytes,
+                self.line_term
+            ])
     
     @property
     def full_message_bytes_p(self):
