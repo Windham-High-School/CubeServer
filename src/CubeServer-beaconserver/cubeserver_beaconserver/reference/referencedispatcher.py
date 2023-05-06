@@ -1,6 +1,7 @@
 """A server to redirect request to reference stations via ReferenceServer instances"""
 
 from ssl import SSLEOFError
+import threading
 from typing import Mapping
 
 from cubeserver_common.reference_api import protocol
@@ -15,24 +16,27 @@ class ReferenceDispatcherServer:
     def __init__(self, routing_id_map: Mapping[int,ReferenceServer], listen_port: int = REFERENCE_COMMAND_PORT, timeout: int = 10, **kwargs):
         self.socketserver = PlainSocketServer(port=listen_port, **kwargs)
         self.timeout = timeout
+        self.lock = threading.Lock()
 
         @self.socketserver.on_connect
         def connect_hook(client_socket):
             """Runs on connect from internal api"""
-            self.sock = client_socket
+            self.sock: socket.socket = client_socket
             self.sock.settimeout(self.timeout)
 
             try:
                 with self.lock: # Lock to prevent multiple threads from sending at once
                     self.sock.setblocking(True)
                     # Figure out how to route the request
-                    req = protocol.ReferenceRequest.from_bytes(self.rx_bytes(6))
+                    req_bytes = self.sock.recv(6)
+                    logging.debug(f"Dispatcher request from internal api: {req_bytes}")
+                    req = protocol.ReferenceRequest.from_bytes(req_bytes)
 
                     # Log the request
                     logging.debug(f"Dispatcher request from internal api: {req.dump()}")
 
                     if req.routing_id not in routing_id_map:
-                        self.sock.send(protocol.ReferenceSignal.NACK.value)
+                        self.sock.send(protocol.ReferenceSignal.NAK.value)
                         return
                     self.sock.send(protocol.ReferenceSignal.ACK.value)
                     # Send the request to the appropriate reference server
@@ -58,4 +62,3 @@ class ReferenceDispatcherServer:
         """A blocking method that never returns
         Runs the server"""
         self.socketserver.run_server()
-
