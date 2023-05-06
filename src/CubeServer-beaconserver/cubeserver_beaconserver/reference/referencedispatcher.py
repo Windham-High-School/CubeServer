@@ -27,6 +27,10 @@ class ReferenceDispatcherServer:
                     self.sock.setblocking(True)
                     # Figure out how to route the request
                     req = protocol.ReferenceRequest.from_bytes(self.rx_bytes(6))
+
+                    # Log the request
+                    logging.debug(f"Dispatcher request from internal api: {req.dump()}")
+
                     if req.routing_id not in routing_id_map:
                         self.sock.send(protocol.ReferenceSignal.NACK.value)
                         return
@@ -37,14 +41,16 @@ class ReferenceDispatcherServer:
                     # Wait for response from reference server
                     response = protocol.ReferenceResponse.from_socket(routing_id_map[req.routing_id].sock)
 
+                    # Log the response
+                    logging.debug(f"Dispatcher response from reference server: {response.dump()}")
+
                     # Send response to internal api
                     self.sock.send(response.dump())
 
-            except SSLEOFError | OSError | EOFError | protocol.ProtocolError as e:
+            except (SSLEOFError, OSError, EOFError, protocol.ProtocolError) as e:
                 logging.warn("Error while receiving request from internal api: %s", e)
             finally:
                 self.sock = None
-                self.connection_present.clear()
             # Socket is closed upon this method's return
             return
 

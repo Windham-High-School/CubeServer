@@ -10,6 +10,7 @@ Response:
 import dataclasses
 import enum
 import socket
+import logging
 import struct
 
 
@@ -92,9 +93,10 @@ class ReferenceRequest:
             self.signal.value,
             self.command.value,
             self.param,
-            ReferenceSignal.EOT
+            ReferenceSignal.EOT.value
         ])
         if len(dumped_bytes) != 6:
+            logging.error(f"Malformed request: {dumped_bytes}")
             raise ProtocolError("Invalid request - wrong length")
         return dumped_bytes
 
@@ -152,20 +154,20 @@ class ReferenceResponse:
     def from_socket(self, socket: socket.socket) -> 'ReferenceResponse':
         """Reads a response from the given socket"""
         # <version><signal><length><struct_type><response><EOT>
-        version = self.rx_bytes(1)
+        version = socket.recv(1)
         if version != REFERENCECOM_VERSION:
-            self.sock.send(ReferenceSignal.NACK.value)
+            socket.sendall(ReferenceSignal.NACK.value)
             return
-        signal = self.rx_bytes(1)
+        signal = socket.recv(1)
         if signal != ReferenceSignal.ACK.value:
-            self.sock.send(ReferenceSignal.NACK.value)
+            socket.sendall(ReferenceSignal.NACK.value)
             return
         length = int.from_bytes(self.rx_bytes(1), 'big')
-        struct_type = self.rx_bytes(1)
-        response = self.rx_bytes(length)
-        eot = self.rx_bytes(1)
+        struct_type = socket.recv(1)
+        response = socket.recv(length)
+        eot = socket.recv(1)
         if eot != ReferenceSignal.EOT.value:
-            self.sock.send(ReferenceSignal.NACK.value)
+            socket.sendall(ReferenceSignal.NACK.value)
             return
         
         # Package response
