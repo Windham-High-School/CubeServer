@@ -726,16 +726,21 @@ def referencetest():
     # Check admin status:
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
-    request = ref_protocol.ReferenceRequest(
-        id = b'0x00',
-        signal=ref_protocol.ReferenceSignal.ENQ,
-        command=ref_protocol.ReferenceCommand.MEAS,
-        param=ref_protocol.MeasurementType.TEMP.value
-    )
-    with DispatcherClient() as client:
-        response = client.request(request)
-    return render_template(
-        'reference_test.html.jinja2',
-        request_pre = pformat(request.dump(), indent=4),
-        response_pre = pformat(response.dump(), indent=4)
-    )
+    try:
+        request = ref_protocol.ReferenceRequest(
+            id = b'\x00',
+            signal=ref_protocol.ReferenceSignal.ENQ,
+            command=ref_protocol.ReferenceCommand.MEAS,
+            param=ref_protocol.MeasurementType.TEMP.value
+        )
+        with DispatcherClient() as client:
+            response = client.request(request)
+        return render_template(
+            'reference_test.html.jinja2',
+            request_pre = pformat(request.dump(), indent=4),
+            response_pre = pformat(response.dump(), indent=4)
+        )
+    except:
+        tb = traceback.format_exc()
+        logging.error(tb)
+        return render_template('errorpages/500.html.jinja2', message=tb)

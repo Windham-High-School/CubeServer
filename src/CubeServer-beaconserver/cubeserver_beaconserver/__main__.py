@@ -63,8 +63,9 @@ def transmit_message(message: BeaconMessage) -> bool:
 def shutdown_hook():
     """Runs before closing..."""
     logging.info("Preparing for exit...")
-    logging.debug("Shutting down scheduler")
-    scheduler.shutdown()
+    if scheduler.running:
+        logging.debug("Shutting down scheduler")
+        scheduler.shutdown()
     mark_unscheduled()
     logging.info("Ready for exit.")
 
