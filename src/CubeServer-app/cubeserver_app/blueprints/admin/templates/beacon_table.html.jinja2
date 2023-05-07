@@ -4,7 +4,7 @@
 {% block header %}
     <form method="POST" enctype="multipart/form-data" action="{{ url_for('admin.beacon_csv') }}">
         Upload CSV<br>
-        <a href="https://gist.github.com/snorklerjoe/70d627482c4ce41ba48bc05478ddf868">CSV Template</a><br>
+        <a href="https://gist.githubusercontent.com/snorklerjoe/70d627482c4ce41ba48bc05478ddf868/raw/602d67ef5cde05f40cbb18080401b2ee921864a9/example.csv" download>CSV Template</a><br>
         <input type="file" name="file" class="btn">
         <input type="submit" value="Upload" class="btn btn-submit btn-danger">
     </form>

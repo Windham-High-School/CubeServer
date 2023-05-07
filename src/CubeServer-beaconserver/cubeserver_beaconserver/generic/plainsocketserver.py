@@ -61,7 +61,6 @@ class PlainSocketServer:
                 finally:
                     logging.info("Closing socket.")
                     client_socket.close()
-                break
             except socket.timeout:
                 continue
 
