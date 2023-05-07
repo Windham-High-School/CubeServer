@@ -80,6 +80,7 @@ def load_packets_from_db():
             mark_unscheduled()
         finally:
             quit_signal.set()
+            return
     logging.debug("Polling scheduled jobs...")
     scheduled = [job.name for job in scheduler.get_jobs()]
     logging.debug(scheduled)

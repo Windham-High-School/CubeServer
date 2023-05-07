@@ -56,22 +56,23 @@
             {{macros.startbox("Beacon", "col")}}
                 <a href={{ url_for('admin.beacon_table') }} class="btn">Manage Message Queue</a>
                 <hr>
-                <p>
-                    Schedule a message now:
-                </p>
-                <form method="POST" action="beaconnow" class="form">
-                    {{ beacon_form.hidden_tag() }}
-                    {{ wtf.form_errors(beacon_form, hiddens="only") }}
 
-                    {{ wtf.form_field(beacon_form.instant) }}
-                    {{ wtf.form_field(beacon_form.message) }}
-                    {{ wtf.form_field(beacon_form.division) }}
-                    {{ wtf.form_field(beacon_form.destination) }}
-                    {{ wtf.form_field(beacon_form.msg_format) }}
-                    {{ wtf.form_field(beacon_form.intensity) }}
-                    {{ wtf.form_field(beacon_form.misfire_grace) }}
-                    {{ wtf.form_field(beacon_form.submit) }}
-                </form>
+                <br>
+
+                <u>Beacon Status-</u><br><br>
+
+                <b>Statistics- 24 hrs-</b>
+                <ul>
+                    <li>Messages Transmitted: <code style="float:right;">{{ beacon_stats['transmitted_today'] }}</code></li>
+                    <li>Messages Scheduled: <code style="float:right;">{{ beacon_stats['scheduled_today'] }}</code></li>
+                    <li>Messages Missed: <code style="float:right;">{{ beacon_stats['missed_today'] }}</code></li>
+                </ul>
+                <b>All time-</b>
+                <ul>
+                    <li>Messages Queued: <code style="float:right;">{{ beacon_stats['queued'] }}</code></li>
+                    <li>Messages Transmitted: <code style="float:right;">{{ beacon_stats['transmitted'] }}</code></li>
+                    <li>Messages Missed: <code style="float:right;">{{ beacon_stats['missed'] }}</code></li>
+                </ul>
             {{macros.endbox()}}
 
         </div>
