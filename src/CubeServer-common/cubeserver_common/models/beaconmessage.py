@@ -4,7 +4,7 @@
 import logging
 from enum import Enum, unique
 from typing import Optional, Union, Mapping
-from datetime import datetime
+from datetime import datetime, timedelta
 from pprint import pformat
 
 from .utils.modelutils import PyMongoModel
@@ -216,3 +216,8 @@ class BeaconMessage(PyMongoModel):
     def find_by_status(cls, status: SentStatus) -> 'BeaconMessage':
         """Returns all messages that have a given status"""
         return cls.find({'status': status.value})
+    
+    @classmethod
+    def find_since(cls, how_far_back: timedelta) -> 'BeaconMessage':
+        """Returns all messages with times within a given window to now"""
+        return cls.find({'send_at': {'$gte': datetime.now() - how_far_back}})

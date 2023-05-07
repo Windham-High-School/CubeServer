@@ -2,22 +2,63 @@
 {% block title %}Beacon Schedule{% endblock %}
 
 {% block header %}
+    <h4>Beacon Messages</h4>
+{% endblock %}
+
+{% block content %}
     <form method="POST" enctype="multipart/form-data" action="{{ url_for('admin.beacon_csv') }}">
         Upload CSV<br>
         <a href="https://gist.githubusercontent.com/snorklerjoe/70d627482c4ce41ba48bc05478ddf868/raw/602d67ef5cde05f40cbb18080401b2ee921864a9/example.csv" download>CSV Template</a><br>
         <input type="file" name="file" class="btn">
         <input type="submit" value="Upload" class="btn btn-submit btn-danger">
     </form>
-    <hr>
+    <p>
+        <h4>Beacon Message Status Steps:</h4>
+        <ol>
+            <li><b>Queued</b> - Message is entered to the database</li>
+            <li><b>Scheduled</b> - Database entry is read by the beaconserver and a task to transmit the message is scheduled</li>
+            <li><b>Missed</b> - Message could not be transmitted and the grace window passed</li>
+            <li><b>Transmitting...</b> - Message is <i>presently</i> being transmitted</li>
+            <li><b>Transmitted</b> - Message <i>was</i> transmitted by the beacon</li>
+        </ol>
+        <i>Note that beacon messages cannot be de-commissioned or unscheduled without shutting down the server.</i>
+    </p>
+{% endblock %}
+
+{% block body %}
+{{ super() }}
+    <div class="justify-content-md-center container container-fluid text-center">
+    {{macros.startbox("Beacon Message Database", "col")}}
+ 
     <h4>Scheduled Transmissions</h4>
     <p>
         (as of {{current_time}})
     </p>
-{% endblock %}
-
-{% block content %}
-    <div>
+    <div class="col">
         {{ beacon_table }}
+    </div>
+    {{macros.endbox()}}
+
+    <div class="col">
+    {{macros.startbox("Live Schedule", "col")}}
+        <p>
+            Schedule a message now:
+        </p>
+        <form method="POST" action="beaconnow" class="form">
+            {{ beacon_form.hidden_tag() }}
+            {{ wtf.form_errors(beacon_form, hiddens="only") }}
+
+            <i>Leave time as is and use adequate misfire grace period in order to transmit immediately</i>
+            {{ wtf.form_field(beacon_form.instant) }}
+            {{ wtf.form_field(beacon_form.message) }}
+            {{ wtf.form_field(beacon_form.division) }}
+            {{ wtf.form_field(beacon_form.destination) }}
+            {{ wtf.form_field(beacon_form.msg_format) }}
+            {{ wtf.form_field(beacon_form.intensity) }}
+            {{ wtf.form_field(beacon_form.misfire_grace) }}
+            {{ wtf.form_field(beacon_form.submit) }}
+        </form>
+    {{macros.endbox()}}
     </div>
 {% endblock %}
 
