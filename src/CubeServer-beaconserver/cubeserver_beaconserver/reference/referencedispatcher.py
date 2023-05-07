@@ -28,14 +28,13 @@ class ReferenceDispatcherServer:
                 with self.lock: # Lock to prevent multiple threads from sending at once
                     self.sock.setblocking(True)
                     # Figure out how to route the request
-                    req_bytes = self.sock.recv(6)
-                    logging.debug(f"Dispatcher request from internal api: {req_bytes}")
-                    req = protocol.ReferenceRequest.from_bytes(req_bytes)
+                    req = protocol.ReferenceRequest.from_bytes(self.sock.recv(6))
 
                     # Log the request
                     logging.debug(f"Dispatcher request from internal api: {req.dump()}")
 
                     if req.routing_id not in routing_id_map:
+                        logging.warn("Unregistered routing id: %d", req.routing_id)
                         self.sock.send(protocol.ReferenceSignal.NAK.value)
                         return
                     self.sock.send(protocol.ReferenceSignal.ACK.value)
