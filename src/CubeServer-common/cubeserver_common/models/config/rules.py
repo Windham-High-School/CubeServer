@@ -187,7 +187,7 @@ class Rules(PyMongoModel):
         # TODO: Make this more Pythonic
         if datapoint.category in DataClass.manual \
            and datapoint.category in DataClass.measurable:
-            if bool(datapoint.value):
+            if bool(datapoint.value):  # If this is a manually scored datapoint that is being manually scored:
                 datapoint.rawscore = self.point_menu[team.weight_class][datapoint.category]
             else:
                 datapoint.rawscore = 0.0
