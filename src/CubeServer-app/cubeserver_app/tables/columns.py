@@ -146,6 +146,41 @@ class HTMLCol(Col):
             escape_content=False,
             attrs=td_attrs | self.td_html_attrs)
 
+class DateTimeCol(HTMLCol):
+    def generate_html(
+        self,
+        content: Any,
+        identifier: str,
+        attr_list: List[str]
+    ) -> str:
+        """An abstract method for generating a cell's HTML
+
+        Args:
+            content (Any): The Python object represented by the cell
+            identifier (str): If item.id exists, the string value of item.id for use in pymongo document-modifying forms
+            attr_list (List[str]): attr_list from Col.__init__
+
+        Returns:
+            str: HTML for this cell
+        """
+        return f"<span class='datetime'>{content}</span>"
+    def generate_attrs(
+        self,
+        content: Any
+    ) -> Mapping[str, str]:
+        """Generate any attributes to the td element
+
+        Args:
+            content (Any): the python object from which the cell contents are derived
+
+        Returns:
+            Mapping[str, str]
+        """
+        return {
+            'data-search': str(content.isoformat()),
+            'data-order': str(content.timestamp())
+        }
+
 class DropDownEnumCol(Col):
     """A Column with a drop-down box to select an option from an Enum"""
 
