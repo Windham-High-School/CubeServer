@@ -10,6 +10,7 @@ Response:
 import dataclasses
 import enum
 import socket
+import logging
 import struct
 
 
@@ -68,21 +69,21 @@ class ReferenceRequest:
     @classmethod
     def from_bytes(cls, data: bytes) -> 'ReferenceRequest':
         """Generates request object from byte string"""
-        if data[-1] != ReferenceSignal.EOT.value:
+        if data[-1] != ReferenceSignal.EOT.value[0]:
             raise ProtocolError("Invalid request - missing EOT")
-        if data[0] != REFERENCECOM_VERSION:
+        if data[0] != REFERENCECOM_VERSION[0]:
             raise ProtocolError("Invalid request - wrong version")
         return cls(
-            id      = data[1],
-            signal  = ReferenceSignal(data[2]),
-            command = ReferenceCommand(data[3]),
+            id      = data[1:2],
+            signal  = ReferenceSignal(data[2:3]),
+            command = ReferenceCommand(data[3:4]),
             param   = data[4:-1]
         )
     
     @property
     def routing_id(self):
         """Returns the routing ID for the request"""
-        return self.id
+        return self.id[0]
 
     def dump(self) -> bytes:
         """Dumps the request to a byte string"""
@@ -92,9 +93,10 @@ class ReferenceRequest:
             self.signal.value,
             self.command.value,
             self.param,
-            ReferenceSignal.EOT
+            ReferenceSignal.EOT.value
         ])
         if len(dumped_bytes) != 6:
+            logging.error(f"Malformed request: {dumped_bytes}")
             raise ProtocolError("Invalid request - wrong length")
         return dumped_bytes
 
@@ -111,14 +113,14 @@ class ReferenceResponse:
     @classmethod
     def from_bytes(cls, data: bytes) -> 'ReferenceResponse':
         """Generates response object from byte string"""
-        if data[-1] != ReferenceSignal.EOT.value:
+        if data[-1] != ReferenceSignal.EOT.value[0]:
             raise ProtocolError("Invalid response - missing EOT")
-        if data[0] != REFERENCECOM_VERSION:
+        if data[0] != REFERENCECOM_VERSION[0]:
             raise ProtocolError("Invalid response - wrong version")
         return cls(
-            signal      = ReferenceSignal(data[1]),
-            length      = data[2],
-            struct_type = data[3],
+            signal      = ReferenceSignal(data[1:2]),
+            length      = data[2:3],
+            struct_type = data[3:4],
             response    = data[4:-1]
         )
 
@@ -152,20 +154,20 @@ class ReferenceResponse:
     def from_socket(self, socket: socket.socket) -> 'ReferenceResponse':
         """Reads a response from the given socket"""
         # <version><signal><length><struct_type><response><EOT>
-        version = self.rx_bytes(1)
+        version = socket.recv(1)
         if version != REFERENCECOM_VERSION:
-            self.sock.send(ReferenceSignal.NACK.value)
+            socket.sendall(ReferenceSignal.NAK.value)
             return
-        signal = self.rx_bytes(1)
+        signal = socket.recv(1)
         if signal != ReferenceSignal.ACK.value:
-            self.sock.send(ReferenceSignal.NACK.value)
+            socket.sendall(ReferenceSignal.NAK.value)
             return
         length = int.from_bytes(self.rx_bytes(1), 'big')
-        struct_type = self.rx_bytes(1)
-        response = self.rx_bytes(length)
-        eot = self.rx_bytes(1)
+        struct_type = socket.recv(1)
+        response = socket.recv(length)
+        eot = socket.recv(1)
         if eot != ReferenceSignal.EOT.value:
-            self.sock.send(ReferenceSignal.NACK.value)
+            socket.sendall(ReferenceSignal.NAK.value)
             return
         
         # Package response

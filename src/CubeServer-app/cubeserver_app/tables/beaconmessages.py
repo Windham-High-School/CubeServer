@@ -1,10 +1,10 @@
 """Tables for team-related things."""
 
 from typing import List
-from flask_table import Table, Col, DatetimeCol
+from flask_table import Table, Col
 
 from cubeserver_common.models.beaconmessage import BeaconMessage
-from cubeserver_app.tables.columns import EnumCol, PreCol
+from cubeserver_app.tables.columns import EnumCol, PreCol, DateTimeCol
 
 __all__ = ['BeaconMessageTable']
 
@@ -16,7 +16,7 @@ class BeaconMessageTable(Table):
     thead_classes = ["thead-dark"]
     border = True
 
-    send_at             = DatetimeCol('Scheduled Time')
+    send_at             = DateTimeCol('Scheduled Time')
     str_status          = Col('Status')
     division            = EnumCol('Division')
     destination         = EnumCol('Output')

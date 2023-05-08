@@ -63,8 +63,9 @@ def transmit_message(message: BeaconMessage) -> bool:
 def shutdown_hook():
     """Runs before closing..."""
     logging.info("Preparing for exit...")
-    logging.debug("Shutting down scheduler")
-    scheduler.shutdown()
+    if scheduler.running:
+        logging.debug("Shutting down scheduler")
+        scheduler.shutdown()
     mark_unscheduled()
     logging.info("Ready for exit.")
 
@@ -73,12 +74,6 @@ quit_signal = threading.Event()
 
 def load_packets_from_db():
     """Loads the current database into the jobs"""
-    if server.is_stale and server.running:
-        logging.warning("Connection is stale!")
-        try:
-            mark_unscheduled()
-        finally:
-            quit_signal.set()
     logging.debug("Polling scheduled jobs...")
     scheduled = [job.name for job in scheduler.get_jobs()]
     logging.debug(scheduled)
@@ -152,6 +147,31 @@ def reference_dispatcher_target():
 
 reference_dispatcher_thread = threading.Thread(target=reference_dispatcher_target, daemon=True)
 reference_dispatcher_thread.start()
+
+def check_stale():
+    """Checks all server threads and restarts if necessary"""
+    if server.is_stale and server.running:
+        logging.warning("Connection is stale!")
+        try:
+            mark_unscheduled()
+        finally:
+            quit_signal.set()
+            return
+    for reference_server in reference_routing_table.values():
+        if reference_server.is_stale and reference_server.running:
+            logging.warning(f"Reference server #{reference_server.team.reference_id} is stale!")
+            try:
+                mark_unscheduled()
+            finally:
+                quit_signal.set()
+                return
+
+scheduler.add_job(
+    check_stale,
+    'interval',
+    seconds=30,
+    name='check_stale'
+)
 
 quit_signal.wait()
 logging.info("Preparing for exit...")

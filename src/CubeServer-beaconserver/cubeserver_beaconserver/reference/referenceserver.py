@@ -83,7 +83,7 @@ class ReferenceServer:
     @property
     def is_stale(self) -> bool:  # Don't worry about stale connection if there never was one-
         """Returns True if the connection is stale"""
-        return self.connection_present.is_set() and time.time() - self.keepalivetime > self.timeout
+        return time.time() - self.keepalivetime > 2*self.timeout
 
     # def send_cmd(self, message: BeaconCommand) -> bool:
     #     """Sends a command to the beacon.

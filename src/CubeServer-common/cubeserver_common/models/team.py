@@ -320,10 +320,15 @@ class Team(PyMongoModel):
             }
         )
 
+    @property
+    def is_reference(self) -> bool:
+        """Returns True if this team is a reference team"""
+        return self.weight_class == TeamLevel.REFERENCE and self.name != config.BEACON_TEAM_NAME
+
     # TODO: Document that reference names must end in -<int>
     @property
     def reference_id(self) -> int:
-        if self.weight_class != TeamLevel.REFERENCE:
+        if not self.is_reference:
             raise AttributeError("This team is not a reference team.")
         return int(self.name.split('-')[-1])
     
