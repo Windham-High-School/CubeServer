@@ -117,9 +117,9 @@
             {{macros.startbox("Internal API \"Team\"s", "col")}}
                 <b>Reserved team names </b> (click to generate)<b>:</b> 
                 <ul>
-                    {% for name, url in reserved_names %}
+                    {% for name, url, url2 in reserved_names %}
                         {% if url == None %}
-                            <li>{{name}}</li>
+                            <li>{{name}} {% if url2 != None %}<a href={{url2}}>Test</a>{% endif %}</li>
                         {% else %}
                             <li><a href={{url}}>{{name}}</a></li>
                         {% endif %}

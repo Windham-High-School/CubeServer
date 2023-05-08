@@ -100,10 +100,24 @@ def admin_home():
     # Reserved / internal team handling:
     reserved_links = []
     for name in Team.RESERVED_NAMES:
-        if Team.find_by_name(name) is not None:
-            reserved_links += [(name, None)]
+        team = Team.find_by_name(name)
+        if team is not None:
+            reserved_links += [
+                (
+                    name,
+                    None, 
+                    url_for('.referencetest', station_id=team.reference_id)
+                    if team.is_reference else None
+                )
+            ]
         else:
-            reserved_links += [(name, url_for('.gen_reserved', name=name))]
+            reserved_links += [
+                (
+                    name,
+                    url_for('.gen_reserved', name=name),
+                    None
+                )
+            ]
 
     # Beacon Status:
     txd = 0
@@ -742,22 +756,27 @@ def package_beacon_code():
     )
     return response
 
-@bp.route('/referencetest')
+@bp.route('/referencetest/<station_id>')
 @login_required
-def referencetest():
+def referencetest(station_id: str | int = ""):
     """Tests reference stations"""
     # Check admin status:
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
     try:
         request = ref_protocol.ReferenceRequest(
-            id = b'\x00',
+            id = int(station_id).to_bytes(1, 'big'),
             signal=ref_protocol.ReferenceSignal.ENQ,
             command=ref_protocol.ReferenceCommand.MEAS,
             param=ref_protocol.MeasurementType.TEMP.value
         )
         with DispatcherClient() as client:
             response = client.request(request)
+        if response is None:
+            return render_template(
+                'errorpages/500.html.jinja2',
+                message="No response received"
+            )
         return render_template(
             'reference_test.html.jinja2',
             request_pre = pformat(request.dump(), indent=4),

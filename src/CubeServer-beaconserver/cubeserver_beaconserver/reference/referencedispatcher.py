@@ -39,10 +39,9 @@ class ReferenceDispatcherServer:
                         return
                     self.sock.send(protocol.ReferenceSignal.ACK.value)
                     # Send the request to the appropriate reference server
-                    routing_id_map[req.routing_id].tx_bytes(req.dump())
-
-                    # Wait for response from reference server
-                    response = protocol.ReferenceResponse.from_socket(routing_id_map[req.routing_id].sock)
+                    with routing_id_map[req.routing_id].lock:
+                        routing_id_map[req.routing_id].tx_bytes(req.dump())
+                        response = protocol.ReferenceResponse.from_socket(routing_id_map[req.routing_id].sock)
 
                     # Log the response
                     logging.debug(f"Dispatcher response from reference server: {response.dump()}")
