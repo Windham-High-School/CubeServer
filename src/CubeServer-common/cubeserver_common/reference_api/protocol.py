@@ -83,7 +83,7 @@ class ReferenceRequest:
     @property
     def routing_id(self):
         """Returns the routing ID for the request"""
-        return self.id
+        return self.id[0]
 
     def dump(self) -> bytes:
         """Dumps the request to a byte string"""
