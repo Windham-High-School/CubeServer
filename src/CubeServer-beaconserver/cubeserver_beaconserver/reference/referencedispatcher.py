@@ -41,6 +41,9 @@ class ReferenceDispatcherServer:
                     # Send the request to the appropriate reference server
                     with routing_id_map[req.routing_id].lock:
                         routing_id_map[req.routing_id].tx_bytes(req.dump())
+                        if routing_id_map[req.routing_id].rx_bytes(1) != protocol.ReferenceSignal.ACK.value:
+                            logging.warn("Reference server did not acknowledge request")
+                            return
                         response = protocol.ReferenceResponse.from_socket(routing_id_map[req.routing_id].sock)
 
                     # Log the response

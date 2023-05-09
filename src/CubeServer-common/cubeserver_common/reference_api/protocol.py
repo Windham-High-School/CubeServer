@@ -128,11 +128,11 @@ class ReferenceResponse:
         """Dumps the response to a byte string"""
         return b''.join([
             REFERENCECOM_VERSION,
-            self.signal.value,
+            self.signal.value if isinstance(self.signal, ReferenceSignal) else self.signal,
             self.length,
             self.struct_type,
             self.response,
-            ReferenceSignal.EOT
+            ReferenceSignal.EOT.value
         ])
     
     def get_value(self) -> bytes | int | bool | float:
@@ -154,26 +154,47 @@ class ReferenceResponse:
     def from_socket(self, socket: socket.socket) -> 'ReferenceResponse':
         """Reads a response from the given socket"""
         # <version><signal><length><struct_type><response><EOT>
+        logging.debug("Reading response from socket")
         version = socket.recv(1)
+        if version == ReferenceSignal.ACK.value:
+            logging.debug("Received ACK")
+            version = socket.recv(1)
+        elif version == ReferenceSignal.NAK.value:
+            logging.debug("Received NAK")
+            return None
+        logging.debug(f"Version: {version}")
         if version != REFERENCECOM_VERSION:
+            logging.warning(f"Invalid response - wrong version")
             socket.sendall(ReferenceSignal.NAK.value)
             return
         signal = socket.recv(1)
+        logging.debug(f"Signal: {signal}")
         if signal != ReferenceSignal.ACK.value:
+            logging.warning(f"Invalid Did not get ACK")
             socket.sendall(ReferenceSignal.NAK.value)
             return
-        length = int.from_bytes(self.rx_bytes(1), 'big')
+        length = int.from_bytes(socket.recv(1), 'big')
+        logging.debug(f"Length: {length}")
         struct_type = socket.recv(1)
+        logging.debug(f"Struct Type: {struct_type}")
         response = socket.recv(length)
+        logging.debug(f"Response: {response}")
         eot = socket.recv(1)
         if eot != ReferenceSignal.EOT.value:
+            logging.warning(f"Invalid response - missing EOT")
             socket.sendall(ReferenceSignal.NAK.value)
             return
         
+        logging.debug(f"Signal: {signal}")
+        logging.debug(f"Length: {bytes([length])}")
+        logging.debug(f"Struct Type: {struct_type}")
+        logging.debug(f"Response: {response}")
+        logging.debug(f"EOT: {eot}")
+
         # Package response
         return ReferenceResponse(
             signal=signal,
-            length=length,
+            length=bytes([length]),
             struct_type=struct_type,
             response=response
         )
