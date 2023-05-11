@@ -1,2 +1,2 @@
-apscheduler==3.10.0  # For scheduling beacon tx's
+apscheduler==3.10.1  # For scheduling beacon tx's
 better-profanity==0.7.0    # Profanity checking/filtering
