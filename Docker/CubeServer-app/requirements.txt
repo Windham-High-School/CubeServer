@@ -1,4 +1,5 @@
 Gunicorn==20.1.0           # WSGI server
+apscheduler==3.10.1        # For scheduling tasks
 Flask==2.3.2               # Flask core for web app
 Flask-PyMongo==2.3.0       # MongoDB access
 better-profanity==0.7.0    # Profanity checking/filtering
