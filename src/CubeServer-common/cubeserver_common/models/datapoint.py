@@ -21,7 +21,8 @@ class DataClass(Enum):
     PRESSURE = "pressure"
     COMMENT = "comment"
     SIGNAL_LIGHT = "signal"
-    BATTERY_REMAINING = "remaining battery"
+    BATTERY_REMAINING = "remaining battery"  # Deprecated
+    BATTERY_VOLTAGE = "battery voltage"
     BEACON_CHALLENGE = "beacon challenge"
 
     @property
@@ -33,6 +34,7 @@ class DataClass(Enum):
             DataClass.COMMENT: str,
             DataClass.SIGNAL_LIGHT: bool,
             DataClass.BATTERY_REMAINING: int,
+            DataClass.BATTERY_VOLTAGE: float,
             DataClass.BEACON_CHALLENGE: str
         }[self]
 
@@ -46,7 +48,8 @@ class DataClass(Enum):
             DataClass.COMMENT: "",
             DataClass.BEACON_CHALLENGE: "",
             DataClass.SIGNAL_LIGHT: "",
-            DataClass.BATTERY_REMAINING: "%"
+            DataClass.BATTERY_REMAINING: "%",
+            DataClass.BATTERY_VOLTAGE: "V"
         }[self]
     
     @classmethod
