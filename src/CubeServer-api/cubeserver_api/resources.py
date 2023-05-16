@@ -37,6 +37,7 @@ class Data(Resource):
     decorators = [auth.login_required]
 
     def post(self):
+        logging.debug(f"Data post req from {auth.username()}")
         team = Team.find_by_name(auth.username())
         logging.info(f"Data submission de {team.name}")
         # Get DataClass and cast the value:
@@ -73,6 +74,7 @@ class Email(Resource):
     decorators = [auth.login_required]
 
     def post(self):
+        logging.debug(f"Email send req from {auth.username()}")
         team = Team.find_by_name(auth.username())
         logging.info(f"Email submission from: {team.name}")
         # Get DataClass and cast the value:
@@ -111,6 +113,7 @@ class Status(Resource):
     decorators = [auth.login_required]
 
     def get(self):
+        logging.debug(f"Status get req de {auth.username()}")
         team = Team.find_by_name(auth.username())
         logging.info(f"Status req de {team.name}")
         return {
