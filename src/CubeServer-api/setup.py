@@ -33,6 +33,7 @@ setup(name='CubeServer-api',
             'Flask-RESTful>=0.3.9,<1.0',
             'CubeServer-common',
             'Flask-HTTPAuth>=4.7.0,<5.0',
-            'Flask-APScheduler>=1.12.4,<2.0'
+            'Flask-APScheduler>=1.12.4,<2.0',
+            'pytest>=7.3.1,<8.0'
       ]
      )

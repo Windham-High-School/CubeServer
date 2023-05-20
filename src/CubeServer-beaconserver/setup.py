@@ -30,6 +30,7 @@ setup(name='CubeServer-beaconserver',
       packages=find_packages(),
       install_requires=[
             'CubeServer-common',
-            'apscheduler>=3.9.1,<4.0'
+            'apscheduler>=3.9.1,<4.0',
+            'pytest>=7.3.1,<8.0'
       ]
      )

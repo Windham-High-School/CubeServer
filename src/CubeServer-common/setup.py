@@ -35,6 +35,7 @@ setup(name='CubeServer-common',
             'better-profanity>=0.7.0',
             'bcrypt>=4.0.0,<5.0',
             'jsonpickle>=3.0.1,<4.0',
-            'PyYAML>=6.0,<7.0'
+            'PyYAML>=6.0,<7.0',
+            'pytest>=7.3.1,<8.0'
       ]
      )
