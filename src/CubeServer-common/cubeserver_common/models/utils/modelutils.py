@@ -75,7 +75,7 @@ class Encodable(_Encoder):
     @abstractmethod
     def decode(cls, value: dict) -> _Encoder:
         """Decodes a dictionary into an Encodable object"""
-    
+
     def __eq__(self, __value: object) -> bool:
         if not isinstance(__value, Encodable):
             return False
@@ -198,6 +198,10 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
         already registered.
         The force parameter allows you to force the registration of a field
         despite checks failing or the type appearing to be bson-compatible"""
+
+        if value is not None:  # Also set the value while we're at it:
+            self._setattr_shady(attr_name, value)
+
         if attr_name in self._fields:
             return
         codec = custom_codec
@@ -220,8 +224,6 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
             self.register_codec(codec)
         if codec is None and type(value) in self._codecs:
             codec = self._codecs[type(value)]
-        if value is not None:  # Also set the value while we're at it:
-            self._setattr_shady(attr_name, value)
         self._fields[attr_name] = codec  # Register the field!
 
     def encode(self) -> dict:
@@ -287,6 +289,18 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
            __name not in self._fields:
             self.register_field(__name, __value)
         super().__setattr__(__name, __value)
+
+    def __hash__(self) -> int:
+        return hash(self._id)
+
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, PyMongoModel):
+            return False
+        for field in self._fields:
+            if field in self._ignored:
+                continue
+            if getattr(self, field) != getattr(__value, field):
+                return False
 
     def _setattr_shady(self, __name: str, __value: Any):
         """Shadily goes around __setattr__ and straight to the superclass.

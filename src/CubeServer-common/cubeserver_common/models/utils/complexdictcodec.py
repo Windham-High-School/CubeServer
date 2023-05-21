@@ -40,7 +40,7 @@ class ComplexDictCodec(TypeCodec):
             for k,v in value.items()
         }
 
-    def transform_bson(self, value) -> Enum:
+    def transform_bson(self, value) -> dict:
         return {
             self.key_codec.transform_bson(k): self.value_codec.transform_bson(v)
             for k,v in value.items()

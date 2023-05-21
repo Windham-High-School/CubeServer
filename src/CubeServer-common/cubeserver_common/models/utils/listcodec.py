@@ -4,7 +4,7 @@ Limitations:
 Assumes the type of the list's elements is uniform
 """
 
-from typing import Optional
+from typing import Optional, List
 from bson.codec_options import TypeCodec
 
 __all__ = ['ListCodec']
