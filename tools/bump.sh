@@ -1,9 +1,18 @@
 #!/usr/bin/env bash
 # Bumps the version to the semver specified in the first argument.
 
+
 parent_path=$( cd "$(dirname "${BASH_SOURCE[0]}")" ; pwd -P )
 cd "$parent_path"
 source inc/colors.sh
+
+echo -e "${PURPLE} Running tests..."
+cd ..
+./configure
+tox > /dev/null || exit 1
+./clean
+cd tools
+echo -e "${LGREEN}  Tests passed.${RESTORE}\n"
 
 RELEASE=$1
 
