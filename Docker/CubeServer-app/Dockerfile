@@ -23,3 +23,8 @@ RUN rm -r /tmp/common
 # Webapp itself:
 COPY src/CubeServer-app/ /app/
 RUN pip3 install /app
+
+HEALTHCHECK --interval=5m --timeout=3s \
+  CMD curl -f http://localhost/ || exit 1
+
+EXPOSE 80
