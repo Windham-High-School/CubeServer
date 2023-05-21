@@ -75,6 +75,11 @@ class Encodable(_Encoder):
     @abstractmethod
     def decode(cls, value: dict) -> _Encoder:
         """Decodes a dictionary into an Encodable object"""
+    
+    def __eq__(self, __value: object) -> bool:
+        if not isinstance(__value, Encodable):
+            return False
+        return self.encode() == __value.encode()
 
 class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
                                 #  AutoEncodable superclass that implements
