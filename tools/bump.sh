@@ -11,7 +11,6 @@ cd ..
 ./configure
 tox > /dev/null || exit 1
 ./clean
-cd tools
 echo -e "${LGREEN}  Tests passed.${RESTORE}\n"
 
 RELEASE=$1
