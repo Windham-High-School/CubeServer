@@ -7,8 +7,13 @@ from setuptools import setup, find_packages
 with open("cubeserver_beaconserver/_version.py", "r", encoding="utf-8") as version_file:
       exec(version_file.read())
 
+assert '__version__' in locals(), "Missing version metadata- broken package."
+
+if '__timestamp__' not in locals():
+      raise RuntimeError("Could not find __timestamp__ in _version.py")
+
 # Metadata:
-VERSION: str = __version__
+VERSION: str = __version__  # type: ignore
 """Version string"""
 
 AUTHORS: str = "Joseph R. Freeston"
@@ -30,6 +35,7 @@ setup(name='CubeServer-beaconserver',
       packages=find_packages(),
       install_requires=[
             'CubeServer-common',
-            'apscheduler>=3.9.1,<4.0'
+            'apscheduler>=3.9.1,<4.0',
+            'pytest>=7.3.1,<8.0'
       ]
      )

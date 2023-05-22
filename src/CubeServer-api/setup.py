@@ -7,8 +7,13 @@ from setuptools import setup, find_packages
 with open("cubeserver_api/_version.py", "r", encoding="utf-8") as version_file:
       exec(version_file.read())
 
+assert '__version__' in locals(), "Missing version metadata- broken package."
+
+if '__timestamp__' not in locals():
+      raise RuntimeError("Could not find __timestamp__ in _version.py")
+
 # Metadata:
-VERSION: str = __version__
+VERSION: str = __version__  # type: ignore
 """Version string"""
 
 AUTHORS: str = "Joseph R. Freeston"
@@ -33,6 +38,7 @@ setup(name='CubeServer-api',
             'Flask-RESTful>=0.3.9,<1.0',
             'CubeServer-common',
             'Flask-HTTPAuth>=4.7.0,<5.0',
-            'Flask-APScheduler>=1.12.4,<2.0'
+            'Flask-APScheduler>=1.12.4,<2.0',
+            'pytest>=7.3.1,<8.0'
       ]
      )

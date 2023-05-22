@@ -10,6 +10,8 @@ from cubeserver_common.models.team import Team
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 from cubeserver_common.models.utils.modelutils import PyMongoModel
 
+from cubeserver_common.reference_api import protocol as ref_protocol
+from cubeserver_common.reference_api import DispatcherClient
 
 class ReferencePoint(PyMongoModel):
     """Holds a set of reference measurements from a point in time"""
@@ -76,15 +78,30 @@ class Reference:
         #pressures = []
         #for reference_cube in Team.find_references():
         #    data = 
+        temp_request = ref_protocol.ReferenceRequest(
+            id = b'\x00',
+            signal=ref_protocol.ReferenceSignal.ENQ,
+            command=ref_protocol.ReferenceCommand.MEAS,
+            param=ref_protocol.MeasurementType.TEMP.value
+        )
+        pres_request = ref_protocol.ReferenceRequest(
+            id = b'\x00',
+            signal=ref_protocol.ReferenceSignal.ENQ,
+            command=ref_protocol.ReferenceCommand.MEAS,
+            param=ref_protocol.MeasurementType.PRES.value
+        )
+        with DispatcherClient() as client:
+            response_temp = client.request(temp_request)
+            response_pres = client.request(pres_request)
 
         ref_pt = ReferencePoint(
             DataPoint(
                 category=DataClass.TEMPERATURE,
-                value=32.0  # TODO: Collect actual data!
+                value=9/5 * (response_temp.get_value()) + 32
             ),
             DataPoint(
                 category=DataClass.PRESSURE,
-                value=30.00
+                value=(response_temp.get_value())
             )
         )
         ref_pt.save()
@@ -101,12 +118,13 @@ class Reference:
     @classmethod
     def collect_avg(cls) -> ReferencePoint:
         """Collects the trimmed mean reference point as discussed earlier"""
+        raise NotImplementedError("Not implemented yet")
         for station in Team.find_references():
             ref = cls.collect(station)
-        return ReferencePoint(
-            cls.trimmed_mean(),
-            cls.trimmed_mean()
-        )
+        #return ReferencePoint(
+        #    cls.trimmed_mean(),
+        #    cls.trimmed_mean()
+        #)
 
     @classmethod
     def get_window_point(cls, window: int) -> ReferencePoint:
@@ -117,5 +135,5 @@ class Reference:
         elapsed = datetime.now() - most_recent.moment
         if elapsed.total_seconds() <= window:
             return most_recent
-        return cls.collect_avg()  # If it's too old, grab a new point
+        return cls.collect(Team.find_references()[0])  # If it's too old, grab a new point
 
