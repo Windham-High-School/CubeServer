@@ -130,10 +130,10 @@ class Reference:
     def get_window_point(cls, window: int) -> ReferencePoint:
         """Returns the most recent reference point in the db if it falls within the time window of now in seconds"""
         logging.debug("Getting a reference point within " + str(window) + " seconds...")
-        most_recent = ReferencePoint.find_most_recent()
-        logging.debug(most_recent)
-        elapsed = datetime.now() - most_recent.moment
-        if elapsed.total_seconds() <= window:
-            return most_recent
+        #most_recent = ReferencePoint.find_most_recent()
+        #logging.debug(most_recent)
+        #elapsed = datetime.now() - most_recent.moment
+        #if elapsed.total_seconds() <= window:
+        #    return most_recent
         return cls.collect(Team.find_references()[0])  # If it's too old, grab a new point
 
