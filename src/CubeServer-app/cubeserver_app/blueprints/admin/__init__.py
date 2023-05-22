@@ -11,6 +11,7 @@ from datetime import timedelta
 from math import floor
 from random import randint
 import subprocess
+from cubeserver_common.models.reference import Reference
 from bson.objectid import ObjectId
 from flask import abort, Blueprint, make_response, render_template, request, url_for, current_app, flash, session, send_file, redirect
 from werkzeug.utils import secure_filename
@@ -780,6 +781,30 @@ def referencetest(station_id: str | int = ""):
             'reference_test.html.jinja2',
             request_pre = pformat(request.dump(), indent=4),
             response_pre = pformat(response.dump(), indent=4)
+        )
+    except:
+        tb = traceback.format_exc()
+        logging.error(tb)
+        return render_template('errorpages/500.html.jinja2', message=tb)
+
+@bp.route('/referencepttest/<window>')
+@login_required
+def referencepttest(window: str | int = ""):
+    """Tests reference stations"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+    try:
+        refpt = Reference.get_window_point(int(window))
+        if refpt is None:
+            return render_template(
+                'errorpages/500.html.jinja2',
+                message="No response received"
+            )
+        return render_template(
+            'reference_test.html.jinja2',
+            request_pre = 'yah',
+            response_pre = refpt.__str__()
         )
     except:
         tb = traceback.format_exc()
