@@ -4,7 +4,7 @@ from enum import Enum, unique
 
 from cubeserver_common.models.beaconmessage import BeaconMessage, OutputDestination
 
-BEACONCOM_VERSION = b'\x01'
+BEACONCOM_VERSION = b'\x02'
 
 @unique
 class BeaconStatus(Enum):

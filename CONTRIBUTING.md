@@ -78,9 +78,28 @@ Such issues have the following parameters:
     | Mid           | Requires some programming experience or learning efforts to tackle, but nothing that cannot be figured out reasonably easily by looking at neighboring code and poking around. |
     | Challenging   | Requires practical or more advanced (especially networking, crypto, database, Docker, threading, etc) computer science experience and may not be straightforward whatsoever |
     | Complex       | This is likely a multi-faceted issue that requires some programming intuition to solve in a timely manner. Experience with Linux, bash scripting, web dev, containerization, threading / processes, databases, OOP, networking, some software conventions, and more may be necessary to understand just the scope of the issue. |
+
 ## Commit/PR Guidelines
 
 Please run `./clean` before each commit and/or pull request. If the repository is not left tidy (and there is no excuse; this step is pretty darn easy), your pull request may not be approved.
+
+Also- **run tests** before pushing stuff or you will most likely **not be approved.**
+
+## Testing
+
+This project uses unit testing with `tox`.
+
+To run the tests, from the root of the repository, run
+```bash
+./configure  # Not needed if done since the last clean
+tox  # (or python3 -m tox)
+```
+
+If `tox` isn't already installed, get it with pip
+```bash
+pip3 install tox
+```
+Installing tox within a virtual environment is recommended but up to you.
 
 
 ## Versioning

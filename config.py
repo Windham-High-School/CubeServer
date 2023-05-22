@@ -9,7 +9,6 @@ A rebuild of the docker container is
 required to implement changes from this file.
 """
 
-from hashlib import algorithms_available
 import logging
 
 ############################
@@ -172,18 +171,6 @@ This *MUST* be present in hashlib.algorithms_available or things will break!"""
 
 TEMP_PATH: str = "/tmp/"
 """A path to a temporary directory that will not be persistent"""
-
-
-
-########################
-# Configuration checks #
-########################
-
-# Check that the selected hash algorithms exist:
-assert PASSWORD_HASH_ALGORITHM in algorithms_available, \
-    "Selected password hash must be available on this system."
-assert CRYPTO_HASH_ALGORITHM in algorithms_available, \
-    "Selected crypto hash must be available on this system."
 
 
 

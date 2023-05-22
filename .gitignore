@@ -30,3 +30,14 @@ MANIFEST
 .vscode/
 .VSCodeCounter/
 files.exclude
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/

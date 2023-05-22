@@ -1,8 +1,9 @@
 Gunicorn==20.1.0           # WSGI server
-Flask==2.2.3               # Flask core for web app
+apscheduler==3.10.1        # For scheduling tasks
+Flask==2.3.2               # Flask core for web app
 Flask-PyMongo==2.3.0       # MongoDB access
 better-profanity==0.7.0    # Profanity checking/filtering
-Flask-WTF==1.0.1           # Flask-WTForms for handling forms and captcha
+Flask-WTF==1.1.1           # Flask-WTForms for handling forms and captcha
 wtforms[email]==3.0.1      # A package for facilitating email validation
 Flask-Bootstrap==3.3.7.1   # Bootstrap integration with Flask
 uptime==3.0.0              # For server stats
@@ -10,3 +11,4 @@ Flask-Table==0.5.0         # For rendering tables
 Flask-Login==0.6.2         # For making authentication a little easier
 is-safe-url==1.0           # Unpackaged DJango url origin checker
 jsonpickle==3.0.1
+pytest>=7.3.1

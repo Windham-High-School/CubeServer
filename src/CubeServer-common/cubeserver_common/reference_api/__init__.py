@@ -23,6 +23,9 @@ class DispatcherClient:
         """Sends a request to the reference server and returns the response"""
         self.sock.setblocking(True)
         self.sock.send(req.dump())
+#        if self.sock.rx_bytes(1) != protocol.ReferenceSignal.ACK.value:
+#            logging.warn("Reference server did not acknowledge request")
+#            return
         return protocol.ReferenceResponse.from_socket(self.sock)
 
     def close(self):

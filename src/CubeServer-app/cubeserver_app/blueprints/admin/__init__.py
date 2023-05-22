@@ -34,7 +34,7 @@ from cubeserver_common.models.user import User, UserLevel
 from cubeserver_common.models.beaconmessage import OutputDestination
 from cubeserver_common.models.multiplier import Multiplier, MassMultiplier, VolumeMultiplier, CostMultiplier, VolumeUnit
 from cubeserver_common.models.mail import Message
-from cubeserver_common.models.beaconmessage import BeaconMessage, BeaconMessageEncoding
+from cubeserver_common.models.beaconmessage import BeaconMessage, BeaconMessageEncoding, SentStatus
 from cubeserver_common.models.reference import ReferencePoint
 from cubeserver_common.config import FROM_NAME, FROM_ADDR, INTERNAL_SECRET_LENGTH, TEMP_PATH
 from cubeserver_common.reference_api import protocol as ref_protocol
@@ -97,15 +97,47 @@ def admin_home():
     conf_form.banner_message.data = db_conf.banner_message
     conf_form.beacon_polling_period.data = db_conf.beacon_polling_period
 
+    # Reserved / internal team handling:
     reserved_links = []
     for name in Team.RESERVED_NAMES:
-        if Team.find_by_name(name) is not None:
-            reserved_links += [(name, None)]
+        team = Team.find_by_name(name)
+        if team is not None:
+            reserved_links += [
+                (
+                    name,
+                    None, 
+                    url_for('.referencetest', station_id=team.reference_id)
+                    if team.is_reference else None
+                )
+            ]
         else:
-            reserved_links += [(name, url_for('.gen_reserved', name=name))]
+            reserved_links += [
+                (
+                    name,
+                    url_for('.gen_reserved', name=name),
+                    None
+                )
+            ]
 
-    beacon_form = ImmediateBeaconForm()
-    beacon_form.instant.data = datetime.now()
+    # Beacon Status:
+    txd = 0
+    sched = 0
+    missed = 0
+    for msg in BeaconMessage.find_since(timedelta(days=1)):
+        if msg.status == SentStatus.TRANSMITTED:
+            txd += 1
+        elif msg.status == SentStatus.MISSED:
+            missed += 1
+        elif msg.status == SentStatus.SCHEDULED:
+            sched += 1
+    beacon_status = {
+        'transmitted_today': txd,
+        'missed_today': missed,
+        'scheduled_today': sched,
+        'queued': len(BeaconMessage.find_by_status(SentStatus.QUEUED)),
+        'transmitted': len(BeaconMessage.find_by_status(SentStatus.TRANSMITTED)),
+        'missed': len(BeaconMessage.find_by_status(SentStatus.MISSED))
+    }
 
     # Render the template:
     return render_template(
@@ -113,7 +145,6 @@ def admin_home():
         teams_table = teams_table.__html__(),
         user_form = InvitationForm(),
         config_form = conf_form,
-        beacon_form = beacon_form,
         email_groups = {
             TeamLevel.JUNIOR_VARSITY.value: base64.urlsafe_b64encode(',  '.join([
                 ', '.join(team.emails) for team in
@@ -128,6 +159,7 @@ def admin_home():
                     Team.find()
             ]).encode())
         }.items(),
+        beacon_stats = beacon_status,
         reserved_names=reserved_links,
         rand=randint(0, 1000000)
     )
@@ -566,9 +598,14 @@ def beacon_table():
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
     table = BeaconMessageTable(BeaconMessage.find())
+
+    beacon_form = ImmediateBeaconForm()
+    beacon_form.instant.data = datetime.now()
+
     return render_template(
         'beacon_table.html.jinja2',
         beacon_table=table.__html__(),
+        beacon_form=beacon_form,
         current_time = str(datetime.now())
     )
 
@@ -680,8 +717,7 @@ def gen_reserved(name: str = ""):
         name=name,
         weight_class=TeamLevel.REFERENCE,
         status=TeamStatus.INTERNAL,
-        _secret_length=INTERNAL_SECRET_LENGTH,
-        _find_new_reference_port=True
+        _secret_length=INTERNAL_SECRET_LENGTH
     )
     team.save()
     flash(f"Successfully created reserved team {name} ({team.id})", category='success')
@@ -719,22 +755,27 @@ def package_beacon_code():
     )
     return response
 
-@bp.route('/referencetest')
+@bp.route('/referencetest/<station_id>')
 @login_required
-def referencetest():
+def referencetest(station_id: str | int = ""):
     """Tests reference stations"""
     # Check admin status:
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
     try:
         request = ref_protocol.ReferenceRequest(
-            id = b'\x00',
+            id = int(station_id).to_bytes(1, 'big'),
             signal=ref_protocol.ReferenceSignal.ENQ,
             command=ref_protocol.ReferenceCommand.MEAS,
             param=ref_protocol.MeasurementType.TEMP.value
         )
         with DispatcherClient() as client:
             response = client.request(request)
+        if response is None:
+            return render_template(
+                'errorpages/500.html.jinja2',
+                message="No response received"
+            )
         return render_template(
             'reference_test.html.jinja2',
             request_pre = pformat(request.dump(), indent=4),
