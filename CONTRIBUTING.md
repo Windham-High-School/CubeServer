@@ -4,16 +4,16 @@ Firstly, thank you to anyone interested in helping out- I hope you get a chance 
 
 Contributing to CubeServer should imply **no commitment**, other than to communicate if plans change and you need someone else to take something over. Reflexively, we hope to communicate back and respond to any questions you might have in a timely manner.
 
-## Current Scope
+## Current Scope :telescope:
 
 Currently, we are working to deploy CubeServer for a competition at [WHS](https://github.com/Windham-High-School). Because this project's scope is localized, contributions from outside the organization are not currently expected. The majority of general communications will occur through the [cubeserver-dev GitHub team](https://github.com/orgs/Windham-High-School/teams/cubeserver-dev).
 
 
 ## Helpful Links :link:
-- [CubeServer-dev Team Project (Primary issue tracker)](https://github.com/orgs/Windham-High-School/projects/1)
-- [CubeServer Discussions (Ask questions here)](https://github.com/Windham-High-School/CubeServer/discussions)
+- :notebook_with_decorative_cover: [CubeServer-dev Team Project (Primary issue tracker)](https://github.com/orgs/Windham-High-School/projects/1)
+- :question: [CubeServer Discussions (Ask questions here)](https://github.com/Windham-High-School/CubeServer/discussions)
 
-## Branching Model & Workflow
+## Branching Model & Workflow :memo:
 
 1. Create an **issue** & document the problem
 2. Assign the **issue**
@@ -83,13 +83,13 @@ Such issues have the following parameters:
     | Challenging   | Requires practical or more advanced (especially networking, crypto, database, Docker, threading, etc) computer science experience and may not be straightforward whatsoever |
     | Complex       | This is likely a multi-faceted issue that requires some programming intuition to solve in a timely manner. Experience with Linux, bash scripting, web dev, containerization, threading / processes, databases, OOP, networking, some software conventions, and more may be necessary to understand just the scope of the issue. |
 
-## Commit/PR Guidelines
+## Commit/PR Guidelines :memo:
 
 Please run `./clean` before each commit and/or pull request. If the repository is not left tidy (and there is no excuse; this step is pretty darn easy), your pull request may not be approved.
 
 Also- **run tests** before pushing stuff or you will most likely **not be approved.**
 
-## Testing
+## Testing :test_tube:
 
 This project uses unit testing with `tox`.
 
