@@ -70,11 +70,13 @@ class NextMessage(Resource):
             return None, 404
 
         return {
+            "id": str(message.id),
             "timestamp": message.send_at.timestamp(),
             "offset": (datetime.now() - message.send_at).total_seconds(),
             "destination": message.destination.value,
             "intensity": message.intensity,
-            "message": message.full_message_bytes.decode('utf-8')
+            "message": message.full_message_bytes.decode('utf-8'),
+            "status": message.status.value
         }, 200
 
 class Message(Resource):
@@ -93,27 +95,6 @@ class Message(Resource):
     decorators = [auth.login_required]
 
     @internal
-    def post(self):
-        logging.debug(f"Message post req from {auth.username()}")
-        data_str = request.get_json()
-        logging.debug(f"Request: {data_str}")
-        if data_str is None:
-            data_str = loads(request.form['data'])
-        message: BeaconMessage = BeaconMessage(
-            destination=data_str['destination'],
-            intensity=data_str['intensity'],
-            full_message_bytes=data_str['message'].encode('utf-8')
-        )
-        message.save()
-        return {
-            "timestamp": message.send_at.timestamp(),
-            "offset": (datetime.now() - message.send_at).total_seconds(),
-            "destination": message.destination.value,
-            "intensity": message.intensity,
-            "message": message.full_message_bytes.decode('utf-8')
-        }, 201
-
-    @internal
     def put(self, message_id: str):
         logging.debug(f"Message put req from {auth.username()}")
         data_str = request.get_json()
@@ -121,17 +102,20 @@ class Message(Resource):
         if data_str is None:
             data_str = loads(request.form['data'])
         message: BeaconMessage = BeaconMessage.find_by_id(message_id)
-        if data_str['status'] not in SentStatus:
+        try:
+            message.status = SentStatus(data_str['status'])  # TODO: Support other fields
+        except ValueError:
             logging.debug("Attempted to set invalid status")
             return None, 400
-        message.status = SentStatus(data_str['status'])  # TODO: Support other fields
         message.save()
         return {
+            "id": str(message.id),
             "timestamp": message.send_at.timestamp(),
             "offset": (datetime.now() - message.send_at).total_seconds(),
             "destination": message.destination.value,
             "intensity": message.intensity,
-            "message": message.full_message_bytes.decode('utf-8')
+            "message": message.full_message_bytes.decode('utf-8'),
+            "status": message.status.value
         }, 200
 
     @internal
@@ -139,9 +123,11 @@ class Message(Resource):
         logging.debug(f"Message get req from {auth.username()}")
         message: BeaconMessage = BeaconMessage.find_by_id(message_id)
         return {
+            "id": str(message.id),
             "timestamp": message.send_at.timestamp(),
             "offset": (message.send_at - datetime.now()).total_seconds(),
             "destination": message.destination.value,
             "intensity": message.intensity,
-            "message": message.full_message_bytes.decode('utf-8')
+            "message": message.full_message_bytes.decode('utf-8'),
+            "status": message.status.value
         }, 200

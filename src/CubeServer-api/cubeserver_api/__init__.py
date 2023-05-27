@@ -62,6 +62,6 @@ if all(key in environ for key in [
 
     logging.debug("Attaching beacon api resources")
     api.add_resource(NextMessage, '/beacon/message/next_queued')
-    api.add_resource(Message, '/beacon/message/<string:msg_id>')
+    api.add_resource(Message, '/beacon/message/<string:message_id>')
 else:
     logging.warn("API NOT INITIALIZED! (okay if this is a docs build)")
