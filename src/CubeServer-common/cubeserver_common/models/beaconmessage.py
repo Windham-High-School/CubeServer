@@ -223,7 +223,7 @@ class BeaconMessage(PyMongoModel):
         return cls.find({'send_at': {'$gte': datetime.now() - how_far_back}})
 
     @classmethod
-    def find_one_queued(cls) -> 'BeaconMessage' | None:
+    def find_one_queued(cls) -> Optional['BeaconMessage']:
         """Returns the soonest queued message"""
         # return cls.find({'status': SentStatus.QUEUED.value}).sort('send_at', 1).limit(1)
         try:
