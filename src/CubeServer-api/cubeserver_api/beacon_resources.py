@@ -26,7 +26,7 @@ def internal(func: callable) -> callable:
     """
     def wrapper(*args, **kwargs):
         team: Team = Team.find_by_name(auth.username())
-        if team.weight_class != TeamStatus.INTERNAL:
+        if team.status != TeamStatus.INTERNAL:
             # Abort due to unauthorized access
             logging.info(f"Unauthorized access attempt to internal resource by {team.name}")
             return None, 401
