@@ -225,4 +225,5 @@ class BeaconMessage(PyMongoModel):
     @classmethod
     def find_one_queued(cls) -> 'BeaconMessage':
         """Returns the soonest queued message"""
-        return cls.find({'status': SentStatus.QUEUED.value}).sort('send_at', 1).limit(1)
+        # return cls.find({'status': SentStatus.QUEUED.value}).sort('send_at', 1).limit(1)
+        return cls.find_sorted({'status': SentStatus.QUEUED.value}, 'send_at', 1)[0]
