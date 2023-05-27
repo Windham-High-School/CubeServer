@@ -66,6 +66,8 @@ class NextMessage(Resource):
         #     data_str = loads(request.form['data'])
 
         message: BeaconMessage = BeaconMessage.find_one_queued()
+        if message is None:
+            return None, 404
 
         return {
             "timestamp": message.send_at.timestamp(),
