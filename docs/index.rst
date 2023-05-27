@@ -15,4 +15,3 @@ This is basic API documentation for the code that runs the server and webapp. Th
    codedocs/cubeserver_api/cubeserver_api
    codedocs/cubeserver_app/cubeserver_app
    codedocs/cubeserver_common/cubeserver_common
-   codedocs/cubeserver_beaconserver/cubeserver_beaconserver

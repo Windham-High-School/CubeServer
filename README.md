@@ -101,8 +101,6 @@ CubeServer is built upon the containerization platform Docker. As described in d
   - A standalone MongoDB server, central to the other containers
 - CubeServer-accesspoint
   - The container from which the WiFi access point and routing is taken care of to allow Cubes to connect to the API.
-- CubeServer-beaconserver
-  - The container that deals with talking to the beacon and to the reference cubes in real-time
 
 Files used for building each of these containers (other than CubeServer-mongodb, which is prebuilt) may be found in Docker/.
 

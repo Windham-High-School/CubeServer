@@ -9,7 +9,6 @@ from sphinx.ext.apidoc import main
 main(['../src/CubeServer-app/cubeserver_app/', '-o', './codedocs/cubeserver_app'])
 main(['../src/CubeServer-api/cubeserver_api/', '-o', './codedocs/cubeserver_api'])
 main(['../src/CubeServer-common/cubeserver_common/', '-o', './codedocs/cubeserver_common'])
-main(['../src/CubeServer-beaconserver/cubeserver_beaconserver/', '-o', './codedocs/cubeserver_beaconserver'])
 
 # -- Project information
 
