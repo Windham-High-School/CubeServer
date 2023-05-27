@@ -140,7 +140,7 @@ class Message(Resource):
         message: BeaconMessage = BeaconMessage.find_by_id(message_id)
         return {
             "timestamp": message.send_at.timestamp(),
-            "offset": (datetime.now() - message.send_at).total_seconds(),
+            "offset": (message.send_at - datetime.now()).total_seconds(),
             "destination": message.destination.value,
             "intensity": message.intensity,
             "message": message.full_message_bytes.decode('utf-8')
