@@ -47,15 +47,21 @@ if all(key in environ for key in [
     scheduler.start()
 
     # Import after init'ing the db:
-    logging.debug("Loading api resources")
-    from cubeserver_api.resources import Data, Status, Email, CodeUpdate
+    logging.debug("Loading team api resources")
+    from cubeserver_api.team_resources import Data, Status, Email, CodeUpdate
+    logging.debug("Loading beacon api resources")
+    from cubeserver_api.beacon_resources import NextMessage, Message
 
     # Attach resources:
-    logging.debug("Attaching api resources")
+    logging.debug("Attaching team api resources")
     api.add_resource(Data, '/data')  # TODO: Use as decorators?
     api.add_resource(Status, '/status')
     api.add_resource(Email, '/email')
     api.add_resource(CodeUpdate, '/update')
     #api.add_resource(BeaconMessages, '/test')  # A dummy api endpoint for db testing
+
+    logging.debug("Attaching beacon api resources")
+    api.add_resource(NextMessage, '/beacon/next_queued')
+    api.add_resource(Message, '/beacon/message/<string:msg_id>')
 else:
     logging.warn("API NOT INITIALIZED! (okay if this is a docs build)")
