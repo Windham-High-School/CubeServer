@@ -1,4 +1,4 @@
-"""This package contains the resource classes for the api
+"""This package contains the resource classes for the api used by teams
 """
 
 from datetime import datetime

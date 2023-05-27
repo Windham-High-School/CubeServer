@@ -38,8 +38,6 @@ from cubeserver_common.models.mail import Message
 from cubeserver_common.models.beaconmessage import BeaconMessage, BeaconMessageEncoding, SentStatus
 from cubeserver_common.models.reference import ReferencePoint
 from cubeserver_common.config import FROM_NAME, FROM_ADDR, INTERNAL_SECRET_LENGTH, TEMP_PATH
-from cubeserver_common.reference_api import protocol as ref_protocol
-from cubeserver_common.reference_api import DispatcherClient
 
 from flask_table import Table
 from cubeserver_app.tables.columns import PreCol, OptionsCol
@@ -764,24 +762,24 @@ def referencetest(station_id: str | int = ""):
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
     try:
-        request = ref_protocol.ReferenceRequest(
-            id = int(station_id).to_bytes(1, 'big'),
-            signal=ref_protocol.ReferenceSignal.ENQ,
-            command=ref_protocol.ReferenceCommand.MEAS,
-            param=ref_protocol.MeasurementType.TEMP.value
-        )
-        with DispatcherClient() as client:
-            response = client.request(request)
-        if response is None:
-            return render_template(
-                'errorpages/500.html.jinja2',
-                message="No response received"
-            )
+        # request = ref_protocol.ReferenceRequest(
+        #     id = int(station_id).to_bytes(1, 'big'),
+        #     signal=ref_protocol.ReferenceSignal.ENQ,
+        #     command=ref_protocol.ReferenceCommand.MEAS,
+        #     param=ref_protocol.MeasurementType.TEMP.value
+        # )
+        # with DispatcherClient() as client:
+        #     response = client.request(request)
+        # if response is None:
         return render_template(
-            'reference_test.html.jinja2',
-            request_pre = pformat(request.dump(), indent=4),
-            response_pre = pformat(response.dump(), indent=4)
+            'errorpages/500.html.jinja2',
+            message="No response received"
         )
+        # return render_template(
+        #     'reference_test.html.jinja2',
+        #     request_pre = pformat(request.dump(), indent=4),
+        #     response_pre = pformat(response.dump(), indent=4)
+        # )
     except:
         tb = traceback.format_exc()
         logging.error(tb)

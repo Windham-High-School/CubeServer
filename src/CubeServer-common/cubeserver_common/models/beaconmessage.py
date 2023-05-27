@@ -221,3 +221,12 @@ class BeaconMessage(PyMongoModel):
     def find_since(cls, how_far_back: timedelta) -> 'BeaconMessage':
         """Returns all messages with times within a given window to now"""
         return cls.find({'send_at': {'$gte': datetime.now() - how_far_back}})
+
+    @classmethod
+    def find_one_queued(cls) -> Optional['BeaconMessage']:
+        """Returns the soonest queued message"""
+        # return cls.find({'status': SentStatus.QUEUED.value}).sort('send_at', 1).limit(1)
+        try:
+            return cls.find_sorted({'status': SentStatus.QUEUED.value}, key='send_at', order=1)[0]
+        except IndexError:
+            return None

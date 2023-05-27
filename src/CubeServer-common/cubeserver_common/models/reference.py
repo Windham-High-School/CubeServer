@@ -10,9 +10,6 @@ from cubeserver_common.models.team import Team
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 from cubeserver_common.models.utils.modelutils import PyMongoModel
 
-from cubeserver_common.reference_api import protocol as ref_protocol
-from cubeserver_common.reference_api import DispatcherClient
-
 class ReferencePoint(PyMongoModel):
     """Holds a set of reference measurements from a point in time"""
 
@@ -78,30 +75,30 @@ class Reference:
         #pressures = []
         #for reference_cube in Team.find_references():
         #    data = 
-        temp_request = ref_protocol.ReferenceRequest(
-            id = b'\x00',
-            signal=ref_protocol.ReferenceSignal.ENQ,
-            command=ref_protocol.ReferenceCommand.MEAS,
-            param=ref_protocol.MeasurementType.TEMP.value
-        )
-        pres_request = ref_protocol.ReferenceRequest(
-            id = b'\x00',
-            signal=ref_protocol.ReferenceSignal.ENQ,
-            command=ref_protocol.ReferenceCommand.MEAS,
-            param=ref_protocol.MeasurementType.PRES.value
-        )
-        with DispatcherClient() as client:
-            response_temp = client.request(temp_request)
-            response_pres = client.request(pres_request)
+        # temp_request = ref_protocol.ReferenceRequest(
+        #     id = b'\x00',
+        #     signal=ref_protocol.ReferenceSignal.ENQ,
+        #     command=ref_protocol.ReferenceCommand.MEAS,
+        #     param=ref_protocol.MeasurementType.TEMP.value
+        # )
+        # pres_request = ref_protocol.ReferenceRequest(
+        #     id = b'\x00',
+        #     signal=ref_protocol.ReferenceSignal.ENQ,
+        #     command=ref_protocol.ReferenceCommand.MEAS,
+        #     param=ref_protocol.MeasurementType.PRES.value
+        # )
+        # with DispatcherClient() as client:
+        #     response_temp = client.request(temp_request)
+        #     response_pres = client.request(pres_request)
 
         ref_pt = ReferencePoint(
             DataPoint(
                 category=DataClass.TEMPERATURE,
-                value=9/5 * (response_temp.get_value()) + 32
+                value=32  # TODO: Use real data
             ),
             DataPoint(
                 category=DataClass.PRESSURE,
-                value=(response_temp.get_value())
+                value=0  # TODO: Use real data
             )
         )
         ref_pt.save()
