@@ -25,7 +25,7 @@ COPY Docker/CubeServer-api/gunicorn.conf.py /
 # Entrypoint:
 COPY Docker/CubeServer-api/gunicorn_start.sh /
 RUN chmod +x /gunicorn_start.sh
-ENTRYPOINT /gunicorn_start.sh
+# ENTRYPOINT /gunicorn_start.sh
 
 # Requirements:
 COPY Docker/CubeServer-api/requirements.txt /tmp/
@@ -33,8 +33,8 @@ RUN pip3 install -r /tmp/requirements.txt
 
 # Common dependency:
 COPY ./src/CubeServer-common/ /tmp/common
-RUN pip3 install /tmp/common
-RUN rm -r /tmp/common
+RUN pip3 install /tmp/common \
+    && rm -r /tmp/common
 
 # API package itself:
 COPY ./src/CubeServer-api/ /app/

@@ -1,0 +1,21 @@
+{
+	"name": "CuberServer",
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "dev",
+	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+
+	"forwardPorts": [
+		5000,
+		8080
+	],
+  
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"lfs.vscode-emacs-friendly",
+				"ms-python.isort",
+				"ms-python.pylint"
+			]
+		}
+	}
+}

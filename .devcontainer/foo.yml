@@ -1,0 +1,94 @@
+services:
+
+  # Main application container:
+  app:
+    container_name: ${PROJECT_NAME}-app
+    image: snorklerjoe/cubeserver-app:${VERSION_TAG}
+    restart: unless-stopped
+    volumes:
+      - flask-secret:/secret/
+      - api-ssl-cert:/api_cert/
+    build:
+      context: .
+      dockerfile: Docker/CubeServer-app/Dockerfile
+    environment:
+      # MongoDB credentials stuff:
+      - MONGODB_DATABASE=flaskdb
+      - MONGODB_USERNAME=flask
+      - MONGODB_HOSTNAME=mongodb
+      - MONGODB_PASSWORD=${MONGODB_PWD}
+      # Wrapper packaging stuff:
+      - API_WRAPPER_GIT_URL_ARDUINO=${API_WRAPPER_GIT_URL_ARDUINO}
+      - API_WRAPPER_ZIP_FILENAME_ARDUINO=${API_WRAPPER_ZIP_FILENAME_ARDUINO}
+      - API_WRAPPER_GIT_URL_PYTHON=${API_WRAPPER_GIT_URL_PYTHON}
+      - API_WRAPPER_ZIP_FILENAME_PYTHON=${API_WRAPPER_ZIP_FILENAME_PYTHON}
+      - API_WRAPPER_GIT_URL_CIRCUITPYTHON=${API_WRAPPER_GIT_URL_CIRCUITPYTHON}
+      - API_WRAPPER_ZIP_FILENAME_CIRCUITPYTHON=${API_WRAPPER_ZIP_FILENAME_CIRCUITPYTHON}
+      - API_WRAPPER_PEM_FILENAME=${API_WRAPPER_PEM_FILENAME}
+      - BEACON_CODE_GIT_URL=${BEACON_CODE_GIT_URL}
+      # Connection stuff:
+      - AP_SSID=${AP_SSID}
+      - API_ADDR=${API_ADDR}
+      - API_ALT_ADDR=${API_ALT_ADDR}
+      - API_PORT=${API_PORT}
+      # Flask stuff:
+      - SERVER_NAME=${DOMAIN}
+      # Logging Level for GUnicorn:
+      - LOGLEVEL=${LOGLEVEL}
+    ports: # Bind the port for the web server
+      - ${DEVMODE+$WEBAPP_PORT}:80  # But only in dev mode
+    depends_on:
+      - mongodb
+      - api
+
+  # API server container:
+  api:
+    container_name: ${PROJECT_NAME}-api
+    image: snorklerjoe/cubeserver-api:${VERSION_TAG}
+    restart: unless-stopped
+    volumes:
+      - flask-secret:/secret/
+      - api-ssl-cert:/etc/ssl/api_cert/
+    build:
+      context: .
+      dockerfile: Docker/CubeServer-api/Dockerfile
+      args:
+        CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}/"
+#        CERT_SUBJ: "${API_ADDR}"
+        CERT_SUBJALTNAME: "${API_ALT_ADDR}"
+        CERT_EXP_DAYS: ${API_CERT_EXP_DAYS}
+    environment:
+      # MongoDB credentials:
+      - MONGODB_DATABASE=flaskdb
+      - MONGODB_USERNAME=flask
+      - MONGODB_HOSTNAME=mongodb
+      - MONGODB_PASSWORD=${MONGODB_PWD}
+      # Flask stuff:
+      - SERVER_NAME=${DOMAIN}
+      - FLASK_ENV=development
+      # Logging Level for GUnicorn:
+      - LOGLEVEL=${LOGLEVEL}
+    network_mode: service:mongodb
+    depends_on:
+      - mongodb
+    #command: sleep infinity
+    command: flask --app cubeserver_api run --host 0.0.0.0
+
+  # Database container:
+  mongodb:
+    container_name: ${PROJECT_NAME}-mongodb
+    image: ${MONGO_CONTAINER}:${MONGO_VERSION}
+    volumes: # Corresponds with volume at the bottom
+      - mongodb-data:/data/db
+    restart: unless-stopped
+    command: mongod --auth
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: flask
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PWD}
+      MONGO_INITDB_DATABASE: flaskdb
+      MONGODB_DATA_DIR: /data/db
+      MONDODB_LOG_DIR: /dev/null
+
+volumes:
+  mongodb-data:
+ 
