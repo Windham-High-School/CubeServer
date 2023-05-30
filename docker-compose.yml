@@ -10,8 +10,9 @@ services:
       - flask-secret:/secret/
       - api-ssl-cert:/api_cert/
     build:
-      context: .
-      dockerfile: Docker/CubeServer-app/Dockerfile
+      context: ..
+      dockerfile: Docker/CubeServer/Dockerfile
+      target: app
     environment:
       # MongoDB credentials stuff:
       - MONGODB_DATABASE=flaskdb
@@ -54,8 +55,9 @@ services:
       - flask-secret:/secret/
       - api-ssl-cert:/etc/ssl/api_cert/
     build:
-      context: .
-      dockerfile: Docker/CubeServer-api/Dockerfile
+      context: ..
+      dockerfile: Docker/CubeServer/Dockerfile
+      target: api
       args:
         CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}/"
 #        CERT_SUBJ: "${API_ADDR}"
