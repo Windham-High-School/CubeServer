@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+mkdir -p /etc/ssl/api_cert
+
 # version <= 0.5.3 COMPATIBILITY:
 if [ -f "/etc/ssl/api_cert/cert.pem" ]; then
     echo "Moving [cert.pem -> server.pem, key.key -> server.key] for compatibility with newer versions!"

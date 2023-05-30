@@ -1,13 +1,13 @@
 FROM mcr.microsoft.com/devcontainers/python:0-3.11 as common
 
-ENV APP_HOME /app
+ENV APP_HOME /code
 
 WORKDIR $APP_HOME
 
 COPY ./src/CubeServer-common/requirements.txt requirements-common.txt
 RUN pip install -r requirements-common.txt
 
-COPY ./src/CubeServer-common/cubeserver_common .
+COPY ./src/CubeServer-common/cubeserver_common ./cubeserver_common
 
 #---
 FROM common as combined
@@ -39,7 +39,7 @@ RUN chmod +x /CubeServer-api/gen_ssl_cert.sh \
 COPY ./src/CubeServer-api/requirements.txt requirements-api.txt
 RUN pip install -r requirements-api.txt
 
-COPY ./src/CubeServer-api/cubeserver_api .
+COPY ./src/CubeServer-api/cubeserver_api ./cubeserver_api
 
 ## -- APP --
 RUN mkdir /CubeServer-app
@@ -56,7 +56,13 @@ RUN chmod +x /CubeServer-app/package_lib.sh \
 COPY ./src/CubeServer-app/requirements.txt requirements-app.txt
 RUN pip install -r requirements-app.txt
 
-COPY ./src/CubeServer-app/cubeserver_app .
+COPY ./src/CubeServer-app/cubeserver_app ./cubeserver_app
+
+#---
+FROM combined as combined-dev
+
+RUN /CubeServer-api/setup.sh
+RUN /CubeServer-app/setup.sh
 
 #---
 FROM combined as api

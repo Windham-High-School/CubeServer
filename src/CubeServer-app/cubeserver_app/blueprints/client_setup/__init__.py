@@ -14,11 +14,11 @@ bp = Blueprint('config', __name__, url_prefix='/setup', template_folder='templat
 
 
 logging.debug("Loading server API certificates")
-with open("/api_cert/sha1_fingerprint.txt", "r", encoding="utf-8") as fh:
+with open("/etc/ssl/api_cert/sha1_fingerprint.txt", "r", encoding="utf-8") as fh:
     sha_fingerprint = fh.read()
-with open("/api_cert/sha256_fingerprint.txt", "r", encoding="utf-8") as fh:
+with open("/etc/ssl/api_cert/sha256_fingerprint.txt", "r", encoding="utf-8") as fh:
     sha_fingerprint_256 = fh.read()
-with open("/api_cert/server.pem", "r", encoding="utf-8") as fh:
+with open("/etc/ssl/api_cert/server.pem", "r", encoding="utf-8") as fh:
     pem_cert = fh.read()
 
 

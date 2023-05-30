@@ -5,15 +5,18 @@ services:
     container_name: ${PROJECT_NAME}-combined
     restart: unless-stopped
     volumes:
-      - flask-secret:/secret/
-      - ../src/CubeServer-api/cubeserver_common:/app/cubeserver_common:cached
-      - ../src/CubeServer-api/cubeserver_api:/app/cubeserver_api:cached
-      - ../src/CubeServer-api/cubeserver_app:/app/cubeserver_app:cached
-      - ../src/CubeServer-common/tests:/app/tests:cached
+      - ./secret_key.txt:/secret/secret_key.txt:cached
+      - ../src/CubeServer-common/cubeserver_common:/code/cubeserver_common:cached
+      - ../src/CubeServer-common/requirements.txt:/code/requirements-common.txt:cached
+      - ../src/CubeServer-common/tests:/code/tests:cached
+      - ../src/CubeServer-api/cubeserver_api:/code/cubeserver_api:cached
+      - ../src/CubeServer-api/requirements.txt:/code/requirements-api.txt:cached
+      - ../src/CubeServer-app/cubeserver_app:/code/cubeserver_app:cached
+      - ../src/CubeServer-app/requirements.txt:/code/requirements-app.txt:cached
     build:
       context: ..
       dockerfile: Docker/CubeServer/Dockerfile
-      target: combined
+      target: combined-dev
       args:
         CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}/"
         CERT_SUBJALTNAME: "${API_ALT_ADDR}"
@@ -55,4 +58,3 @@ services:
   
 volumes:
   mongodb-data:
-  flask-secret:
