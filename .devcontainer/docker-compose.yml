@@ -1,21 +1,48 @@
 version: '3.8'
 
 services:
-  dev:
+  combined:
+    container_name: ${PROJECT_NAME}-combined
+    restart: unless-stopped
+    volumes:
+      - flask-secret:/secret/
+      - ../src/CubeServer-api/cubeserver_common:/app/cubeserver_common:cached
+      - ../src/CubeServer-api/cubeserver_api:/app/cubeserver_api:cached
+      - ../src/CubeServer-api/cubeserver_app:/app/cubeserver_app:cached
+      - ../src/CubeServer-common/tests:/app/tests:cached
     build:
       context: ..
-      dockerfile: Dockerfile
-
-    volumes:
-      - ../..:/workspaces:cached
-
-    # Overrides default command so things don't shut down after the process ends.
+      dockerfile: Docker/CubeServer/Dockerfile
+      target: combined
+      args:
+        CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}/"
+        CERT_SUBJALTNAME: "${API_ALT_ADDR}"
+        CERT_EXP_DAYS: ${API_CERT_EXP_DAYS}
+    environment:
+      # MongoDB credentials:
+      - MONGODB_DATABASE=flaskdb
+      - MONGODB_USERNAME=flask
+      - MONGODB_HOSTNAME=mongodb
+      - MONGODB_PASSWORD=${MONGODB_PWD}
+      # Wrapper packaging stuff:
+      - API_WRAPPER_GIT_URL_ARDUINO=${API_WRAPPER_GIT_URL_ARDUINO}
+      - API_WRAPPER_ZIP_FILENAME_ARDUINO=${API_WRAPPER_ZIP_FILENAME_ARDUINO}
+      - API_WRAPPER_GIT_URL_PYTHON=${API_WRAPPER_GIT_URL_PYTHON}
+      - API_WRAPPER_ZIP_FILENAME_PYTHON=${API_WRAPPER_ZIP_FILENAME_PYTHON}
+      - API_WRAPPER_GIT_URL_CIRCUITPYTHON=${API_WRAPPER_GIT_URL_CIRCUITPYTHON}
+      - API_WRAPPER_ZIP_FILENAME_CIRCUITPYTHON=${API_WRAPPER_ZIP_FILENAME_CIRCUITPYTHON}
+      - API_WRAPPER_PEM_FILENAME=${API_WRAPPER_PEM_FILENAME}
+      - BEACON_CODE_GIT_URL=${BEACON_CODE_GIT_URL}
+      # Flask stuff:
+      - SERVER_NAME=${DOMAIN}
+      - FLASK_DEBUG=True
+    network_mode: service:mongodb
     command: sleep infinity
 
   mongodb:
     container_name: ${PROJECT_NAME}-mongodb
     image: ${MONGO_CONTAINER}:${MONGO_VERSION}
-    volumes: # Corresponds with volume at the bottom
+    volumes:
       - mongodb-data:/data/db
     restart: unless-stopped
     command: mongod --auth
@@ -25,6 +52,7 @@ services:
       MONGO_INITDB_DATABASE: flaskdb
       MONGODB_DATA_DIR: /data/db
       MONDODB_LOG_DIR: /dev/null
-
+  
 volumes:
   mongodb-data:
+  flask-secret:

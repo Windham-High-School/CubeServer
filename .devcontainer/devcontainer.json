@@ -1,7 +1,7 @@
 {
 	"name": "CuberServer",
 	"dockerComposeFile": "docker-compose.yml",
-	"service": "dev",
+	"service": "combined",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
 	"forwardPorts": [

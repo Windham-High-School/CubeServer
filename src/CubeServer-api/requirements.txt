@@ -6,4 +6,3 @@ jsonpickle==3.0.1
 apscheduler==3.10.1
 Flask-APScheduler==1.12.4
 better-profanity==0.7.0    # Profanity checking/filtering
-pytest>=7.3.1
