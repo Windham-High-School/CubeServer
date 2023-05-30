@@ -4,4 +4,4 @@
 
 echo "Starting GUnicorn..."
 export PYTHONUNBUFFERED=TRUE  # Log Python output
-gunicorn --chdir /app/ cubeserver_api:app --log-level $LOGLEVEL -c /gunicorn.conf.py
+gunicorn --chdir /code/ cubeserver_api:app --log-level $LOGLEVEL -c /CubeServer-api/gunicorn.conf.py
