@@ -10,7 +10,7 @@ services:
       - flask-secret:/secret/
       - api-ssl-cert:/api_cert/
     build:
-      context: ..
+      context: .
       dockerfile: Docker/CubeServer/Dockerfile
       target: app
     environment:
@@ -55,7 +55,7 @@ services:
       - flask-secret:/secret/
       - api-ssl-cert:/etc/ssl/api_cert/
     build:
-      context: ..
+      context: .
       dockerfile: Docker/CubeServer/Dockerfile
       target: api
       args:
