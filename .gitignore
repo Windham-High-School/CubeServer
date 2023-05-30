@@ -8,6 +8,7 @@ pip-delete-this-directory.txt
 .venv/
 venv/
 .venv
+.env
 
 build/
 develop-eggs/
