@@ -9,9 +9,8 @@ from typing import Mapping, List, Optional
 from cubeserver_common.models.team import Team
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 from cubeserver_common.models.utils.modelutils import PyMongoModel
-
-from cubeserver_common.reference_api import protocol as ref_protocol
-from cubeserver_common.reference_api import DispatcherClient
+from pymongo import DESCENDING
+from bson import ObjectId
 
 class ReferencePoint(PyMongoModel):
     """Holds a set of reference measurements from a point in time"""
@@ -78,30 +77,30 @@ class Reference:
         #pressures = []
         #for reference_cube in Team.find_references():
         #    data = 
-        temp_request = ref_protocol.ReferenceRequest(
-            id = b'\x00',
-            signal=ref_protocol.ReferenceSignal.ENQ,
-            command=ref_protocol.ReferenceCommand.MEAS,
-            param=ref_protocol.MeasurementType.TEMP.value
-        )
-        pres_request = ref_protocol.ReferenceRequest(
-            id = b'\x00',
-            signal=ref_protocol.ReferenceSignal.ENQ,
-            command=ref_protocol.ReferenceCommand.MEAS,
-            param=ref_protocol.MeasurementType.PRES.value
-        )
-        with DispatcherClient() as client:
-            response_temp = client.request(temp_request)
-            response_pres = client.request(pres_request)
+        # temp_request = ref_protocol.ReferenceRequest(
+        #     id = b'\x00',
+        #     signal=ref_protocol.ReferenceSignal.ENQ,
+        #     command=ref_protocol.ReferenceCommand.MEAS,
+        #     param=ref_protocol.MeasurementType.TEMP.value
+        # )
+        # pres_request = ref_protocol.ReferenceRequest(
+        #     id = b'\x00',
+        #     signal=ref_protocol.ReferenceSignal.ENQ,
+        #     command=ref_protocol.ReferenceCommand.MEAS,
+        #     param=ref_protocol.MeasurementType.PRES.value
+        # )
+        # with DispatcherClient() as client:
+        #     response_temp = client.request(temp_request)
+        #     response_pres = client.request(pres_request)
 
         ref_pt = ReferencePoint(
             DataPoint(
                 category=DataClass.TEMPERATURE,
-                value=9/5 * (response_temp.get_value()) + 32
+                value=32  # TODO: Use real data
             ),
             DataPoint(
                 category=DataClass.PRESSURE,
-                value=(response_temp.get_value())
+                value=0  # TODO: Use real data
             )
         )
         ref_pt.save()
@@ -126,14 +125,27 @@ class Reference:
         #    cls.trimmed_mean()
         #)
 
+    # @classmethod
+    # def get_window_point(cls, window: int) -> ReferencePoint:
+    #     """Returns the most recent reference point in the db if it falls within the time window of now in seconds"""
+    #     logging.debug("Getting a reference point within " + str(window) + " seconds...")
+    #     #most_recent = ReferencePoint.find_most_recent()
+    #     #logging.debug(most_recent)
+    #     #elapsed = datetime.now() - most_recent.moment
+    #     #if elapsed.total_seconds() <= window:
+    #     #    return most_recent
+    #     return cls.collect(Team.find_references()[0])  # If it's too old, grab a new point
+
     @classmethod
     def get_window_point(cls, window: int) -> ReferencePoint:
-        """Returns the most recent reference point in the db if it falls within the time window of now in seconds"""
-        logging.debug("Getting a reference point within " + str(window) + " seconds...")
-        #most_recent = ReferencePoint.find_most_recent()
-        #logging.debug(most_recent)
-        #elapsed = datetime.now() - most_recent.moment
-        #if elapsed.total_seconds() <= window:
-        #    return most_recent
-        return cls.collect(Team.find_references()[0])  # If it's too old, grab a new point
-
+        """Just returns a ReferencePoint object from the last most recent DataPoints"""
+        try:
+            temp_point = DataPoint.find_one_sorted({'team_reference': ObjectId(Team.find_references()[0].id), 'category': DataClass.TEMPERATURE.value}, key='moment', order=DESCENDING)
+            pres_point = DataPoint.find_one_sorted({'team_reference': ObjectId(Team.find_references()[0].id), 'category': DataClass.PRESSURE.value}, key='moment', order=DESCENDING)
+            return ReferencePoint(
+                temp=temp_point.value,
+                pressure=pres_point.value,
+            )
+        except Exception as e:
+            logging.error(e)
+            return cls.collect(Team.find_references()[0])

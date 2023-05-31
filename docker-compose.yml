@@ -41,7 +41,6 @@ services:
     depends_on:
       - mongodb
       - api
-      - beaconserver
     networks:
       - frontend
       - backend
@@ -74,37 +73,6 @@ services:
       - LOGLEVEL=${LOGLEVEL}
     ports: # Bind the port for the web server
       - "${API_PORT}:443"
-    depends_on:
-      - mongodb
-      - accesspoint
-    networks:
-      - api
-      - backend
-
-  # Beacon server container:
-  beaconserver:
-    container_name: ${PROJECT_NAME}-beaconserver
-    image: snorklerjoe/cubeserver-beaconserver:${VERSION_TAG}
-    restart: unless-stopped
-    volumes:
-      - api-ssl-cert:/etc/ssl/beacon_cert/
-    build:
-      context: .
-      dockerfile: Docker/CubeServer-beaconserver/Dockerfile
-      args:
-        CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}/"
-#        CERT_SUBJ: "${API_ADDR}"
-        CERT_SUBJALTNAME: "${API_ALT_ADDR}"
-        CERT_EXP_DAYS: ${API_CERT_EXP_DAYS}
-    environment:
-      # MongoDB credentials:
-      - MONGODB_DATABASE=flaskdb
-      - MONGODB_USERNAME=flask
-      - MONGODB_HOSTNAME=mongodb
-      - MONGODB_PASSWORD=${MONGODB_PWD}
-    ports: # Bind the port for the web server
-      - "${BEACON_PORT}:8888"
-      - "32769-32800:32769-32800"
     depends_on:
       - mongodb
       - accesspoint

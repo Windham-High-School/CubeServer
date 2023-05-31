@@ -9,13 +9,13 @@ from bson import ObjectId
 from json import loads
 from bson import _BUILT_IN_TYPES as BSON_TYPES
 from bson.codec_options import TypeCodec, TypeRegistry
-from pymongo import MongoClient, ASCENDING
+from pymongo import MongoClient, ASCENDING, DESCENDING
 from pymongo.collection import Collection
 
 from .dummycodec import DummyCodec
 from .enumcodec import EnumCodec
 
-__all__ = ['PyMongoModel', 'Encodable', 'EncodableCodec']
+__all__ = ['PyMongoModel', 'Encodable', 'EncodableCodec', 'ASCENDING', 'DESCENDING']
 
 def _locatable_name(type_to_name: type) -> str:
     """Returns a string that can be used in reverse with pydoc.locate"""
