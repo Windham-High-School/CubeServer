@@ -72,7 +72,7 @@ class NextMessage(Resource):
         return {
             "id": str(message.id),
             "timestamp": message.send_at.timestamp(),
-            "offset": (datetime.now() - message.send_at).total_seconds(),
+            "offset": (message.send_at - datetime.now()).total_seconds(),
             "destination": message.destination.value,
             "intensity": message.intensity,
             "message": message.full_message_bytes.decode('utf-8'),
@@ -111,7 +111,7 @@ class Message(Resource):
         return {
             "id": str(message.id),
             "timestamp": message.send_at.timestamp(),
-            "offset": (datetime.now() - message.send_at).total_seconds(),
+            "offset": (message.send_at - datetime.now()).total_seconds(),
             "destination": message.destination.value,
             "intensity": message.intensity,
             "message": message.full_message_bytes.decode('utf-8'),
