@@ -1,0 +1,10 @@
+#!/bin/bash
+
+theargs=""
+for i in "$@" ; do
+    theargs="${theargs} '$i'"
+done
+
+echo "!! $theargs !!"
+
+flask --app cubeserver_app.main run --port 8080 $@
