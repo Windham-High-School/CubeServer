@@ -28,7 +28,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-.vscode/
 .VSCodeCounter/
 files.exclude
 

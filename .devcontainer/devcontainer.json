@@ -5,8 +5,8 @@
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
 	"forwardPorts": [
-		5000,
-		8080
+		8080,
+		8081
 	],
   
 	"customizations": {

@@ -11,8 +11,10 @@ services:
       - ../src/CubeServer-common/tests:/code/tests:cached
       - ../src/CubeServer-api/cubeserver_api:/code/cubeserver_api:cached
       - ../src/CubeServer-api/requirements.txt:/code/requirements-api.txt:cached
+      - ./api-server:/code/api-server:cached
       - ../src/CubeServer-app/cubeserver_app:/code/cubeserver_app:cached
       - ../src/CubeServer-app/requirements.txt:/code/requirements-app.txt:cached
+      - ./app-server:/code/app-server:cached
     build:
       context: ..
       dockerfile: Docker/CubeServer/Dockerfile
@@ -22,6 +24,11 @@ services:
         CERT_SUBJALTNAME: "${API_ALT_ADDR}"
         CERT_EXP_DAYS: ${API_CERT_EXP_DAYS}
     environment:
+      # Connection stuff:
+      - AP_SSID=${AP_SSID}
+      - API_ADDR=${API_ADDR}
+      - API_ALT_ADDR=${API_ALT_ADDR}
+      - API_PORT=${API_PORT}
       # MongoDB credentials:
       - MONGODB_DATABASE=flaskdb
       - MONGODB_USERNAME=flask

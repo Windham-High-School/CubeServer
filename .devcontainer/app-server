@@ -1,0 +1,3 @@
+#!/bin/bash
+
+flask --app cubeserver_app.main run --port 8080 "$@"
