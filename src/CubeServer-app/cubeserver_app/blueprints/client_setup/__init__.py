@@ -2,11 +2,12 @@
 
 import logging
 from datetime import datetime
-from random import randint
 from subprocess import call
 from os import environ, mkdir, chdir
 from shutil import rmtree
-from random import random
+from random import randint, random
+
+from cubeserver_app import settings
 
 from flask import Blueprint, render_template, session, make_response
 
@@ -84,7 +85,7 @@ def package_arduino_lib():
     call(
         [
             "/CubeServer-app/package_lib.sh",
-            environ["API_WRAPPER_GIT_URL_ARDUINO"],
+            settings.API_WRAPPER_GIT_URL_ARDUINO,
             client_config_path,
             output_path,
         ]
@@ -101,7 +102,7 @@ def package_arduino_lib():
     response.headers.set(
         "Content-Disposition",
         "attachment",
-        filename=environ["API_WRAPPER_ZIP_FILENAME_ARDUINO"],
+        filename=settings.API_WRAPPER_ZIP_FILENAME_ARDUINO,
     )
     return response
 
@@ -120,7 +121,7 @@ def package_circuitpython_lib():
     call(
         [
             "/CubeServer-app/package_lib.sh",
-            environ["API_WRAPPER_GIT_URL_CIRCUITPYTHON"],
+            settings.API_WRAPPER_GIT_URL_CIRCUITPYTHON,
             client_config_path,
             output_path,
         ]
@@ -137,7 +138,7 @@ def package_circuitpython_lib():
     response.headers.set(
         "Content-Disposition",
         "attachment",
-        filename=environ["API_WRAPPER_ZIP_FILENAME_CIRCUITPYTHON"],
+        filename=settings.API_WRAPPER_ZIP_FILENAME_CIRCUITPYTHON,
     )
     return response
 
@@ -153,6 +154,6 @@ def api_cert():
     response.headers.set(
         "Content-Disposition",
         "attachment",
-        filename=environ["API_WRAPPER_PEM_FILENAME"],
+        filename=settings.API_WRAPPER_PEM_FILENAME,
     )
     return response

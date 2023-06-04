@@ -67,6 +67,7 @@ from cubeserver_common.config import (
 )
 
 from flask_table import Table
+from cubeserver_app import settings
 from cubeserver_app.tables.columns import PreCol, OptionsCol
 
 from cubeserver_app.tables.team import AdminTeamTable
@@ -789,7 +790,7 @@ def package_beacon_code():
     subprocess.call(
         [
             "/CubeServer-app/package_internal.sh",
-            os.environ["BEACON_CODE_GIT_URL"],
+            settings.BEACON_CODE_GIT_URL,
             output_path,
         ]
     )
