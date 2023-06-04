@@ -18,6 +18,9 @@ gcloud config set project $PROJECT_ID
 export REGION=us-central1
 export APP_SERVICE=app-service
 export API_SERVICE=api-service
+export DB_HOST=cluster0.dkt0odd.mongodb.net
+export DB_USER=flask
+export DB_NAME=flaskdb
 
 export PROJECT_NAME=`gcloud projects describe $PROJECT_ID --format="value(name)"`
 export PROJECT_NUMBER=`gcloud projects describe $PROJECT_ID --format="value(projectNumber)"`
@@ -26,12 +29,6 @@ export COMPUTE_SERVICE_ACCOUNT=$PROJECT_NUMBER-compute@developer.gserviceaccount
 export CLOUD_BUILD_SERVICE_ACCOUNT=$PROJECT_NUMBER@cloudbuild.gserviceaccount.com
 
 ---
-
-# Setup a service account instead of using the default compute service account (best practice)
-
-export CLOUDRUN_SA_NAME=the-project-sa
-gcloud iam service-accounts create $CLOUDRUN_SA_NAME --description="The Project SA for cloudrun" --display-name="The Project SA"
-
 
 gcloud services enable \
     artifactregistry.googleapis.com \
@@ -63,20 +60,6 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member="serviceAccount:$COMPUTE_SERVICE_ACCOUNT" \
     --role="roles/iam.serviceAccountTokenCreator"
-    
-# Provide neccessary roles/permissions to CLOUDRUN_SA_NAME
-
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-    --member="serviceAccount:$CLOUDRUN_SA_NAME" \
-    --role="roles/run.admin"
-    
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-    --member="serviceAccount:$CLOUDRUN_SA_NAME" \
-    --role="roles/iam.serviceAccountUser"
-
-gcloud projects add-iam-policy-binding $PROJECT_ID \
-    --member="serviceAccount:$CLOUDRUN_SA_NAME" \
-    --role="roles/secretmanager.secretAccessor"
 
 # SETUP ARTIFACT REPO
 gcloud artifacts repositories create docker-repo --repository-format=docker \
