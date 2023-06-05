@@ -3,6 +3,8 @@ steps:
 - name: 'gcr.io/cloud-builders/docker'
   args: 
   - 'build'
+  - '--file'
+  - 'Docker/CubeServer/Dockerfile'
   - '--target'
   - '$_TARGET'
   - '-t'
