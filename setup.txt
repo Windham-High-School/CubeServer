@@ -30,6 +30,13 @@ export CLOUD_BUILD_SERVICE_ACCOUNT=$PROJECT_NUMBER@cloudbuild.gserviceaccount.co
 
 ---
 
+# Setup a service account instead of using the default compute service account (best practice)
+
+export CLOUD_RUN_SA_NAME=the-project-sa
+export CLOUD_RUN_SERVICE_ACCOUNT=$CLOUD_RUN_SA_NAME@$PROJECT_ID.iam.gserviceaccount.com
+gcloud iam service-accounts create $CLOUD_RUN_SA_NAME --description="The Project SA for cloudrun" --display-name="The Project SA"
+
+
 gcloud services enable \
     artifactregistry.googleapis.com \
     cloudbuild.googleapis.com \
@@ -60,6 +67,29 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
 gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member="serviceAccount:$COMPUTE_SERVICE_ACCOUNT" \
     --role="roles/iam.serviceAccountTokenCreator"
+
+# Provide neccessary roles/permissions to CLOUD_RUN_SERVICE_ACCOUNT
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$CLOUD_RUN_SERVICE_ACCOUNT" \
+    --role="roles/run.admin"
+    
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$CLOUD_RUN_SERVICE_ACCOUNT" \
+    --role="roles/iam.serviceAccountUser"
+    
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$CLOUD_RUN_SERVICE_ACCOUNT" \
+    --role="roles/cloudsql.client"
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$CLOUD_RUN_SERVICE_ACCOUNT" \
+    --role="roles/secretmanager.secretAccessor"
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$CLOUD_RUN_SERVICE_ACCOUNT" \
+    --role="roles/logging.logWriter"
+    
 
 # SETUP ARTIFACT REPO
 gcloud artifacts repositories create docker-repo --repository-format=docker \
