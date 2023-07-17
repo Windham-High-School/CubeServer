@@ -783,10 +783,11 @@ def package_beacon_code():
     output_path = f"{working_dir}/download.zip"
     shutil.copyfile("/api_cert/beacon.pem", f"{working_dir}/beacon.pem")
     shutil.copyfile("/api_cert/beacon.key", f"{working_dir}/beacon.key")
-    with open(f"{working_dir}/cert.pem", "w") as fh:
-        from ..client_setup import pem_cert
 
-        fh.write(pem_cert)
+    from ..client_setup import pem_cert
+    if pem_cert:
+        with open(f"{working_dir}/cert.pem", "w") as fh:
+            fh.write(pem_cert)
     subprocess.call(
         [
             "/CubeServer-app/package_internal.sh",

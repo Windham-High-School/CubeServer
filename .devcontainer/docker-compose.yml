@@ -11,14 +11,12 @@ services:
       - ../src/CubeServer-common/tests:/code/tests:cached
       - ../src/CubeServer-api/cubeserver_api:/code/cubeserver_api:cached
       - ../src/CubeServer-api/requirements.txt:/code/requirements-api.txt:cached
-      - ./api-server:/code/api-server:cached
       - ../src/CubeServer-app/cubeserver_app:/code/cubeserver_app:cached
       - ../src/CubeServer-app/requirements.txt:/code/requirements-app.txt:cached
-      - ./app-server:/code/app-server:cached
     build:
       context: ..
       dockerfile: Docker/CubeServer/Dockerfile
-      target: combined-dev
+      target: base
       args:
         CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}/"
         CERT_SUBJALTNAME: "${API_ALT_ADDR}"

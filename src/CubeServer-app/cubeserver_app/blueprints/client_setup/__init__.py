@@ -15,12 +15,11 @@ bp = Blueprint("config", __name__, url_prefix="/setup", template_folder="templat
 
 
 logging.debug("Loading server API certificates")
-with open("/etc/ssl/api_cert/sha1_fingerprint.txt", "r", encoding="utf-8") as fh:
-    sha_fingerprint = fh.read()
-with open("/etc/ssl/api_cert/sha256_fingerprint.txt", "r", encoding="utf-8") as fh:
-    sha_fingerprint_256 = fh.read()
-with open("/etc/ssl/api_cert/server.pem", "r", encoding="utf-8") as fh:
-    pem_cert = fh.read()
+try:
+    with open("/etc/ssl/api_cert/server.pem", "r", encoding="utf-8") as fh:
+        pem_cert = fh.read()
+except:
+    pem_cert = None
 
 
 @bp.route("/")
@@ -40,8 +39,6 @@ def header_file():
         timestamp=datetime.now().isoformat(),
         team_name=team_name,
         team_secret=team_secret,
-        server_fingerprint=sha_fingerprint.strip(),
-        server_fingerprint_256=sha_fingerprint_256.strip(),
         ssid=environ["AP_SSID"],
         common_name=environ["API_ALT_ADDR"],
         base_url="https://" + environ["API_ALT_ADDR"],
@@ -60,13 +57,11 @@ def py_file():
         timestamp=datetime.now().isoformat(),
         team_name=team_name,
         team_secret=team_secret,
-        server_fingerprint=sha_fingerprint.strip(),
-        server_fingerprint_256=sha_fingerprint_256.strip(),
         ssid=environ["AP_SSID"],
         common_name=environ["API_ALT_ADDR"],
         base_url=environ["API_ALT_ADDR"],
         port=environ["API_PORT"],
-        server_cert=pem_cert.replace("\n", "\\n"),
+        server_cert=pem_cert.replace("\n", "\\n") if pem_cert else None,
     )
 
 
