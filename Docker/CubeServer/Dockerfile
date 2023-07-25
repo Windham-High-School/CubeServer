@@ -16,7 +16,7 @@ RUN .venv-app/bin/pip install -r requirements-common.txt -r requirements-app.txt
 
 COPY ./src/CubeServer-common/cubeserver_common ./cubeserver_common
 COPY ./src/CubeServer-api/cubeserver_api ./cubeserver_api
-COPY ./src/CubeServer-api/cubeserver_app ./cubeserver_app
+COPY ./src/CubeServer-app/cubeserver_app ./cubeserver_app
 
 ARG LOGLEVEL
 ENV LOGLEVEL=${LOGLEVEL}
