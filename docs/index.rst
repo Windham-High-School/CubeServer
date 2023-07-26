@@ -1,17 +1,29 @@
-Welcome to the CubeServer Docs!
-===============================
+========================
+CubeServer Documentation
+========================
 
-This is currently under active development.
-In the future, this will contain some getting started guides.
+Welcome to the CubeServer documentation!
+This documentation provides information on how to use and contribute to CubeServer,
+as well as the API documentation.
 
-Code Documentation
-^^^^^^^^^^^^^^^^^^
-This is basic API documentation for the code that runs the server and webapp. This is helpful in maintaining & improving this project, or for those who are curious in the inner-workings.
+This documentation is geared towards those interested in maintaining or contributing to CubeServer.
+
+Guides
+------
+The following guides are available to assist with development:
 
 .. toctree::
-   :name: mastertoc
-   :maxdepth: 2
+   :maxdepth: 1
 
-   codedocs/cubeserver_api/cubeserver_api
-   codedocs/cubeserver_app/cubeserver_app
-   codedocs/cubeserver_common/cubeserver_common
+   contribution
+   hardware
+
+Reference
+---------
+The source modules and a detailed documentation of the api are available here:
+
+.. toctree::
+   :maxdepth: 7
+
+   modules
+   api
