@@ -37,5 +37,8 @@ Testing Guidelines
 Review Process
 --------------
 
+Releases & Versioning
+---------------------
+
 Conclusion
 ----------
