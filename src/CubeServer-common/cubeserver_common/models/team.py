@@ -2,7 +2,7 @@
 
 import logging
 from enum import Enum, unique
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Self
 from math import ceil
 from urllib.parse import quote_plus
 import secrets
@@ -294,7 +294,7 @@ class Team(PyMongoModel):
         return self._code_update
 
     @classmethod
-    def find_beacon(cls) -> 'Team':
+    def find_beacon(cls) -> Self:
         """Finds the reserved team for the beacon.
         If it doesn't exist already, it will be created.
         """

@@ -1,4 +1,4 @@
-FROM python:3.10-slim-bullseye
+FROM python:3.11-slim-bullseye
 
 # Subject line of the self-signed ssl cert:
 ARG CERT_SUBJ
