@@ -25,14 +25,14 @@ COPY Docker/CubeServer/CubeServer-api/gunicorn.conf.py ./api.conf.py
 COPY Docker/CubeServer/CubeServer-app/gunicorn.conf.py ./app.conf.py
 
 #---
-FROM combined as api
+FROM base as api
 
 COPY Docker/CubeServer/CubeServer-api/gunicorn_start.sh /code/api_start.sh
 
 ENTRYPOINT /code/api_start.sh
 
 #---
-FROM combined as app
+FROM base as app
 
 COPY Docker/CubeServer/CubeServer-app/gunicorn_start.sh /code/app_start.sh
 
