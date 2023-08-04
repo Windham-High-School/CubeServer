@@ -20,10 +20,6 @@ services:
       context: ..
       dockerfile: Docker/CubeServer/Dockerfile
       target: base
-      args:
-        CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}/"
-        CERT_SUBJALTNAME: "${API_ALT_ADDR}"
-        CERT_EXP_DAYS: ${API_CERT_EXP_DAYS}
     environment:
       # Connection stuff:
       - AP_SSID=${AP_SSID}

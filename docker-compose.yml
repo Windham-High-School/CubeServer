@@ -47,11 +47,6 @@ services:
       context: .
       dockerfile: Docker/CubeServer/Dockerfile
       target: api
-      args:
-        CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}/"
-#        CERT_SUBJ: "${API_ADDR}"
-        CERT_SUBJALTNAME: "${API_ALT_ADDR}"
-        CERT_EXP_DAYS: ${API_CERT_EXP_DAYS}
     environment:
       # MongoDB credentials:
       - MONGODB_DATABASE=flaskdb
