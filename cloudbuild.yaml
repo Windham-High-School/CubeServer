@@ -1,36 +1,68 @@
 steps:
-# Build the container image
+# Build the app container image
 - name: 'gcr.io/cloud-builders/docker'
   args: 
   - 'build'
   - '--file'
   - 'Docker/CubeServer/Dockerfile'
   - '--target'
-  - '$_TARGET'
+  - '$_APP_TARGET'
   - '-t'
-  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:latest'
+  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_APP_IMAGE_NAME:latest'
   - '-t'
-  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:$COMMIT_SHA'
+  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_APP_IMAGE_NAME:$COMMIT_SHA'
   - '.'
-# Push the container image to Container Registry
+# Push the app container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:$COMMIT_SHA']
-# Push the latest container image to Container Registry
+  args: ['push', '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_APP_IMAGE_NAME:$COMMIT_SHA']
+# Push the latest app container image to Container Registry
 - name: 'gcr.io/cloud-builders/docker'
-  args: ['push', '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:latest']
-# Deploy container image to Cloud Run
+  args: ['push', '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_APP_IMAGE_NAME:latest']
+# Build the api container image
+- name: 'gcr.io/cloud-builders/docker'
+  args: 
+  - 'build'
+  - '--file'
+  - 'Docker/CubeServer/Dockerfile'
+  - '--target'
+  - '$_API_TARGET'
+  - '-t'
+  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_API_IMAGE_NAME:latest'
+  - '-t'
+  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_API_IMAGE_NAME:$COMMIT_SHA'
+  - '.'
+# Push the api container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_API_IMAGE_NAME:$COMMIT_SHA']
+# Push the latest api container image to Container Registry
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['push', '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_API_IMAGE_NAME:latest']
+# Deploy app container image to Cloud Run
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
   entrypoint: gcloud
   args:
   - 'run'
   - 'deploy'
-  - '$_SERVICE_NAME'
+  - '$_APP_SERVICE_NAME'
   - '--image'
-  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:$COMMIT_SHA'
+  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_APP_IMAGE_NAME:$COMMIT_SHA'
+  - '--region'
+  - '$_REGION'
+# Deploy api container image to Cloud Run
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk:slim'
+  entrypoint: gcloud
+  args:
+  - 'run'
+  - 'deploy'
+  - '$_API_SERVICE_NAME'
+  - '--image'
+  - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_API_IMAGE_NAME:$COMMIT_SHA'
   - '--region'
   - '$_REGION'
 images:
-- '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:$COMMIT_SHA'
-- '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_IMAGE_NAME:latest'
+- '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_APP_IMAGE_NAME:$COMMIT_SHA'
+- '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_APP_IMAGE_NAME:latest'
+- '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_API_IMAGE_NAME:$COMMIT_SHA'
+- '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_API_IMAGE_NAME:latest'
 options:
   logging: CLOUD_LOGGING_ONLY

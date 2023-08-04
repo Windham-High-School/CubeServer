@@ -1,5 +1,6 @@
 """Configuration file for gunicorn"""
 
+import os
 from multiprocessing import cpu_count
 
 # gunicorn configuration
@@ -7,14 +8,16 @@ from multiprocessing import cpu_count
 workers = cpu_count()
 threads = 2
 
-# TODO: Add TLS configurability to maybe use certbot?
-# Need to secure the webapp with TLS...
-#keyfile = "/etc/ssl/key.key"
-#certfile = "/etc/ssl/cert.pem"
-#ssl_version = "TLS"
-
-# Bind:
-bind = ['0.0.0.0:80']
+if os.path.exists("/etc/ssl/api_cert/server.key") and os.path.exists("/etc/ssl/api_cert/server.pem"):
+    # HTTPS:
+    keyfile = "/etc/ssl/api_cert/server.key"
+    certfile = "/etc/ssl/api_cert/server.pem"
+    ssl_version = "TLS"
+    # Bind:
+    bind = [f'0.0.0.0:{os.environ.get("PORT", 443)}']
+else:
+    # Bind:
+    bind = [f'0.0.0.0:{os.environ.get("PORT", 80)}']
 
 # Logging:
 accesslog = '-'  # Access log to stdout

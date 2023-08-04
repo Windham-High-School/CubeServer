@@ -111,6 +111,7 @@ gcloud run deploy $API_SERVICE \
 
 # SETUP CLOUD BUILD TRIGGER
 echo "Create Trigger for Continuous Builds"
+echo "NOTE: Make sure to select $COMPUTE_SERVICE_ACCOUNT as the service account to use on the trigger"
 echo "https://console.cloud.google.com/cloud-build/triggers?project=$PROJECT_ID"
 
 ----
