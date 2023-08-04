@@ -1,6 +1,7 @@
 Gunicorn==20.1.0           # WSGI server
-apscheduler==3.10.1        # For scheduling tasks
 Flask==2.3.2               # Flask core for web app
+apscheduler==3.10.1        # For scheduling tasks
+Flask-APScheduler==1.12.4
 better-profanity==0.7.0    # Profanity checking/filtering
 Flask-WTF==1.1.1           # Flask-WTForms for handling forms and captcha
 wtforms[email]==3.0.1      # A package for facilitating email validation

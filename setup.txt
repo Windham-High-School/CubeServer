@@ -100,14 +100,14 @@ gcloud run deploy $APP_SERVICE \
   --image us-docker.pkg.dev/cloudrun/container/hello:latest \
   --region=$REGION \
   --allow-unauthenticated \
-  --set-env-vars=DB_HOST="$DB_HOST",DB_USER="$DB_USER",DB_NAME="$DB_NAME"
+  --set-env-vars=DB_HOST="$DB_HOST",DB_USER="$DB_USER",DB_NAME="$DB_NAME",LOGLEVEL=debug
 
 # SETUP API SERVICE
 gcloud run deploy $API_SERVICE \
   --image us-docker.pkg.dev/cloudrun/container/hello:latest \
   --region=$REGION \
   --allow-unauthenticated \
-  --set-env-vars=DB_HOST="$DB_HOST",DB_USER="$DB_USER",DB_NAME="$DB_NAME"
+  --set-env-vars=DB_HOST="$DB_HOST",DB_USER="$DB_USER",DB_NAME="$DB_NAME",LOGLEVEL=debug
 
 # SETUP CLOUD BUILD TRIGGER
 echo "Create Trigger for Continuous Builds"
