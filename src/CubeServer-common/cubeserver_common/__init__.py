@@ -15,7 +15,8 @@ def init_logging():
 def configure_db(app=None):
     """Configures the database"""
     # Configure MongoDB:
-    uri = 'mongodb://' + os.environ['MONGODB_USERNAME'] \
+
+    uri = os.environ.get('MONGODB_DRIVER', 'mongodb') + '://' + os.environ['MONGODB_USERNAME'] \
         + ':' + os.environ['MONGODB_PASSWORD'] + '@' + os.environ['MONGODB_HOSTNAME'] \
             + ':27017/' + os.environ['MONGODB_DATABASE'] + '?authSource=admin'
     if app is not None:
