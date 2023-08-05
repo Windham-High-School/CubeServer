@@ -18,9 +18,9 @@ gcloud config set project $PROJECT_ID
 export REGION=us-central1
 export APP_SERVICE=app-service
 export API_SERVICE=api-service
-export DB_HOST=cluster0.dkt0odd.mongodb.net
-export DB_USER=flask
-export DB_NAME=flaskdb
+export MONGODB_HOST=cluster0.dkt0odd.mongodb.net
+export MONGODB_USER=flask
+export MONGODB_NAME=flaskdb
 
 export PROJECT_NAME=`gcloud projects describe $PROJECT_ID --format="value(name)"`
 export PROJECT_NUMBER=`gcloud projects describe $PROJECT_ID --format="value(projectNumber)"`
@@ -100,14 +100,14 @@ gcloud run deploy $APP_SERVICE \
   --image us-docker.pkg.dev/cloudrun/container/hello:latest \
   --region=$REGION \
   --allow-unauthenticated \
-  --set-env-vars=DB_HOST="$DB_HOST",DB_USER="$DB_USER",DB_NAME="$DB_NAME",LOGLEVEL=debug
+  --set-env-vars=MONGODB_HOST="$MONGODB_HOST",MONGODB_USER="$MONGODB_USER",MONGODB_NAME="$MONGODB_NAME",LOGLEVEL=debug,MONGODB_DRIVER="",MONGODB_OPTIONS=""
 
 # SETUP API SERVICE
 gcloud run deploy $API_SERVICE \
   --image us-docker.pkg.dev/cloudrun/container/hello:latest \
   --region=$REGION \
   --allow-unauthenticated \
-  --set-env-vars=DB_HOST="$DB_HOST",DB_USER="$DB_USER",DB_NAME="$DB_NAME",LOGLEVEL=debug
+  --set-env-vars=MONGODB_HOST="$MONGODB_HOST",MONGODB_USER="$MONGODB_USER",MONGODB_NAME="$MONGODB_NAME",LOGLEVEL=debug
 
 # SETUP CLOUD BUILD TRIGGER
 echo "Create Trigger for Continuous Builds"

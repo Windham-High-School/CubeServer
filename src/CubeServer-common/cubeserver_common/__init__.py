@@ -17,7 +17,7 @@ def configure_db(app=None):
     # Configure MongoDB:
 
     driver = os.environ.get('MONGODB_DRIVER', 'mongodb')
-    port = '' if '+srv' in driver else ':27017/'
+    port = '/' if '+srv' in driver else ':27017/'
     extra = '/' if '+srv' in driver else ''
     options = os.environ.get('MONGODB_OPTIONS', 'authSource=admin')
 
