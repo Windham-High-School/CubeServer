@@ -18,15 +18,16 @@ COPY ./src/CubeServer-common/cubeserver_common ./cubeserver_common
 COPY ./src/CubeServer-api/cubeserver_api ./cubeserver_api
 COPY ./src/CubeServer-app/cubeserver_app ./cubeserver_app
 
+COPY Docker/CubeServer/CubeServer-app/package_internal.sh ./package_internal.sh
+COPY Docker/CubeServer/CubeServer-app/package_lib.sh ./package_lib.sh
+
 ARG LOGLEVEL
 ENV LOGLEVEL=${LOGLEVEL}
-
-COPY Docker/CubeServer/CubeServer-api/gunicorn.conf.py ./api.conf.py
-COPY Docker/CubeServer/CubeServer-app/gunicorn.conf.py ./app.conf.py
 
 #---
 FROM base as api
 
+COPY Docker/CubeServer/CubeServer-api/gunicorn.conf.py ./api.conf.py
 COPY Docker/CubeServer/CubeServer-api/gunicorn_start.sh /code/api_start.sh
 
 ENTRYPOINT /code/api_start.sh
@@ -34,6 +35,7 @@ ENTRYPOINT /code/api_start.sh
 #---
 FROM base as app
 
+COPY Docker/CubeServer/CubeServer-app/gunicorn.conf.py ./app.conf.py
 COPY Docker/CubeServer/CubeServer-app/gunicorn_start.sh /code/app_start.sh
 
 ENTRYPOINT /code/app_start.sh

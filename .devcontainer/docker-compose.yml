@@ -16,6 +16,8 @@ services:
       - ../src/CubeServer-app/requirements.txt:/code/requirements-app.txt:cached
       - ./api-server:/code/api-server:cached
       - ./app-server:/code/app-server:cached
+      - ../Docker/CubeServer/CubeServer-app/package_internal.sh:/code/package_internal.sh:cached
+      - ../Docker/CubeServer/CubeServer-app/package_lib.sh:/code/package_lib.sh:cached
     build:
       context: ..
       dockerfile: Docker/CubeServer/Dockerfile

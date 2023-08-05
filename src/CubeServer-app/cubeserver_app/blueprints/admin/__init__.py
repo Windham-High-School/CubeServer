@@ -790,7 +790,7 @@ def package_beacon_code():
             fh.write(pem_cert)
     subprocess.call(
         [
-            "/CubeServer-app/package_internal.sh",
+            "/code/package_internal.sh",
             settings.BEACON_CODE_GIT_URL,
             output_path,
         ]

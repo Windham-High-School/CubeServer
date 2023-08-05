@@ -79,7 +79,7 @@ def package_arduino_lib():
         fh.write(header_file())
     call(
         [
-            "/CubeServer-app/package_lib.sh",
+            "/code/package_lib.sh",
             settings.API_WRAPPER_GIT_URL_ARDUINO,
             client_config_path,
             output_path,
@@ -115,7 +115,7 @@ def package_circuitpython_lib():
         fh.write(py_file())
     call(
         [
-            "/CubeServer-app/package_lib.sh",
+            "/code/package_lib.sh",
             settings.API_WRAPPER_GIT_URL_CIRCUITPYTHON,
             client_config_path,
             output_path,
