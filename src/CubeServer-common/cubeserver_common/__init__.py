@@ -17,11 +17,13 @@ def configure_db(app=None):
     # Configure MongoDB:
 
     driver = os.environ.get('MONGODB_DRIVER', 'mongodb')
-    port = '' if '+srv' in driver else ':27017/' 
+    port = '' if '+srv' in driver else ':27017/'
+    extra = '/' if '+srv' in driver else ''
+    options = os.environ.get('MONGODB_OPTIONS', 'authSource=admin')
 
     uri = driver + '://' + os.environ['MONGODB_USERNAME'] \
         + ':' + os.environ['MONGODB_PASSWORD'] + '@' + os.environ['MONGODB_HOSTNAME'] \
-            + port + os.environ['MONGODB_DATABASE'] + '?authSource=admin'
+            + port + os.environ['MONGODB_DATABASE'] + extra + '?' + options
     if app is not None:
         app.config["MONGO_URI"] = uri
         mongo = PyMongo(app, uri=uri)
