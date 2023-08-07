@@ -1,6 +1,10 @@
 """For encoding/decoding "complex dictionaries" into bson
 
 - "complex dictionary" meaning a dictionary with non-bson-compatible types
+
+This is not selected automatically by AutoEncodable for performance reasons
+(doing so would require a lot of potentially recursive type checking
+for all dicts), and therefore must be specified explicitly if needed.
 """
 
 from enum import Enum
