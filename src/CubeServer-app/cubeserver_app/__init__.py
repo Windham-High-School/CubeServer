@@ -14,30 +14,30 @@ from cubeserver_common.models import PyMongoModel
 from cubeserver_common.gensecret import check_secrets
 from cubeserver_common.config import LOGGING_LEVEL
 
-from ._version import *
-
 # Init logger:
 init_logging()
 
 # Configure application:
 logging.debug("Initializing Flask app")
-app = Flask(__name__,
-            static_url_path='',
-            static_folder='static',
-            template_folder="templates")
+app = Flask(
+    __name__, static_url_path="", static_folder="static", template_folder="templates"
+)
 
 # Load configuration:
-app.config['CONSTANTS'] = config
+app.config["CONSTANTS"] = config
 
 # Bootstrap:
 Bootstrap(app)
 
-if not all(key in environ for key in [
-    'MONGODB_USERNAME',
-    'MONGODB_PASSWORD',
-    'MONGODB_HOSTNAME',
-    'MONGODB_DATABASE'
-]): # If we aren't in the docker container or cannot see the db credentials...
+if not all(
+    key in environ
+    for key in [
+        "MONGODB_USERNAME",
+        "MONGODB_PASSWORD",
+        "MONGODB_HOSTNAME",
+        "MONGODB_DATABASE",
+    ]
+):  # If we aren't in the docker container or cannot see the db credentials...
     # Put a non-None placeholder ... in for the client:
     logging.warn("APP NOT INITIALIZED! (okay if this is a docs build)")
     PyMongoModel.update_mongo_client(...)
@@ -55,15 +55,19 @@ else:
         This retrieves the latest configuration to ensure that any changes
         are synced between server threads."""
         logging.debug("Updating configuration variables from db")
-        app.config['CONFIGURABLE'] = Conf.retrieve_instance()
+        app.config["CONFIGURABLE"] = Conf.retrieve_instance()
 
     logging.debug("Initializing APScheduler")
     scheduler = APScheduler()
     # Make APScheduler a little quieter:
-    logging.getLogger('apscheduler.executors.default').setLevel(LOGGING_LEVEL + 10)
+    logging.getLogger("apscheduler.executors.default").setLevel(LOGGING_LEVEL + 10)
 
-    scheduler.add_job(func=_update_conf, args=[app], trigger='interval', id='configsync', seconds=30)
-    scheduler.add_job(func=clear_bad_attempts, trigger='interval', id='clearbadattempts', seconds=30)
+    scheduler.add_job(
+        func=_update_conf, args=[app], trigger="interval", id="configsync", seconds=30
+    )
+    scheduler.add_job(
+        func=clear_bad_attempts, trigger="interval", id="clearbadattempts", seconds=30
+    )
     scheduler.start()
     logging.debug("Starting scheduler")
 
@@ -71,7 +75,7 @@ else:
 
     # Load SECRET_KEY:
     # Double-check that the secret_file is actually there...
-    app.config['SECRET_KEY'] = check_secrets()
+    app.config["SECRET_KEY"] = check_secrets()
 
 # Login Manager:
 logging.debug("Initializing login manager")

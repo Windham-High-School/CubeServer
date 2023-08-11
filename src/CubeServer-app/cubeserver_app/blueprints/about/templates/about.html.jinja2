@@ -2,8 +2,8 @@
 {% block title %}About{% endblock %}
 
 {% block header %}
-    <h4 class="glow text-light">{{ config['CONSTANTS'].SHORT_TITLE }} Revision {{ version }}</h4>
-    <pre class="px-1 text-warning">Build Configured {{ timestamp }}</pre>
+    <h4 class="glow text-light">{{ server_str }}</h4>
+    <pre class="px-1 text-warning">Based on commit {{ commit_hash }}</pre>
 {% endblock %}
 
 {% block content %}
