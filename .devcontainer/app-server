@@ -1,3 +1,4 @@
 #!/bin/bash
 
+cd /code/
 .venv-app/bin/flask --app cubeserver_app.main run --port 8080 "$@"
