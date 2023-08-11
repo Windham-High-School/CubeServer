@@ -8,6 +8,10 @@ cd "$parent_path"
 source inc/colors.sh
 source inc/getarch.sh
 
+echo -e "${RED}THIS SCRIPT IS OBSOLETE AND KEPT ONLY FOR DEVELOPMENT PURPOSES.${RESTORE}"
+echo -e "${RED}It will be deleted shortly.${RESTORE}"
+exit 1
+
 ./clean.sh preconfigure
 
 echo -e "\n\n${PURPLE}Configuring...${RESTORE}\n"
