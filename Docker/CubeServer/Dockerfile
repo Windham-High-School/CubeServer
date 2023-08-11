@@ -42,7 +42,11 @@ ENTRYPOINT /code/app_start.sh
 
 #---
 FROM base as dev
+
+# Create environment for unit tests:
 RUN python -m venv /code/.venv-test
 RUN .venv-test/bin/pip install -r requirements-common.txt -r requirements-api.txt -r requirements-app.txt
 #RUN .venv-test/bin/pip install pytest
 
+# Install dependencies so VSCode intellisense is happy:
+RUN python -m pip install -r requirements-common.txt -r requirements-api.txt -r requirements-app.txt
