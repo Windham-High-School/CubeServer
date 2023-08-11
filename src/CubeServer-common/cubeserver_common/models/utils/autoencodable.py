@@ -13,7 +13,7 @@ instance = MyModel()
 instance.encode() # {"my_attribute": "my_value", "my_other_attribute": 0}
 """
 
-from typing import List, Optional, Type, cast, Any, Callable, NewType
+from typing import List, Optional, Self, Type, cast, Any, Callable, NewType
 from abc import ABC
 from enum import Enum
 
@@ -23,7 +23,6 @@ from bson.codec_options import TypeRegistry, TypeCodec
 
 from .codecutils import Encodable, EncodableCodec
 from .codecs import EnumCodec, DummyCodec
-from .encodedproperty import DerivedFieldManager
 
 
 __all__ = ['AutoEncodable', 'TypeReference']
@@ -36,8 +35,6 @@ This is effectively just a string, but it is used to indicate an absolute
 type:
 - "None" indicates that the value is directly bson-compatible,
     as will any built-in type name for which this is the case.
-- "derived-property" indicates that the value is a derived property,
-    and will generally be (at least mostly) ignored when decoding.
 - "str" indicates that the value is of the built-in Python string type
 - "module.ClassName" indicates that the value is of the specified class.
     This is used for all other types, including enums.
@@ -68,7 +65,6 @@ class AutoEncodable(Encodable, ABC):
     - _id: Reserved for the document's ObjectId if MongoDB is used
     - model_type_registry: A TypeRegistry to be used when getting the
         collection from the database
-    - _derived_fields: A DerivedFieldManager for derived fields
     """
 
     @property
@@ -78,7 +74,14 @@ class AutoEncodable(Encodable, ABC):
         the database"""
         return TypeRegistry([EncodableCodec(cls)])
 
-    def __init__(self) -> None:
+    def __new__(cls, *args, **kwargs) -> Self:
+        if len(args) > 0:
+            raise TypeError("AutoEncodable does not support positional args in the constructor.")
+        obj = super(AutoEncodable, cls).__new__(cls)
+        obj._setattr_shady("__initphase", True)
+        return cast(Self, obj)
+
+    def __init__(self, **kwargs) -> None:
         """Note that subclasses MUST implement a constructor or a __new__()
         which initializes all attributes with the proper values."""
 
@@ -87,8 +90,7 @@ class AutoEncodable(Encodable, ABC):
             "type_codec",
             "_codecs",
             "_fields",
-            "_ignored",
-            "_derived_fields"
+            "_ignored"
         ]
 
         # Registered TypeCodecs:
@@ -98,11 +100,10 @@ class AutoEncodable(Encodable, ABC):
         # (None is an acceptable codec for directly bson-compatible types)
         self._fields: dict[str, Optional[TypeCodec]] = {}
 
-        # Initialize encoded/cached property store:
-        self._derived_fields = DerivedFieldManager()
-
         # Reserved for the document's ObjectId if MongoDB is used:
         self._id: Optional[ObjectId] = None
+
+        self._setattr_shady("__initphase", False)
 
         super().__init__()
 
@@ -209,6 +210,11 @@ class AutoEncodable(Encodable, ABC):
         super().__delattr__(__name)
 
     def __setattr__(self, __name: str, __value: Any):
+        if '__initphase' in self.__dict__ and self.__dict__['__initphase']:
+            self._setattr_shady(__name, __value)
+            return
+        if '_ignored' not in self.__dict__:
+            raise AttributeError("AutoEncodable.__init__() must be called")
         if __name not in self._ignored and \
            __value is not None and \
            __name not in self._fields:
@@ -231,26 +237,26 @@ class AutoEncodable(Encodable, ABC):
         decode() method."""
         super().__setattr__(__name, __value)
 
-    def derived_field(
-            self,
-            property_method: Callable[[], Any],
-            cache: bool = False
-    ) -> Callable[[], Any]:
-        """Decorator for a derived property method
-        @param func: The property method to decorate
-        @param cache: set to False to force re-evaluation of the property
+    # def derived_field(
+    #         self,
+    #         property_method: Callable[[], Any],
+    #         cache: bool = False
+    # ) -> Callable[[], Any]:
+    #     """Decorator for a derived property method
+    #     @param func: The property method to decorate
+    #     @param cache: set to False to force re-evaluation of the property
 
-        Properties MUST be of bson types; no exceptions.
-        """
-        def property_wrapper():
-            val = property_method()
-            if type(val) not in BSON_TYPES:
-                raise TypeError(
-                    "Derived properties must be of"
-                    "directly-compatible bson types."
-                    )
-            return val
-        return self._derived_fields.derived_property(property_wrapper, cache)
+    #     Properties MUST be of bson types; no exceptions.
+    #     """
+    #     def property_wrapper():
+    #         val = property_method()
+    #         if type(val) not in BSON_TYPES:
+    #             raise TypeError(
+    #                 "Derived properties must be of"
+    #                 "directly-compatible bson types."
+    #                 )
+    #         return val
+    #     return self._derived_fields.derived_property(property_wrapper, cache)
 
     def encode(self) -> dict:
         """Encodes this into a dictionary for BSON to be happy"""
@@ -270,8 +276,8 @@ class AutoEncodable(Encodable, ABC):
                 value = getattr(self, field)
                 #dictionary[field] = (_locatable_name(type(value)), value)
                 dictionary[field] = ("None", value)
-        for (field, value) in self._derived_fields.__property_cache.items():
-            dictionary[field] = ("derived-property", value)
+        # for (field, value) in self._derived_fields.__property_cache.items():
+        #     dictionary[field] = ("derived-property", value)
         return dictionary
 
     def _find_codec(self, field_name: str, field_type_name: TypeReference) -> TypeCodec:
@@ -296,8 +302,8 @@ class AutoEncodable(Encodable, ABC):
         for field_name, (field_type_name, val) in zip(value, value.values()):
             if field_type_name == "None":
                 new_object._setattr_shady(field_name, val)
-            elif field_type_name == "derived-property":
-                new_object._derived_fields.init_property(field_name, val)
+            # elif field_type_name == "derived-property":
+            #     new_object._derived_fields.init_property(field_name, val)
             else:
                 # Try to get the codec from the fields registry
                 # or else try to fall back on the codecs registry
