@@ -39,3 +39,10 @@ COPY Docker/CubeServer/CubeServer-app/gunicorn.conf.py ./app.conf.py
 COPY Docker/CubeServer/CubeServer-app/gunicorn_start.sh /code/app_start.sh
 
 ENTRYPOINT /code/app_start.sh
+
+#---
+FROM base as dev
+RUN python -m venv /code/.venv-test
+RUN .venv-test/bin/pip install -r requirements-common.txt -r requirements-api.txt -r requirements-app.txt
+#RUN .venv-test/bin/pip install pytest
+
