@@ -19,7 +19,9 @@ class EnumCodec(TypeCodec):
 
     def __init__(self, enum_class: Type[Enum], value_class: type = ...):
         """Specify the enum class to encode/decode
-        and the type of the Enum's values.
+        and the type of the Enum's values
+        (or else it will figure out the value type).
+        
         The value class MUST be DIRECTLY bson-compatible!"""
         if value_class is ...:  # If we need to figure that out...
             value_class = type(next(iter(enum_class)).value)

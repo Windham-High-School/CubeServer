@@ -3,7 +3,7 @@
 
 import logging
 from enum import Enum, unique
-from typing import Optional, Union, Mapping
+from typing import Optional, Mapping, Self
 from datetime import datetime, timedelta
 from pprint import pformat
 
@@ -44,7 +44,7 @@ class BeaconMessageEncoding(Enum):
     HEX = "hex dump"
     INTEGER = "integer"
 
-    def encode(self, message: Union[str, bytes]) -> bytes:
+    def encode(self, message: str | bytes) -> bytes:
         """Encodes a message according to the encoding of this enum value
 
         Returns the parameter unchanged if already bytes.
@@ -95,7 +95,7 @@ class BeaconMessage(PyMongoModel):
         self,
         instant: datetime = datetime.now(),
         division: TeamLevel = TeamLevel.PSYCHO_KILLER,
-        message: Union[bytes, str] = b"",
+        message: bytes | str = b"",
         line_term: bytes = b"\r\n",
         additional_headers: Mapping[str, str] = {},
         encoding: Optional[BeaconMessageEncoding] = BeaconMessageEncoding.ASCII,
@@ -108,7 +108,7 @@ class BeaconMessage(PyMongoModel):
     ):
         """
         Args:
-            message (Union[bytes, str]): The message to send
+            message (str | bytes): The message to send
             encoding (Optional[BeaconMessageEncoding], optional): Must be specified if message is not given as bytes object. Defaults to None.
         """
 
@@ -214,17 +214,17 @@ class BeaconMessage(PyMongoModel):
         return self.status.value
 
     @classmethod
-    def find_by_status(cls, status: SentStatus) -> "BeaconMessage":
+    def find_by_status(cls, status: SentStatus) -> Self:
         """Returns all messages that have a given status"""
         return cls.find({"status": status.value})
 
     @classmethod
-    def find_since(cls, how_far_back: timedelta) -> "BeaconMessage":
+    def find_since(cls, how_far_back: timedelta) -> Self:
         """Returns all messages with times within a given window to now"""
         return cls.find({"send_at": {"$gte": datetime.now() - how_far_back}})
 
     @classmethod
-    def find_one_queued(cls) -> Optional["BeaconMessage"]:
+    def find_one_queued(cls) -> Optional[Self]:
         """Returns the soonest queued message"""
         # return cls.find({'status': SentStatus.QUEUED.value}).sort('send_at', 1).limit(1)
         try:
