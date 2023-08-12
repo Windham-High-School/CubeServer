@@ -147,12 +147,24 @@ def test_find():
     model1.save()
     model2.save()
     model3.save()
+
+    # Legacy, manual dict queries:
     found_models = MyModel.find({"foo": {"$in": ["foo", "bar"]}})
+    for model in found_models:
+        print(model.foo)
     assert len(found_models) == 2
     assert MyModel.find_by_id(model3.id).qux == MyEnum.BAR
     assert len(MyModel.find({"bar": 42})) == 1
     assert MyModel.find_one({"bar": 42}) == MyModel.find({"bar": 42})[0]
     assert MyModel.find_one({"bar": 234}) is None
+
+    # Better queries:
+    assert MyModel.find_one({"bar": 42}) == MyModel.find_one(bar=42)
+    assert MyModel.find_one(bar=42) == MyModel.find_one(qux=MyEnum.BAR)
+    assert MyModel.find_one(bar=42) == MyModel.find(bar=42)[0]
+    assert MyModel.find_one(bar=73, foo="bar") == model2
+
+
 
 
 def test_delete():

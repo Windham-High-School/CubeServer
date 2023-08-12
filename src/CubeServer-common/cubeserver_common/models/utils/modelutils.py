@@ -5,7 +5,8 @@ This is not thread safe. Exercise caution if accessing the same instance from mu
 
 from abc import ABC, abstractmethod
 from enum import Enum
-from typing import Any, List, Mapping, Optional, Tuple, Type, cast
+from typing import Any, List, Mapping, Optional, Tuple, Type, cast, Self
+from functools import lru_cache
 import warnings
 from bson import ObjectId
 from json import loads
@@ -13,6 +14,7 @@ from bson.codec_options import TypeCodec, TypeRegistry
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from pymongo.collection import Collection
 
+from .classproperty import classproperty
 from .codecs.dummycodec import DummyCodec
 from .codecs.enumcodec import EnumCodec
 from .autoencodable import AutoEncodable
@@ -47,7 +49,7 @@ class PyMongoModel(AutoEncodable, ABC):
             cls.set_collection_name(cls.__collection_name)
 
     @classmethod
-    @property
+    @classproperty
     def collection(cls) -> Collection:
         """Define the Mongodb collection in your class.
         Use the PyMongoModel.model_type_registry as the type registry.
@@ -75,12 +77,17 @@ class PyMongoModel(AutoEncodable, ABC):
 
         super().__init_subclass__()
 
-
-
     @abstractmethod
     def __init__(self):
         """Initializes the PyMongoModel overhead"""
         super().__init__()
+
+    @classmethod
+    @classproperty
+    @lru_cache(maxsize=1)
+    def default(cls) -> Self:
+        """Returns the default object"""
+        return cls()
 
     @property
     def id(self):
@@ -110,28 +117,48 @@ class PyMongoModel(AutoEncodable, ABC):
             self.collection.delete_one({"_id": self._id})
 
     @classmethod
+    def _encode_query(cls, query: dict[str, Any]) -> dict[str, Any]:
+        return {
+            key:
+            cls.default.encode_value(value) for key, value in query.items()
+        }
+
+    @classmethod
     def find(cls, *args, **kwargs):
         """Finds documents from the collection
-        Arguments are the same as those for PyMongo.collection's find()."""
-        return [
-            cls.decode(document) for document in cls.collection.find(*args, **kwargs)
-        ]
+        Arguments are the same as those for PyMongo.collection's find(), by default.
+
+        Or, specify no positional arguments and all kwargs- In this way you can query where field=val
+        """
+        if len(args) == 0:  # Supports new query type
+            return cls.find(cls._encode_query(kwargs))
+
+        # kwargs as field=value
+        return [cls.decode(document) for document in cls.collection.find(*args, **kwargs)]
 
     @classmethod
     def find_sorted(cls, *args, key: str = ..., order=ASCENDING, **kwargs):
         """Same a find(), but with sorting!"""
         if key is ...:
             raise ValueError("No sorting key was specified")
-        return [
-            cls.decode(document)
-            for document in cls.collection.find(*args, **kwargs).sort(key, order)
-        ]
+        if len(args) == 0:  # Supports new query type
+            return cls.find_sorted(cls._encode_query(kwargs), key=key, order=order)
+        return (
+            [
+                cls.decode(document)
+                for document in cls.collection.find(*args, **kwargs).sort(key, order)
+            ]
+        )
 
     @classmethod
     def find_one(cls, *args, **kwargs):
         """Finds a document from the collection
         Arguments are the same as those for PyMongo's find_one()."""
-        results = cls.collection.find_one(*args, **kwargs)
+        if len(args) == 0:  # Supports new query type
+            return cls.find_one(cls._encode_query(kwargs))
+        results = (
+            cls.collection.find_one(*args, **kwargs)
+        )
         if results is None:
             return None
         return cls.decode(results)

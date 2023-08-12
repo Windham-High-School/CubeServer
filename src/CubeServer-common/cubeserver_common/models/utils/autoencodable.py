@@ -25,7 +25,7 @@ from bson.codec_options import TypeRegistry, TypeCodec
 
 from .codecutils import Encodable, EncodableCodec
 from .codecs import EnumCodec, DummyCodec
-
+from .classproperty import classproperty
 
 __all__ = ["AutoEncodable", "TypeReference"]
 
@@ -73,8 +73,8 @@ class AutoEncodable(Encodable, ABC):
         collection from the database
     """
 
-    @property
     @classmethod
+    @classproperty
     def model_type_registry(cls) -> TypeRegistry:
         """A TypeRegistry to be used when getting the collection from
         the database"""
@@ -273,6 +273,17 @@ class AutoEncodable(Encodable, ABC):
     #         return val
     #     return self._derived_fields.derived_property(property_wrapper, cache)
 
+    def encode_value(self, value: Any, codec: Optional[TypeCodec] = None) -> Any:
+        """Encodes a single value by finding a codec that might work and trying it"""
+        if type(value) in BSON_TYPES:
+            return value
+        if codec is None:
+            type_ref = type_to_reference(type(value))
+            codec = self._find_codec("__BogusFieldNameThatCouldNeverBe", type_ref)
+        if codec is None: # (still)
+            raise KeyError(f"Could not find a suitable codec to encode value {value}.")
+        return codec.transform_python(value)
+
     def encode(self, add_id: bool = False) -> EncodedDict:
         """Encodes this into a dictionary for BSON and other serialization stuff to be happy"""
         dictionary: EncodedDict = {}
@@ -281,7 +292,6 @@ class AutoEncodable(Encodable, ABC):
             if "_id" not in vars(self) or self._id is None:
                 self._id = ObjectId()
             dictionary["_id"] = self._id
-        print(self._fields)
         for field, codec in zip(self._fields, self._fields.values()):
             if codec:  # Encode each field:
                 dictionary[field] = (
