@@ -1,8 +1,11 @@
 """Classes to allow for easy object-mapping to bson for MongoDb"""
 
-from .codecs.enumcodec import EnumCodec
-from .codecs.listcodec import ListCodec
-from .codecs.dummycodec import DummyCodec
-from .codecs.complexdictcodec import ComplexDictCodec
+from .codecs.enumcodec import *
+from .codecs.listcodec import *
+from .codecs.dummycodec import *
+from .codecs.complexdictcodec import *
 
-from .modelutils import PyMongoModel
+from .modelutils import *
+from .codecutils import *
+
+from bson import _BUILT_IN_TYPES as BSON_TYPES

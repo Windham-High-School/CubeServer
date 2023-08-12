@@ -1,10 +1,14 @@
 """Utilities for database codecs
 """
 
-from bson.codec_options import TypeCodec
-from abc import ABC, abstractmethod
 from typing import Type, Self
-from json import dumps, loads
+from abc import ABC, abstractmethod
+import json
+import bson
+from bson.codec_options import TypeCodec
+
+
+__all__ = ["Encodable", "EncodableCodec"]
 
 
 class Encodable(ABC):
@@ -33,12 +37,21 @@ class Encodable(ABC):
 
     def to_json(self) -> str:
         """Returns a JSON representation of this Encodable"""
-        return dumps(self.encode())
-    
+        return json.dumps(self.encode())
+
     @classmethod
-    def from_json(cls, json: str) -> Self:
+    def from_json(cls, json_str: str) -> Self:
         """Returns an Encodable object from a JSON representation"""
-        return cls.decode(loads(json))
+        return cls.decode(json.loads(json_str))
+
+    def to_bson(self) -> bytes:
+        """Returns a BSON representation of this Encodable"""
+        return bson.encode(self.encode())
+
+    @classmethod
+    def from_bson(cls, bson_str: bytes) -> Self:
+        """Returns an Encodable object from a BSON representation"""
+        return cls.decode(bson.decode(bson_str))
 
 
 class EncodableCodec(TypeCodec):

@@ -11,9 +11,11 @@ class MyModel(AutoEncodable):
 
 instance = MyModel()
 instance.encode() # {"my_attribute": "my_value", "my_other_attribute": 0}
+
+This is not thread safe. Exercise caution if accessing the same instance from multiple threads.
 """
 
-from typing import List, Optional, Self, Type, cast, Any, Callable, NewType
+from typing import List, Optional, Self, Type, cast, Any, NewType
 from abc import ABC
 from enum import Enum
 
@@ -25,11 +27,11 @@ from .codecutils import Encodable, EncodableCodec
 from .codecs import EnumCodec, DummyCodec
 
 
-__all__ = ['AutoEncodable', 'TypeReference']
+__all__ = ["AutoEncodable", "TypeReference"]
 
 
 TypeReference = NewType("TypeReference", str)
-"""A type reference for use in bson serialization
+"""A type reference for use in serialization
 
 This is effectively just a string, but it is used to indicate an absolute
 type:
@@ -39,6 +41,10 @@ type:
 - "module.ClassName" indicates that the value is of the specified class.
     This is used for all other types, including enums.
 """
+
+EncodedDict = dict[str, tuple[str, Any] | ObjectId]
+"""A type alias for the dictionary returned by AutoEncodable.encode()"""
+
 
 def type_to_reference(type_to_name: Type[Any]) -> TypeReference:
     """Returns a string that can be used in reverse with pydoc.locate
@@ -56,7 +62,7 @@ def type_to_reference(type_to_name: Type[Any]) -> TypeReference:
 
 
 class AutoEncodable(Encodable, ABC):
-    """A class for (relatively) painless object-mapping to bson
+    """A class for (relatively) painless object-mapping
 
     The following attributes are special:
     - _ignored: A list of attributes to ignore when encoding/decoding
@@ -76,39 +82,41 @@ class AutoEncodable(Encodable, ABC):
 
     def __new__(cls, *args, **kwargs) -> Self:
         if len(args) > 0:
-            raise TypeError("AutoEncodable does not support positional args in the constructor.")
+            raise TypeError(
+                "AutoEncodable does not support positional args in the constructor."
+            )
         obj = super(AutoEncodable, cls).__new__(cls)
         obj._setattr_shady("__initphase", True)
-        return cast(Self, obj)
 
-    def __init__(self, **kwargs) -> None:
-        """Note that subclasses MUST implement a constructor or a __new__()
-        which initializes all attributes with the proper values."""
-
-        self._ignored: List[str] = [
+        obj._ignored: List[str] = [
             "_id",
             "type_codec",
             "_codecs",
             "_fields",
-            "_ignored"
+            "_ignored",
         ]
 
         # Registered TypeCodecs:
-        self._codecs: dict[TypeReference, TypeCodec] = {}
+        obj._codecs: dict[TypeReference, TypeCodec] = {}
 
         # Registered fields and their corresponding TypeCodecs:
         # (None is an acceptable codec for directly bson-compatible types)
-        self._fields: dict[str, Optional[TypeCodec]] = {}
+        obj._fields: dict[str, Optional[TypeCodec]] = {}
 
         # Reserved for the document's ObjectId if MongoDB is used:
-        self._id: Optional[ObjectId] = None
+        obj._id: Optional[ObjectId] = None
 
-        self._setattr_shady("__initphase", False)
+        obj._setattr_shady("__initphase", False)
 
+        return cast(Self, obj)
+
+    def __init__(self, **_) -> None:
+        """Note that subclasses MUST implement a constructor or a __new__()
+        which initializes all attributes with the proper values."""
         super().__init__()
 
     # Codec management:
-    def register_codec(self, type_codec: TypeCodec, replace = False):
+    def register_codec(self, type_codec: TypeCodec, replace=False):
         """Register a TypeCodec for use in the PyMongoModelCodec
         Specify whether to replace an existing one if applicable,
         with the default being False."""
@@ -122,9 +130,7 @@ class AutoEncodable(Encodable, ABC):
                 "TypeCodec.python_type must be a type,"
                 f" not {type(type_codec.python_type)}"
             )
-        self._codecs[
-            type_to_reference(type_codec.python_type)
-        ] = type_codec
+        self._codecs[type_to_reference(type_codec.python_type)] = type_codec
 
     def ignore_attribute(self, attr_name: str):
         """Forces an attribute to be ignored as a document field"""
@@ -136,7 +142,7 @@ class AutoEncodable(Encodable, ABC):
         If the type is built-in to bson, DummyCodec is returned.
         If the type is not built-in to bson, but a TypeCodec is registered
         for it, that TypeCodec is returned.
-        
+
         If no TypeCodec is registered for the type, a TypeError is raised.
 
         All dictionaries, lists, etc are assumed to be completely
@@ -145,24 +151,30 @@ class AutoEncodable(Encodable, ABC):
         specified explicitly for this field.
         """
         # Best-case scenarios (efficient):
-        if issubclass(data_type, Encodable): # Use the one specified:
+        if issubclass(data_type, Encodable):  # Use the one specified:
             return EncodableCodec(data_type)
         elif type(data_type) in BSON_TYPES or data_type is ObjectId:
             return DummyCodec(data_type)
         # Available codecs:
-        elif issubclass(data_type, Enum): # Use the EnumCodec class:
+        elif issubclass(data_type, Enum):  # Use the EnumCodec class:
             return EnumCodec(data_type)
         # Worst-case scenarios (problem. that's bad.):
         elif issubclass(data_type, TypeCodec):
             raise TypeError("TypeCodecs cannot be serialized.")
         else:
-            raise TypeError("No TypeCodec is registered for type "
-                            f"{data_type}. Please register "
-                            "one before setting an attribute of this type.")
+            raise TypeError(
+                "No TypeCodec is registered for type "
+                f"{data_type}. Please register "
+                "one before setting an attribute of this type."
+            )
 
     # Serializable field management:
-    def register_field(self, attr_name: str, value: Optional[Any] = None,
-                       custom_codec: Optional[TypeCodec] = None):
+    def register_field(
+        self,
+        attr_name: str,
+        value: Optional[Any] = None,
+        custom_codec: Optional[TypeCodec] = None,
+    ):
         """Register each attribute of the model for the database.
         Optionally specify with a custom codec prior to setting the attribute.
         If a codec is specified optionally here, it will not be automatically
@@ -181,27 +193,28 @@ class AutoEncodable(Encodable, ABC):
         if attr_name in self._fields:
             return
         codec = custom_codec
-        # TODO: Check recursively for bson compat- there can be dicts of enums for ex
-        if codec is None and \
-           value is not None and \
-           type(value) not in BSON_TYPES and \
-           not type(value) in self._codecs:    # if a TypeCodec is required:
+        if (
+            codec is None
+            and value is not None
+            and type(value) not in BSON_TYPES
+            and not type(value) in self._codecs
+        ):  # if a TypeCodec is required:
             # Find or make a TypeCodec for this field:
-            if isinstance(value, Encodable): # Use the one specified:
+            if isinstance(value, Encodable):  # Use the one specified:
                 codec = EncodableCodec(type(value))
             elif isinstance(value, TypeCodec):
                 codec = value
-            elif isinstance(value, Enum): # Use the EnumCodec class:
+            elif isinstance(value, Enum):  # Use the EnumCodec class:
                 codec = EnumCodec(type(value), type(value.value))
             else:
-                raise TypeError(f"No TypeCodec is registered for type " 
-                                f"{type(value)}, for attribute {attr_name}. "
-                                f"Please register one before setting.")
+                raise TypeError(
+                    f"No TypeCodec is registered for type "
+                    f"{type(value)}, for attribute {attr_name}. "
+                    f"Please register one before setting."
+                )
             self.register_codec(codec)
         if codec is None and type(value) in self._codecs:
-            codec = self._codecs[
-                type_to_reference(type(value))
-            ]
+            codec = self._codecs[type_to_reference(type(value))]
         self._fields[attr_name] = codec  # Register the field!
 
     def __delattr__(self, __name: str):
@@ -210,14 +223,16 @@ class AutoEncodable(Encodable, ABC):
         super().__delattr__(__name)
 
     def __setattr__(self, __name: str, __value: Any):
-        if '__initphase' in self.__dict__ and self.__dict__['__initphase']:
+        if "__initphase" in self.__dict__ and self.__dict__["__initphase"]:
             self._setattr_shady(__name, __value)
             return
-        if '_ignored' not in self.__dict__:
+        if "_ignored" not in self.__dict__:
             raise AttributeError("AutoEncodable.__init__() must be called")
-        if __name not in self._ignored and \
-           __value is not None and \
-           __name not in self._fields:
+        if (
+            __name not in self._ignored
+            and __value is not None
+            and __name not in self._fields
+        ):
             self.register_field(__name, __value)
         super().__setattr__(__name, __value)
 
@@ -258,23 +273,24 @@ class AutoEncodable(Encodable, ABC):
     #         return val
     #     return self._derived_fields.derived_property(property_wrapper, cache)
 
-    def encode(self) -> dict:
-        """Encodes this into a dictionary for BSON to be happy"""
-        dictionary: dict[str, tuple[str, Any] | ObjectId] = {}
+    def encode(self, add_id: bool = False) -> EncodedDict:
+        """Encodes this into a dictionary for BSON and other serialization stuff to be happy"""
+        dictionary: EncodedDict = {}
         # Deal with ObjectId:
-        if '_id' not in vars(self) or self._id is None:
-            self._id = ObjectId()
-        dictionary['_id'] = self._id
-        for (field, codec) in zip(self._fields, self._fields.values()):
+        if add_id:
+            if "_id" not in vars(self) or self._id is None:
+                self._id = ObjectId()
+            dictionary["_id"] = self._id
+        print(self._fields)
+        for field, codec in zip(self._fields, self._fields.values()):
             if codec:  # Encode each field:
-                dictionary[field] = (type_to_reference(codec.python_type),
-                    codec.transform_python(
-                        getattr(self, field)
-                    )
+                dictionary[field] = (
+                    type_to_reference(codec.python_type),
+                    codec.transform_python(getattr(self, field)),
                 )
             else:  # If no TypeCodec was specified, just leave the value raw:
                 value = getattr(self, field)
-                #dictionary[field] = (_locatable_name(type(value)), value)
+                # dictionary[field] = (_locatable_name(type(value)), value)
                 dictionary[field] = ("None", value)
         # for (field, value) in self._derived_fields.__property_cache.items():
         #     dictionary[field] = ("derived-property", value)
@@ -282,7 +298,8 @@ class AutoEncodable(Encodable, ABC):
 
     def _find_codec(self, field_name: str, field_type_name: TypeReference) -> TypeCodec:
         """Finds a codec for a given field (w/ name and type name specified)"""
-        return ( self._fields[field_name]
+        return (
+            self._fields[field_name]
             if field_name in self._fields
             else (
                 self._codecs[field_type_name]
@@ -292,13 +309,13 @@ class AutoEncodable(Encodable, ABC):
         )
 
     @classmethod
-    def decode(cls, value: dict[str, Any]) -> Encodable:
-        """Populates an object from a dictionary of the document
-        """
+    def decode(cls, value: EncodedDict) -> Encodable:
+        """Populates an object from a dictionary of the document"""
         if value is None:
             raise ValueError("Cannot decode Nonetype serial value")
         new_object = cls()
-        new_object._id = value.pop("_id")
+        if "_id" in value:
+            new_object._id = value.pop("_id")
         for field_name, (field_type_name, val) in zip(value, value.values()):
             if field_type_name == "None":
                 new_object._setattr_shady(field_name, val)
@@ -308,14 +325,12 @@ class AutoEncodable(Encodable, ABC):
                 # Try to get the codec from the fields registry
                 # or else try to fall back on the codecs registry
                 # or, if that fails, try the fallback dummy codec:
-#                codec: TypeCodec = new_object._find_codec(field_name, field_type_name)
+                #                codec: TypeCodec = new_object._find_codec(field_name, field_type_name)
                 codec: TypeCodec
                 if field_name in new_object._fields:
                     codec = new_object._fields[field_name] or DummyCodec()
                 elif field_type_name in new_object._codecs:
                     codec = new_object._codecs[field_type_name]
 
-                new_object._setattr_shady(field_name,
-                    codec.transform_bson(val)
-                )
+                new_object._setattr_shady(field_name, codec.transform_bson(val))
         return new_object
