@@ -31,7 +31,7 @@ def _locatable_name(type_to_name: type) -> str:
     return module + "." + type_to_name.__name__
 
 @classproperty
-def __collection_def(cls) -> Collection:
+def _collection_def() -> Collection:
     """Define the Mongodb collection in your class.
     Use the PyMongoModel.model_type_registry as the type registry.
     """
@@ -44,7 +44,7 @@ class PyMongoModel(AutoEncodable, ABC):
     Extend this class for any classes that describe a type of document."""
 
     mongo: Optional[MongoClient] = None
-    collection: Collection = __collection_def
+    collection: Collection = _collection_def
 
     __collection_name: Optional[str] = None
 
