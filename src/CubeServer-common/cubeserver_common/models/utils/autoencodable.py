@@ -88,7 +88,7 @@ class AutoEncodable(Encodable, ABC):
         obj = super(AutoEncodable, cls).__new__(cls)
         obj._setattr_shady("__initphase", True)
 
-        obj._ignored: List[str] = [
+        obj._ignored = [
             "_id",
             "type_codec",
             "_codecs",
@@ -97,14 +97,14 @@ class AutoEncodable(Encodable, ABC):
         ]
 
         # Registered TypeCodecs:
-        obj._codecs: dict[TypeReference, TypeCodec] = {}
+        obj._codecs = {}
 
         # Registered fields and their corresponding TypeCodecs:
         # (None is an acceptable codec for directly bson-compatible types)
-        obj._fields: dict[str, Optional[TypeCodec]] = {}
+        obj._fields = {}
 
         # Reserved for the document's ObjectId if MongoDB is used:
-        obj._id: Optional[ObjectId] = None
+        obj._id = None
 
         obj._setattr_shady("__initphase", False)
 
@@ -113,6 +113,12 @@ class AutoEncodable(Encodable, ABC):
     def __init__(self, **_) -> None:
         """Note that subclasses MUST implement a constructor or a __new__()
         which initializes all attributes with the proper values."""
+
+        self._ignored: list[str]
+        self._codecs: dict[TypeReference, TypeCodec]
+        self._fields: dict[str, Optional[TypeCodec]]
+        self._id: Optional[ObjectId]
+
         super().__init__()
 
     # Codec management:
@@ -323,7 +329,7 @@ class AutoEncodable(Encodable, ABC):
         )
 
     @classmethod
-    def decode(cls, value: EncodedDict) -> Encodable:
+    def decode(cls, value: EncodedDict) -> Self:
         """Populates an object from a dictionary of the document"""
         if value is None:
             raise ValueError("Cannot decode Nonetype serial value")
@@ -344,7 +350,7 @@ class AutoEncodable(Encodable, ABC):
                 if field_name in new_object._fields:
                     codec = new_object._fields[field_name] or DummyCodec()
                 elif field_type_name in new_object._codecs:
-                    codec = new_object._codecs[field_type_name]
+                    codec = new_object._codecs[cast(TypeReference, field_type_name)]
 
                 new_object._setattr_shady(field_name, codec.transform_bson(val))
         return new_object

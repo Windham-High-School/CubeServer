@@ -11,6 +11,7 @@ services:
       - ../src/CubeServer-common/requirements.txt:/code/requirements-common.txt:cached
       - ../src/CubeServer-api/cubeserver_api:/code/cubeserver_api:cached
       - ../src/CubeServer-api/requirements.txt:/code/requirements-api.txt:cached
+      - ./requirements-dev.txt:/code/requirements-dev.txt:cached
       - ../src/CubeServer-app/cubeserver_app:/code/cubeserver_app:cached
       - ../src/CubeServer-app/requirements.txt:/code/requirements-app.txt:cached
       - ./api-server:/code/api-server:cached

@@ -1,9 +1,10 @@
 """Tests for Encodable and EncodableCodec."""
 
-from bson import ObjectId
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
 from typing import List, Optional
+
+from bson import ObjectId
 from cubeserver_common.models.utils.autoencodable import AutoEncodable
 
 
@@ -121,27 +122,3 @@ def test_dataclass_encodable():
         )
         == encodable
     )
-
-
-# def test_encodable_codec():
-#     obj_id = ObjectId()
-#     document = {
-#         'foo': 'foo',
-#         'bar': 42,
-#         'baz': ['baz'],
-#         'qux': str(obj_id),
-#         'enum': 'foo',
-#     }
-#     encodable = MyAutoEncodable.decode(document)
-#     assert encodable.foo == 'foo'
-#     assert encodable.bar == 42
-#     assert encodable.baz == ['baz']
-#     assert encodable.qux == obj_id
-#     assert encodable.enum == MyEnum.FOO
-#     # Check raw encoding:
-#     assert MyAutoEncodable.encode(encodable) == document
-#     # Check equality:
-#     assert encodable == encodable
-#     assert encodable == MyAutoEncodable(foo='foo', bar=42, baz=['baz'], qux=obj_id, enum=MyEnum.FOO)
-#     assert encodable != MyAutoEncodable(foo='foo', bar=42, baz=['baz'], qux=obj_id, enum=MyEnum.BAR)
-#     assert encodable is not MyAutoEncodable(foo='foo', bar=42, baz=['baz'], qux=obj_id, enum=MyEnum.FOO)

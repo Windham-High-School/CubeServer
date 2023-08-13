@@ -2,4 +2,4 @@
 # Runs pytest unit tests in .venv-test
 
 cd /code/
-./.venv-test/bin/python -m pytest
+./.venv-dev/bin/python -m pytest $@

@@ -93,7 +93,7 @@ def test_encodable_codec():
 
 def test_json():
     """Tests the json serialization functionality"""
-    json_str = '{"foo": "foo", "bar": 42, "baz": ["baz"], "qux": "64d691a0ada6bf5f1b868c1b", "enum": "foo"}'
+    json_str = '{"foo": "foo", "bar": 42, "baz": ["baz"], "qux": "64d691a0ada6bf5f1b868c1b", "enum": "foo"}'  # noqa: E501
     encodable = MyEncodable.test_encodable()
     assert encodable.to_json() == json_str
     assert MyEncodable.from_json(json_str) == encodable
@@ -101,7 +101,7 @@ def test_json():
 
 def test_bson():
     """Tests the bson serialization functionality"""
-    bson_str = b"`\x00\x00\x00\x02foo\x00\x04\x00\x00\x00foo\x00\x10bar\x00*\x00\x00\x00\x04baz\x00\x10\x00\x00\x00\x020\x00\x04\x00\x00\x00baz\x00\x00\x02qux\x00\x19\x00\x00\x0064d691a0ada6bf5f1b868c1b\x00\x02enum\x00\x04\x00\x00\x00foo\x00\x00"
+    bson_str = b"`\x00\x00\x00\x02foo\x00\x04\x00\x00\x00foo\x00\x10bar\x00*\x00\x00\x00\x04baz\x00\x10\x00\x00\x00\x020\x00\x04\x00\x00\x00baz\x00\x00\x02qux\x00\x19\x00\x00\x0064d691a0ada6bf5f1b868c1b\x00\x02enum\x00\x04\x00\x00\x00foo\x00\x00"  # noqa: E501
     encodable = MyEncodable.test_encodable()
     assert encodable.to_bson() == bson_str
     assert MyEncodable.from_bson(bson_str) == encodable

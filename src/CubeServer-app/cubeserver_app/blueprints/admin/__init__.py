@@ -342,7 +342,8 @@ def table_endpoint(table, identifier, field):
                 init_rawscore = cast(DataPoint, model_obj).rawscore
 
             # Change that Make!
-            model_obj.set_attr_from_string(field, request.form.get("item"))
+            raise NotImplementedError("set_attr_from_string has been deprecated and removed. Please wait for the admin api to be rewritten :)")
+            #model_obj.set_attr_from_string(field, request.form.get("item"))
 
             if (
                 field == "rawscore" and model_class == DataPoint

@@ -30,12 +30,21 @@ def _locatable_name(type_to_name: type) -> str:
         return type_to_name.__name__
     return module + "." + type_to_name.__name__
 
+@classproperty
+def __collection_def(cls) -> Collection:
+    """Define the Mongodb collection in your class.
+    Use the PyMongoModel.model_type_registry as the type registry.
+    """
+    raise ValueError(
+        "The mongo client has not been given to this class.\nPlease call update_mongo_client."
+    )
 
 class PyMongoModel(AutoEncodable, ABC):
     """A class for easy object-mapping to bson.
     Extend this class for any classes that describe a type of document."""
 
     mongo: Optional[MongoClient] = None
+    collection: Collection = __collection_def
 
     __collection_name: Optional[str] = None
 
@@ -49,24 +58,12 @@ class PyMongoModel(AutoEncodable, ABC):
             cls.set_collection_name(cls.__collection_name)
 
     @classmethod
-    @classproperty
-    def collection(cls) -> Collection:
-        """Define the Mongodb collection in your class.
-        Use the PyMongoModel.model_type_registry as the type registry.
-        """
-        raise ValueError(
-            "The mongo client has not been given to this class.\nPlease call update_mongo_client."
-        )
-
-    @classmethod
     def set_collection_name(cls, collection_name: str):
         """Define the Mongodb collection in your class.
         Use the PyMongoModel.model_type_registry as the type registry."""
         cls.__collection_name = collection_name
-        try:
+        if PyMongoModel.mongo is not None:
             cls.collection = PyMongoModel.mongo.db.get_collection(collection_name)
-        except AttributeError:
-            pass
 
     def __init_subclass__(cls):
         """Note that subclasses must implement a constructor or a __new__()
@@ -137,10 +134,8 @@ class PyMongoModel(AutoEncodable, ABC):
         return [cls.decode(document) for document in cls.collection.find(*args, **kwargs)]
 
     @classmethod
-    def find_sorted(cls, *args, key: str = ..., order=ASCENDING, **kwargs):
+    def find_sorted(cls, *args, key: str, order=ASCENDING, **kwargs):
         """Same a find(), but with sorting!"""
-        if key is ...:
-            raise ValueError("No sorting key was specified")
         if len(args) == 0:  # Supports new query type
             return cls.find_sorted(cls._encode_query(kwargs), key=key, order=order)
         return (
@@ -171,17 +166,6 @@ class PyMongoModel(AutoEncodable, ABC):
     def find_by_id(cls, identifier):
         """Finds a document from the collection, given the id"""
         return cls.find_one({"_id": ObjectId(identifier)}) or None
-
-    def set_attr_from_string(self, field_name: str, value: str):
-        """Decodes and updates a single string value to the document object"""
-        if self._fields[field_name] is not None:
-            self._setattr_shady(
-                field_name, self._fields[field_name].transform_bson(value)
-            )
-        else:  # None means the value is already bson-serializable
-            self._setattr_shady(
-                field_name, type(self.__getattribute__(field_name))(value)
-            )
 
     @classmethod
     def find_safe(cls, *args, **kwargs):
