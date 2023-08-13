@@ -1,11 +1,11 @@
 """Unit tests for PyMongoModel - object-mapping
 """
 
-import pytest
-from bson import ObjectId
+import dataclasses
 from enum import Enum
 from typing import Optional, List
-from pymongo.errors import PyMongoError
+import pytest
+from bson import ObjectId
 from cubeserver_common.models.utils import (
     PyMongoModel,
     EncodableCodec,
@@ -175,3 +175,56 @@ def test_delete():
     assert MyModel.find_by_id(id) is not None
     model.remove()
     assert MyModel.find_by_id(id) is None
+
+def test_dataclasses_simple():
+    """Tests dataclasses method"""
+
+    @dataclasses.dataclass
+    class MyModelDc(PyMongoModel):
+        a: int = 1
+    
+    # Create objects
+    my_obj   = MyModelDc()
+    my_obj_2 = MyModelDc(a=2)
+
+    assert my_obj.a   == 1
+    assert my_obj_2.a == 2
+
+    # Save:
+    my_obj.save()
+    my_obj_2.save()
+
+    assert len(MyModelDc.find()) == 2
+    my_obj.remove()
+    assert len(MyModelDc.find()) == 1
+    assert MyModelDc.find_one() == my_obj_2
+
+def test_dataclasses_complex():
+    """Tests dataclasses method"""
+
+    @dataclasses.dataclass
+    class MyModelDc(PyMongoModel):
+        a: tuple[str] = ('Hola', 'Adios')
+        b: Enum = MyEnum.FOO
+    
+    # Create objects
+    my_obj   = MyModelDc()
+    my_obj_2 = MyModelDc(b = MyEnum.BAR)
+
+    assert my_obj.b   == MyEnum.FOO
+    assert my_obj_2.b == MyEnum.BAR
+
+    # Save:
+    my_obj.save()
+    my_obj_2.save()
+
+    print(my_obj.to_json())
+
+    assert MyModelDc.find_one(b=MyEnum.BAR) == my_obj_2  #*
+    assert len(MyModelDc.find()) == 2
+    assert MyModelDc.find_one(b=MyEnum.FOO) is not None
+    my_obj.remove()
+    assert MyModelDc.find_one(b=MyEnum.FOO) is None
+    assert len(MyModelDc.find()) == 1
+    assert MyModelDc.find_one() == my_obj_2  #*
+    assert MyModelDc.find_one().a == ('Hola', 'Adios')

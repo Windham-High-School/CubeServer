@@ -3,10 +3,7 @@
 from typing import Dict, List
 from bson import ObjectId
 from enum import Enum
-from cubeserver_common.models.utils.modelutils import DummyCodec
-from cubeserver_common.models.utils.codecs.complexdictcodec import ComplexDictCodec
-from cubeserver_common.models.utils.codecs.enumcodec import EnumCodec
-from cubeserver_common.models.utils.codecs.listcodec import ListCodec
+from cubeserver_common.models.utils.codecs import ComplexDictCodec, EnumCodec, ListCodec, TupleCodec, DummyCodec
 
 
 class TestDummyCodec:
@@ -104,3 +101,16 @@ class TestListCodec:
         python_value = [Color.RED, Color.GREEN]
         bson_value = [1, 2]
         assert codec.transform_bson(bson_value) == python_value
+
+def test_tuplecodec():
+    """Tests the TupleCodec class, briefly"""
+    my_tuple = (Color.BLUE, Color.GREEN)
+    codec = TupleCodec(EnumCodec(Color))
+
+    assert codec.bson_type == list
+    assert codec.python_type == tuple
+
+    bson_val = codec.transform_python(my_tuple)
+    assert bson_val == [3, 2]
+
+    assert codec.transform_bson(bson_val) == my_tuple

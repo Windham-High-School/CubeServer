@@ -24,7 +24,7 @@ from bson import ObjectId
 from bson.codec_options import TypeRegistry, TypeCodec
 
 from .codecutils import Encodable, EncodableCodec
-from .codecs import EnumCodec, DummyCodec
+from .codecs import EnumCodec, DummyCodec, TupleCodec
 from .classproperty import classproperty
 
 __all__ = ["AutoEncodable", "TypeReference"]
@@ -153,11 +153,13 @@ class AutoEncodable(Encodable, ABC):
         # Best-case scenarios (efficient):
         if issubclass(data_type, Encodable):  # Use the one specified:
             return EncodableCodec(data_type)
-        elif type(data_type) in BSON_TYPES or data_type is ObjectId:
+        if data_type != tuple and data_type in BSON_TYPES or data_type is ObjectId:
             return DummyCodec(data_type)
         # Available codecs:
         elif issubclass(data_type, Enum):  # Use the EnumCodec class:
             return EnumCodec(data_type)
+        elif isinstance(data_type, tuple):  # Use the TupleCodec class:
+            return TupleCodec()
         # Worst-case scenarios (problem. that's bad.):
         elif issubclass(data_type, TypeCodec):
             raise TypeError("TypeCodecs cannot be serialized.")
@@ -196,7 +198,7 @@ class AutoEncodable(Encodable, ABC):
         if (
             codec is None
             and value is not None
-            and type(value) not in BSON_TYPES
+            and (type(value) not in BSON_TYPES or isinstance(value, tuple))
             and not type(value) in self._codecs
         ):  # if a TypeCodec is required:
             # Find or make a TypeCodec for this field:
@@ -206,6 +208,8 @@ class AutoEncodable(Encodable, ABC):
                 codec = value
             elif isinstance(value, Enum):  # Use the EnumCodec class:
                 codec = EnumCodec(type(value), type(value.value))
+            elif isinstance(value, tuple):  # Use the TupleCodec class:
+                codec = TupleCodec()
             else:
                 raise TypeError(
                     f"No TypeCodec is registered for type "
@@ -227,7 +231,7 @@ class AutoEncodable(Encodable, ABC):
             self._setattr_shady(__name, __value)
             return
         if "_ignored" not in self.__dict__:
-            raise AttributeError("AutoEncodable.__init__() must be called")
+            raise AttributeError("AutoEncodable.__new__() must be called")
         if (
             __name not in self._ignored
             and __value is not None
