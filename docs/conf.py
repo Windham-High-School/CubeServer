@@ -2,7 +2,6 @@
 
 import os
 import sys
-import yaml
 
 # -- Path setup --------------------------------------------------------------
 
@@ -16,11 +15,6 @@ sys.path.insert(0, os.path.abspath('../src/CubeServer-common'))
 project = 'CubeServer'
 author = 'Joseph R. Freeston'
 
-# The full version, including alpha/beta/rc tags
-with open('../version.txt', 'r') as f:
-    version = f.read().strip()
-release = version
-
 # -- General configuration ---------------------------------------------------
 
 extensions = [
@@ -28,7 +22,7 @@ extensions = [
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
-    'sphinx_rtd_theme',
+    'sphinx_rtd_theme'
 ]
 
 templates_path = ['_templates']
