@@ -1,12 +1,14 @@
 """Flask blueprint managing API client (team) configuration stuff"""
 
+from typing import Optional
 import logging
 from datetime import datetime
 from subprocess import call
-from os import environ, mkdir, chdir
+from os import mkdir, chdir
 from shutil import rmtree
 from random import randint, random
 
+from cubeserver_common.environ import EnvConfig
 from cubeserver_app import settings
 
 from flask import Blueprint, render_template, session, make_response
@@ -15,6 +17,8 @@ bp = Blueprint("config", __name__, url_prefix="/setup", template_folder="templat
 
 
 logging.debug("Loading server API certificates")
+
+pem_cert: Optional[str]
 try:
     with open("/etc/ssl/api_cert/server.pem", "r", encoding="utf-8") as fh:
         pem_cert = fh.read()
@@ -39,10 +43,10 @@ def header_file():
         timestamp=datetime.now().isoformat(),
         team_name=team_name,
         team_secret=team_secret,
-        ssid=environ["AP_SSID"],
-        common_name=environ["API_ALT_ADDR"],
-        base_url="https://" + environ["API_ALT_ADDR"],
-        port=environ["API_PORT"],
+        ssid=EnvConfig.CS_AP_SSID,
+        common_name=EnvConfig.CS_API_HOST,
+        base_url="https://" + EnvConfig.CS_API_ADDR,
+        port=EnvConfig.CS_API_PORT,
     )
 
 
@@ -57,10 +61,10 @@ def py_file():
         timestamp=datetime.now().isoformat(),
         team_name=team_name,
         team_secret=team_secret,
-        ssid=environ["AP_SSID"],
-        common_name=environ["API_ALT_ADDR"],
-        base_url=environ["API_ALT_ADDR"],
-        port=environ["API_PORT"],
+        ssid=EnvConfig.CS_AP_SSID,
+        common_name=EnvConfig.CS_API_HOST,
+        base_url="https://" + EnvConfig.CS_API_ADDR,
+        port=EnvConfig.CS_API_PORT,
         server_cert=pem_cert.replace("\n", "\\n") if pem_cert else None,
     )
 

@@ -1,3 +1,0 @@
-#!/usr/bin/env bash
-# Prepare for build
-source ./tools/configure.sh
