@@ -25,3 +25,7 @@ def test_server_name():
 
 def test_authors():
     assert isinstance(AUTHORS, dict)
+
+# Test garaunteed to fail in order to test github check
+def test_will_fail():
+    assert False
