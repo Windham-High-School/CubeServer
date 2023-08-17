@@ -6,8 +6,8 @@ from flask import Flask
 from flask_restful import Api
 from flask_apscheduler import APScheduler
 
-from cubeserver_common.environ import EnvConfig
-from cubeserver_common import configure_db, config, init_logging
+from cubeserver_common.config import EnvConfig
+from cubeserver_common import configure_db, init_logging
 
 # Init logger:
 init_logging()
@@ -15,8 +15,6 @@ init_logging()
 # Create app:
 logging.debug("Initializing Flask app")
 app = Flask(__name__)
-app.config["CONSTANTS"] = config
-
 
 app.config["SECRET_KEY"] = EnvConfig.CS_FLASK_SECRET
 logging.debug("Initializing Flask-Restful Api")

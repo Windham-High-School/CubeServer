@@ -2,9 +2,6 @@
 Tests for CubeServer-common metadata.
 """
 
-import pytest
-import re
-from datetime import datetime
 from cubeserver_common.metadata import LICENSE, LICENSE_FULL, AUTHORS, SERVER_NAME
 
 

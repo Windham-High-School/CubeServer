@@ -70,6 +70,7 @@ from .codecs.listcodec import *
 from .codecs.dummycodec import *
 from .codecs.complexdictcodec import *
 
+from .autoencodable import *
+
 from .modelutils import *
 from .codecutils import *
-from .classproperty import *

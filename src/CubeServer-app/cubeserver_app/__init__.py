@@ -8,7 +8,7 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_apscheduler import APScheduler
 
-from cubeserver_common.environ import EnvConfig
+from cubeserver_common.config import EnvConfig
 from cubeserver_common import config, init_logging, configure_db
 from cubeserver_common.models import PyMongoModel
 from cubeserver_common.gensecret import check_secrets

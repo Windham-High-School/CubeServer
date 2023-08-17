@@ -9,7 +9,7 @@ from bson.objectid import ObjectId
 
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.utils.modelutils import PyMongoModel
-from cubeserver_common.models.utils.dummycodec import DummyCodec
+from cubeserver_common.models.utils.codecs import DummyCodec
 #from cubeserver_common.models.team import Team  # Creates circular import; removed
 
 class Message(PyMongoModel):

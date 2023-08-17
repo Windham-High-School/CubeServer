@@ -8,6 +8,7 @@ from better_profanity import profanity
 
 from pymongo import DESCENDING
 from bson.objectid import ObjectId
+from cubeserver_common.utils import classproperty
 from cubeserver_common.models.utils import PyMongoModel
 from cubeserver_common.models.team import Team
 
@@ -53,7 +54,7 @@ class DataClass(Enum):
         }[self]
     
     @classmethod
-    @property
+    @classproperty
     def measurable(cls):
         """Returns all measurable types of data (not COMMENT, etc)"""
         m = []
@@ -63,7 +64,7 @@ class DataClass(Enum):
         return m
 
     @classmethod
-    @property
+    @classproperty
     def manual(cls):
         """Returns all types of data that are determined manually"""
         return [cls.SIGNAL_LIGHT]

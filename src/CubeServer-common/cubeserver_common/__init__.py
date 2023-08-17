@@ -8,7 +8,7 @@ from pymongo import MongoClient
 from cubeserver_common.models import PyMongoModel
 from . import config
 
-from cubeserver_common.environ import EnvConfig
+from cubeserver_common.config import EnvConfig
 
 # Init environ.py and run validation
 EnvConfig.validate()

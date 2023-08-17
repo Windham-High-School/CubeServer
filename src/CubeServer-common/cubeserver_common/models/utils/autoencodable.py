@@ -23,9 +23,10 @@ from bson import _BUILT_IN_TYPES as BSON_TYPES
 from bson import ObjectId
 from bson.codec_options import TypeRegistry, TypeCodec
 
+from cubeserver_common.utils import classproperty
+
 from .codecutils import Encodable, EncodableCodec
 from .codecs import EnumCodec, DummyCodec, TupleCodec
-from .classproperty import classproperty
 
 __all__ = ["AutoEncodable", "TypeReference"]
 
@@ -290,7 +291,7 @@ class AutoEncodable(Encodable, ABC):
         if codec is None:
             type_ref = type_to_reference(type(value))
             codec = self._find_codec("__BogusFieldNameThatCouldNeverBe", type_ref)
-        if codec is None: # (still)
+        if codec is None:  # (still)
             raise KeyError(f"Could not find a suitable codec to encode value {value}.")
         return codec.transform_python(value)
 

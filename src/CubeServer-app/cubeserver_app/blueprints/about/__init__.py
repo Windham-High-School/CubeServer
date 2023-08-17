@@ -3,7 +3,7 @@
 from flask import Blueprint, render_template
 
 from cubeserver_common.metadata import LICENSE_FULL, AUTHORS, SERVER_NAME
-from cubeserver_common.environ import EnvConfig
+from cubeserver_common.config import EnvConfig
 
 bp = Blueprint("about", __name__, url_prefix="/about", template_folder="templates")
 

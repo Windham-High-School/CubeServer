@@ -2,7 +2,7 @@
 a workaround for Python 3.11 no longer supporting classmethod properties
 """
 
-from cubeserver_common.models.utils import classproperty
+from cubeserver_common.utils import classproperty
 
 
 def test_classproperty():

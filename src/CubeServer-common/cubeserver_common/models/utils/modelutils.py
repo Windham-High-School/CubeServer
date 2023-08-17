@@ -14,7 +14,8 @@ from bson.codec_options import TypeCodec, TypeRegistry
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from pymongo.collection import Collection
 
-from .classproperty import classproperty
+from cubeserver_common.utils import classproperty
+
 from .codecs.dummycodec import DummyCodec
 from .codecs.enumcodec import EnumCodec
 from .autoencodable import AutoEncodable
