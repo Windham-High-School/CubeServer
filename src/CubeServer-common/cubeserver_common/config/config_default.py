@@ -149,7 +149,7 @@ DEFAULT_CONFIG["Email"].add_field(
 DEFAULT_CONFIG["Email"].add_field(
     GroupedConfigField(
         name="Automated Sender Name",
-        description="The name used for automated emails",
+        description="The name used for automated emails from the server",
         default_value="The Project CubeServer",
     )
 )
@@ -157,7 +157,23 @@ DEFAULT_CONFIG["Email"].add_field(
 DEFAULT_CONFIG["Email"].add_field(
     GroupedConfigField(
         name="Automated Sender Address",
-        description="The address used for automated emails",
+        description="The address used for automated emails from the server",
+        default_value="noreply@whsproject.club",
+    )
+)
+
+DEFAULT_CONFIG["Email"].add_field(
+    GroupedConfigField(
+        name="Api Sender Name",
+        description="The name used for emails sent to teams from the cube api",
+        default_value="The Project CubeServer",
+    )
+)
+
+DEFAULT_CONFIG["Email"].add_field(
+    GroupedConfigField(
+        name="Api Sender Address",
+        description="The address used for emails sent to teams from the cube api",
         default_value="noreply@whsproject.club",
     )
 )
@@ -233,9 +249,18 @@ DEFAULT_CONFIG["System"].add_field(
 
 DEFAULT_CONFIG["System"].add_field(
     GroupedConfigField(
-        name="Reference Team Prefix",
-        description="The prefix of the internal reference teams, which will be followed by an integer index",
-        default_value="CubeServer-reference-",
+        name="Reference Team Format",
+        description="The format of the internal reference team names, into which an integer index will be inserted",
+        default_value="CubeServer-reference-{}",
+    )
+)
+
+DEFAULT_CONFIG["System"].add_field(
+    GroupedConfigField(
+        name="Reference Team Number",
+        description="The number, n, of reference teams allowed- The reference team numbers will then be integers in the range [0, n-1]",
+        default_value=10,
+        input_type=FieldInputType.INTEGER,
     )
 )
 

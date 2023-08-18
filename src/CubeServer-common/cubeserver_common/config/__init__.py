@@ -1,11 +1,13 @@
 """Environment variables and database-stored configuration"""
 
 import logging
+from typing import Any
 import traceback
+import time
 
-from .environ import *
+from .environ import EnvConfig, EnvConfigError
 from ..models.grouped_config import GroupedConfig
-from .config_default import *
+from .config_default import DEFAULT_CONFIG
 
 __all__ = [
     "EnvConfig",
@@ -16,13 +18,13 @@ __all__ = [
 ]
 
 
-class _DynamicConfigMeta:
-    """Config not defined in env vars
-    It will try to load this from the database.
-    If that fails, it will log an error and the default will stand-in.
+class _DynamicConfig_meta(dict[str, dict[str, Any]]):
+    """Configuration not defined in the environment, but by the admin user
+    This will stay cached and must be updated from the database as necessary
     """
 
-    def fget(self) -> GroupedConfig:
+    @staticmethod
+    def __get_fresh_from_db() -> GroupedConfig:
         conf: GroupedConfig
         try:
             conf = GroupedConfig.selected
@@ -37,8 +39,31 @@ class _DynamicConfigMeta:
             return DEFAULT_CONFIG
         return conf
 
-    def __get__(self, instance, owner):
-        return self.fget(owner)
+    def reload(self) -> None:
+        """Reloads the configuration from the database.
+        This should be run on each thread periodically.
+        """
+        new_config: GroupedConfig = _DynamicConfig_meta.__get_fresh_from_db()
+        self.update(
+            {
+                category.name: {field.name: field.value for field in category}
+                for category in new_config
+            }
+        )
+        logging.debug("Loaded config")
+        logging.debug(self)
+
+    def __setitem__(self, __key: str, __value: Any) -> None:
+        raise TypeError(
+            "Config is immutable. To make changes, do so through the ORM model, GroupedConfig."
+        )
+
+    def __getitem__(self, __key: str) -> dict[str, Any]:
+        try:
+            return super().__getitem__(__key)
+        except KeyError:
+            self.reload()
+            return super().__getitem__(__key)
 
 
-DynamicConfig = _DynamicConfigMeta()
+DynamicConfig = _DynamicConfig_meta()

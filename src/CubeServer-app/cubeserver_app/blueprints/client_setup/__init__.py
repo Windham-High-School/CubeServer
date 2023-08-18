@@ -8,7 +8,7 @@ from os import mkdir, chdir
 from shutil import rmtree
 from random import randint, random
 
-from cubeserver_common.environ import EnvConfig
+from cubeserver_common.config import EnvConfig
 from cubeserver_app import settings
 
 from flask import Blueprint, render_template, session, make_response

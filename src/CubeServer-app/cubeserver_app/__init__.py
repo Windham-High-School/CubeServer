@@ -10,9 +10,6 @@ from flask_apscheduler import APScheduler
 
 from cubeserver_common.config import EnvConfig
 from cubeserver_common import config, init_logging, configure_db
-from cubeserver_common.models import PyMongoModel
-from cubeserver_common.gensecret import check_secrets
-from cubeserver_common.config import LOGGING_LEVEL
 
 # Init logger:
 init_logging()
@@ -35,7 +32,7 @@ configure_db(app)
 
 # Import models ONLY AFTER the db is configured:
 from cubeserver_common.models.user import clear_bad_attempts
-from cubeserver_common.models.config.conf import Conf
+from cubeserver_common.config import DynamicConfig
 
 
 def _update_conf(app):
@@ -43,13 +40,13 @@ def _update_conf(app):
     This retrieves the latest configuration to ensure that any changes
     are synced between server threads."""
     logging.debug("Updating configuration variables from db")
-    app.config["CONFIGURABLE"] = Conf.retrieve_instance()
+    DynamicConfig.reload()
+    app.config["CONFIGURABLE"] = DynamicConfig.copy()
 
 
 logging.debug("Initializing APScheduler")
 scheduler = APScheduler()
-# Make APScheduler a little quieter:
-logging.getLogger("apscheduler.executors.default").setLevel(LOGGING_LEVEL + 10)
+logging.getLogger("apscheduler.executors.default").setLevel(EnvConfig.CS_LOGLEVEL)
 
 scheduler.add_job(
     func=_update_conf, args=[app], trigger="interval", id="configsync", seconds=30

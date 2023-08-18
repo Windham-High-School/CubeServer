@@ -31,7 +31,8 @@ def _locatable_name(type_to_name: type) -> str:
         return type_to_name.__name__
     return module + "." + type_to_name.__name__
 
-@classproperty
+
+@property
 def _collection_def() -> Collection:
     """Define the Mongodb collection in your class.
     Use the PyMongoModel.model_type_registry as the type registry.
@@ -39,6 +40,7 @@ def _collection_def() -> Collection:
     raise ValueError(
         "The mongo client has not been given to this class.\nPlease call update_mongo_client."
     )
+
 
 class PyMongoModel(AutoEncodable, ABC):
     """A class for easy object-mapping to bson.
@@ -116,10 +118,7 @@ class PyMongoModel(AutoEncodable, ABC):
 
     @classmethod
     def _encode_query(cls, query: dict[str, Any]) -> dict[str, Any]:
-        return {
-            key:
-            cls.default.encode_value(value) for key, value in query.items()
-        }
+        return {key: cls.default.encode_value(value) for key, value in query.items()}
 
     @classmethod
     def find(cls, *args, **kwargs):
@@ -132,19 +131,19 @@ class PyMongoModel(AutoEncodable, ABC):
             return cls.find(cls._encode_query(kwargs))
 
         # kwargs as field=value
-        return [cls.decode(document) for document in cls.collection.find(*args, **kwargs)]
+        return [
+            cls.decode(document) for document in cls.collection.find(*args, **kwargs)
+        ]
 
     @classmethod
     def find_sorted(cls, *args, key: str, order=ASCENDING, **kwargs):
         """Same a find(), but with sorting!"""
         if len(args) == 0:  # Supports new query type
             return cls.find_sorted(cls._encode_query(kwargs), key=key, order=order)
-        return (
-            [
-                cls.decode(document)
-                for document in cls.collection.find(*args, **kwargs).sort(key, order)
-            ]
-        )
+        return [
+            cls.decode(document)
+            for document in cls.collection.find(*args, **kwargs).sort(key, order)
+        ]
 
     @classmethod
     def find_one(cls, *args, **kwargs):
@@ -152,9 +151,7 @@ class PyMongoModel(AutoEncodable, ABC):
         Arguments are the same as those for PyMongo's find_one()."""
         if len(args) == 0:  # Supports new query type
             return cls.find_one(cls._encode_query(kwargs))
-        results = (
-            cls.collection.find_one(*args, **kwargs)
-        )
+        results = cls.collection.find_one(*args, **kwargs)
         if results is None:
             return None
         return cls.decode(results)

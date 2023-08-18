@@ -8,29 +8,45 @@ from wtforms.validators import DataRequired, Length
 
 from cubeserver_common import config
 from cubeserver_common.models.team import TeamLevel
-from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.user import User
 from cubeserver_common.models.team import Team
+
 
 class RegistrationForm(FlaskForm):
     """Defines the form used to register a team"""
 
-    team_name = StringField('Team Name', validators=[Length(min=1, max=config.TEAM_MAX_CHARS, \
-                            message=f"Please provide a team name under {config.TEAM_MAX_CHARS} characters.")])
+    team_name = StringField(
+        "Team Name",
+        validators=[
+            Length(
+                min=1,
+                max=config.DynamicConfig["System"]["Max Team Length"],
+                message=f"Please provide a team name under {config.DynamicConfig['System']['Max Team Length']} characters.",
+            )
+        ],
+    )
 
-    _members_message = f"Must have at least 2 members in a team."
-    _emails_message = f"Who doesn't have an email? Come on. Pony up."
+    _members_message = "Must have at least 2 members in a team."
+    _emails_message = "Who doesn't have an email? Come on. Pony up."
     # TODO: Find a more Pythonic way to do this:
-    member1 = StringField('Member #1', validators=[DataRequired(message=_members_message)])
-    email1 = EmailField('Email #1', validators=[DataRequired(message=_emails_message)])
-    member2 = StringField('Member #2', validators=[DataRequired(message=_members_message)])
-    email2 = EmailField('Email #2', validators=[DataRequired(message=_emails_message)])
-    member3 = StringField('Member #3 (not recommended)')
-    email3 = EmailField('Email #3')
+    member1 = StringField(
+        "Member #1", validators=[DataRequired(message=_members_message)]
+    )
+    email1 = EmailField("Email #1", validators=[DataRequired(message=_emails_message)])
+    member2 = StringField(
+        "Member #2", validators=[DataRequired(message=_members_message)]
+    )
+    email2 = EmailField("Email #2", validators=[DataRequired(message=_emails_message)])
+    member3 = StringField("Member #3 (not recommended)")
+    email3 = EmailField("Email #3")
 
-    classification = RadioField('Class', validators=[DataRequired(message="Please select a weight class!")], choices=[TeamLevel.VARSITY.value, TeamLevel.JUNIOR_VARSITY.value])
+    classification = RadioField(
+        "Class",
+        validators=[DataRequired(message="Please select a weight class!")],
+        choices=[TeamLevel.VARSITY.value, TeamLevel.JUNIOR_VARSITY.value],
+    )
 
-    submit = SubmitField('Register!')
+    submit = SubmitField("Register!")
 
     @staticmethod
     def validate_name(_, field):
@@ -38,7 +54,8 @@ class RegistrationForm(FlaskForm):
         if Team.find_by_name(field.data) is not None:
             raise ValidationError(
                 "This team name already exists in the database..."
-                "Please choose a different one.")
+                "Please choose a different one."
+            )
 
     @staticmethod
     def validate_member1(_, field):
@@ -46,7 +63,8 @@ class RegistrationForm(FlaskForm):
         if User.find_by_username(field.data) is not None:
             raise ValidationError(
                 "This user already exists in the database..."
-                "Contact an administrator for a solution.")
+                "Contact an administrator for a solution."
+            )
 
     @staticmethod
     def validate_email1(_, field):
@@ -58,10 +76,12 @@ class RegistrationForm(FlaskForm):
                 "Contact an administrator for a solution."
             )
         # Make sure it has the right domain (if required by admin)
-        if field.data and not field.data.endswith(Conf.retrieve_instance().email_domain):
+        if field.data and not field.data.endswith(
+            config.DynamicConfig["Competition"]["Registration Email Domain"]
+        ):
             raise ValidationError(
                 "All emails provided must be from "
-                f"{Conf.retrieve_instance().email_domain}"
+                f"{config.DynamicConfig['Competition']['Registration Email Domain']}"
             )
 
     validate_member2 = validate_member1

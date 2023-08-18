@@ -13,3 +13,4 @@ def test_validate_envconf():
 
 def test_default_config_static():
     assert isinstance(DEFAULT_CONFIG, Encodable)
+    # TODO: Test DynamicConfig fallback logic

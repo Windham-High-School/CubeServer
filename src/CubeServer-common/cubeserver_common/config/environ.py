@@ -52,6 +52,9 @@ class EnvConfig:
         __bool_from_str(environ.get("CS_DEVCONTAINER", "FALSE")) or False
     )
     CS_LOGLEVEL: str = environ.get("CS_LOGLEVEL", "info").upper()
+    CS_LOGFORMAT: str = environ.get(
+        "CS_LOGFORMAT", "%(asctime)s : %(levelname)s : %(process)d => %(message)s"
+    )
 
     CS_DOMAIN: str = environ.get("CS_DOMAIN", "localhost")
 
@@ -96,13 +99,13 @@ class EnvConfig:
     CS_API_PORT: int = __sad_if_none(__int_from_str(environ.get("CS_API_PORT", "8081")))
 
     # Database Connection & Credentials
-    CS_MONGODB_USERNAME: str = environ.get("CS_MONGODV_USERNAME", "flask")
-    CS_MONGODB_PASSWORD: str = environ.get("CS_MONGODV_PASSWORD", "")
-    CS_MONGODB_DRIVER: str = environ.get("CS_MONGODV_DRIVER", "mongodb")
-    CS_MONGODB_DATABASE: str = environ.get("CS_MONGODV_DATABASE", "csdb")
-    CS_MONGODB_OPTIONS: str = environ.get("CS_MONGODV_OPTIONS", "authsource=admin")
-    CS_MONGODB_PORT: str | None = __int_from_str(environ.get("CS_MONGODV_PORT", ""))
-    CS_MONGODB_HOST: str = environ.get("CS_MONGODV_HOST", "mongodb")
+    CS_MONGODB_USERNAME: str = environ.get("CS_MONGODB_USERNAME", "flask")
+    CS_MONGODB_PASSWORD: str = environ.get("CS_MONGODB_PASSWORD", "")
+    CS_MONGODB_DRIVER: str = environ.get("CS_MONGODB_DRIVER", "mongodb")
+    CS_MONGODB_DATABASE: str = environ.get("CS_MONGODB_DATABASE", "csdb")
+    CS_MONGODB_OPTIONS: str = environ.get("CS_MONGODB_OPTIONS", "authsource=admin")
+    CS_MONGODB_PORT: int | None = __int_from_str(environ.get("CS_MONGODB_PORT", ""))
+    CS_MONGODB_HOST: str = environ.get("CS_MONGODB_HOST", "mongodb")
 
     # Container setup
     CS_CONTAINER_PREFIX: str = environ.get("CS_CONTAINER_PREFIX", "CubeServer")

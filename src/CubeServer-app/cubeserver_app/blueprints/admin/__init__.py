@@ -37,7 +37,6 @@ from json import loads, dumps
 from pprint import pformat
 from datetime import datetime
 
-from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.datapoint import DataPoint, DataClass
 from cubeserver_common.models.utils import EnumCodec, Encodable
 from bson import _BUILT_IN_TYPES as BSON_TYPES
@@ -52,6 +51,7 @@ from cubeserver_common.models.multiplier import (
     CostMultiplier,
     VolumeUnit,
 )
+from cubeserver_common.config import EnvConfig, DynamicConfig
 from cubeserver_common.models.mail import Message
 from cubeserver_common.models.beaconmessage import (
     BeaconMessage,
@@ -59,12 +59,6 @@ from cubeserver_common.models.beaconmessage import (
     SentStatus,
 )
 from cubeserver_common.models.reference import ReferencePoint
-from cubeserver_common.config import (
-    FROM_NAME,
-    FROM_ADDR,
-    INTERNAL_SECRET_LENGTH,
-    TEMP_PATH,
-)
 
 from flask_table import Table
 from cubeserver_app import settings
@@ -106,19 +100,20 @@ def admin_home():
 
     # Populate configuration form:
     conf_form = ConfigurationForm()
-    db_conf = Conf.retrieve_instance()
-    conf_form.competition_on.data = db_conf.competition_on
-    conf_form.registration_open.data = db_conf.registration_open
-    conf_form.home_description.data = db_conf.home_description
-    conf_form.smtp_credentials.data = f"{db_conf.smtp_user}:{db_conf.smtp_pass}"
-    conf_form.smtp_server.data = db_conf.smtp_server
-    conf_form.email_domain.data = db_conf.email_domain
-    conf_form.reg_confirmation.data = db_conf.reg_confirmation
-    conf_form.notify_teams.data = db_conf.notify_teams
-    conf_form.team_email_quota.data = db_conf.team_email_quota
-    conf_form.quota_reset_hour.data = db_conf.quota_reset_hour
-    conf_form.banner_message.data = db_conf.banner_message
-    conf_form.beacon_polling_period.data = db_conf.beacon_polling_period
+    # TODO: Implement GroupedConfigForm
+    # db_conf = Conf.retrieve_instance()
+    # conf_form.competition_on.data = db_conf.competition_on
+    # conf_form.registration_open.data = db_conf.registration_open
+    # conf_form.home_description.data = db_conf.home_description
+    # conf_form.smtp_credentials.data = f"{db_conf.smtp_user}:{db_conf.smtp_pass}"
+    # conf_form.smtp_server.data = db_conf.smtp_server
+    # conf_form.email_domain.data = db_conf.email_domain
+    # conf_form.reg_confirmation.data = db_conf.reg_confirmation
+    # conf_form.notify_teams.data = db_conf.notify_teams
+    # conf_form.team_email_quota.data = db_conf.team_email_quota
+    # conf_form.quota_reset_hour.data = db_conf.quota_reset_hour
+    # conf_form.banner_message.data = db_conf.banner_message
+    # conf_form.beacon_polling_period.data = db_conf.beacon_polling_period
 
     # Reserved / internal team handling:
     reserved_links = []
@@ -206,7 +201,7 @@ def beacon_csv():
         return redirect(url_for(".admin_home"))
     if file and file.filename.lower().endswith(".csv"):
         logging.debug("Reading CSV of BeaconMessage objects")
-        file_path = os.path.join(TEMP_PATH, secure_filename(file.filename))
+        file_path = os.path.join(EnvConfig.CS_TEMP_PATH, secure_filename(file.filename))
         file.save(file_path)
         file.close()
         reopened = open(file_path, "r")
@@ -296,7 +291,7 @@ def table_endpoint(table, identifier, field):
     model_class = __STR_COLLECTION_MAPPING[table]
     model_obj = model_class.find_by_id(ObjectId(identifier))
     if (
-        model_class == Team and Conf.retrieve_instance().notify_teams
+        model_class == Team and DynamicConfig["Email"]["Notify Teams"]
     ):  # Notify the team of changes:
         desc_str = (
             "deleted"
@@ -304,8 +299,8 @@ def table_endpoint(table, identifier, field):
             else f"given a {field} of {request.form.get('item')}"
         )
         if Message(
-            FROM_NAME,
-            FROM_ADDR,
+            DynamicConfig["Email"]["Automated Sender Name"],
+            DynamicConfig["Email"]["Automated Sender Address"],
             cast(Team, model_obj).emails,
             "Admin Change to Your Team",
             (
@@ -342,8 +337,10 @@ def table_endpoint(table, identifier, field):
                 init_rawscore = cast(DataPoint, model_obj).rawscore
 
             # Change that Make!
-            raise NotImplementedError("set_attr_from_string has been deprecated and removed. Please wait for the admin api to be rewritten :)")
-            #model_obj.set_attr_from_string(field, request.form.get("item"))
+            raise NotImplementedError(
+                "set_attr_from_string has been deprecated and removed. Please wait for the admin api to be rewritten :)"
+            )
+            # model_obj.set_attr_from_string(field, request.form.get("item"))
 
             if (
                 field == "rawscore" and model_class == DataPoint
@@ -395,24 +392,24 @@ def conf_change():
     form = ConfigurationForm()
     if form.validate_on_submit():
         # Update database from form:
-        db_conf: Conf = Conf.retrieve_instance()
-        db_conf.competition_on = form.competition_on.data
-        db_conf.registration_open = form.registration_open.data
-        db_conf.home_description = form.home_description.data
-        db_conf.smtp_server = form.smtp_server.data
-        db_conf.reg_confirmation = form.reg_confirmation.data
-        db_conf.email_domain = form.email_domain.data
-        db_conf.notify_teams = form.notify_teams.data
-        db_conf.team_email_quota = form.team_email_quota.data
-        db_conf.quota_reset_hour = form.quota_reset_hour.data
-        db_conf.banner_message = form.banner_message.data
-        db_conf.beacon_polling_period = form.beacon_polling_period.data
-        credentials = form.smtp_credentials.data.strip().split(":")
-        if len(credentials) > 1:
-            db_conf.smtp_user = credentials[0]
-            db_conf.smtp_pass = credentials[1]
-        db_conf.save()
-        current_app.config["CONFIGURABLE"] = db_conf
+        # db_conf: Conf = Conf.retrieve_instance()
+        # db_conf.competition_on = form.competition_on.data
+        # db_conf.registration_open = form.registration_open.data
+        # db_conf.home_description = form.home_description.data
+        # db_conf.smtp_server = form.smtp_server.data
+        # db_conf.reg_confirmation = form.reg_confirmation.data
+        # db_conf.email_domain = form.email_domain.data
+        # db_conf.notify_teams = form.notify_teams.data
+        # db_conf.team_email_quota = form.team_email_quota.data
+        # db_conf.quota_reset_hour = form.quota_reset_hour.data
+        # db_conf.banner_message = form.banner_message.data
+        # db_conf.beacon_polling_period = form.beacon_polling_period.data
+        # credentials = form.smtp_credentials.data.strip().split(":")
+        # if len(credentials) > 1:
+        #     db_conf.smtp_user = credentials[0]
+        #     db_conf.smtp_pass = credentials[1]
+        # db_conf.save()
+        # current_app.config["CONFIGURABLE"] = db_conf
         return render_template("redirect_back.html.jinja2")
     return abort(500)
 
@@ -767,7 +764,7 @@ def gen_reserved(name: str = ""):
         name=name,
         weight_class=TeamLevel.REFERENCE,
         status=TeamStatus.INTERNAL,
-        _secret_length=INTERNAL_SECRET_LENGTH,
+        _secret_length=DynamicConfig["System"]["Internal Secret Length"],
     )
     team.save()
     flash(f"Successfully created reserved team {name} ({team.id})", category="success")
@@ -786,6 +783,7 @@ def package_beacon_code():
     shutil.copyfile("/api_cert/beacon.key", f"{working_dir}/beacon.key")
 
     from ..client_setup import pem_cert
+
     if pem_cert:
         with open(f"{working_dir}/cert.pem", "w") as fh:
             fh.write(pem_cert)
