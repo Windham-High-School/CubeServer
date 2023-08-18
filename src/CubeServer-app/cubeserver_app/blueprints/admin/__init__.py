@@ -779,8 +779,6 @@ def package_beacon_code():
     os.mkdir(working_dir)
     os.chdir(working_dir)
     output_path = f"{working_dir}/download.zip"
-    shutil.copyfile("/api_cert/beacon.pem", f"{working_dir}/beacon.pem")
-    shutil.copyfile("/api_cert/beacon.key", f"{working_dir}/beacon.key")
 
     from ..client_setup import pem_cert
 

@@ -61,6 +61,10 @@ class Message(PyMongoModel):
         if self.from_addr is None:
             raise TypeError("Cannot send empty message")
 
+        # Temporarily just save no sen no SMTP for dev stuff
+        self.save()
+        return
+
         self._mimetext = MIMEText(self.message)
         self._mimetext["Subject"] = self.subject
         self._mimetext["From"] = self.sender_str

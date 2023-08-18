@@ -7,7 +7,6 @@ import logging
 
 from flask import request
 from flask_restful import Resource
-from flask_httpauth import HTTPBasicAuth
 from json import dumps, loads, decoder
 from base64 import encodebytes
 
@@ -18,34 +17,7 @@ from cubeserver_common.models.beaconmessage import BeaconMessage, SentStatus
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 from cubeserver_common import config
 
-auth = HTTPBasicAuth()
-
-
-def internal(func: callable) -> callable:
-    """A decorator for internal resource functions"""
-
-    def wrapper(*args, **kwargs):
-        team: Team = Team.find_by_name(auth.username())
-        if team.status != TeamStatus.INTERNAL:
-            # Abort due to unauthorized access
-            logging.info(
-                f"Unauthorized access attempt to internal resource by {team.name}"
-            )
-            return None, 401
-        return func(*args, **kwargs)
-
-    return wrapper
-
-
-@auth.get_password
-def get_team_secret(team_name: str) -> str:
-    """Returns the secret code of a team by name
-    (The digest username is the team name)"""
-    team = Team.find_by_name(team_name)
-    logging.debug(f"Request from {team_name}")
-    if team and team.status.is_active:
-        return team.secret
-    return None
+from .auth import auth, internal, check_secret_header
 
 
 class NextMessage(Resource):
@@ -57,7 +29,7 @@ class NextMessage(Resource):
     The response will only have information for the next soonest beacon message that has the status of "queued" in the database.
     """
 
-    decorators = [auth.login_required]
+    decorators = [auth.login_required, check_secret_header]
 
     @internal
     def get(self):
@@ -96,7 +68,7 @@ class Message(Resource):
     The response will be a json object with the same format as the GET request.
     """
 
-    decorators = [auth.login_required]
+    decorators = [auth.login_required, check_secret_header]
 
     @internal
     def put(self, message_id: str):

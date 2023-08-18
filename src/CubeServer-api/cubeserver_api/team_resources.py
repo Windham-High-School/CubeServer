@@ -18,7 +18,7 @@ from cubeserver_common.models.beaconmessage import BeaconMessage
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 from cubeserver_common import config
 
-auth = HTTPBasicAuth()
+from .auth import auth, check_secret_header
 
 
 @auth.get_password
@@ -35,7 +35,7 @@ def get_team_secret(team_name: str) -> str:
 class Data(Resource):
     """A POST-only resource for datapoints"""
 
-    decorators = [auth.login_required]
+    decorators = [auth.login_required, check_secret_header]
 
     def post(self):
         logging.debug(f"Data post req from {auth.username()}")
@@ -74,7 +74,7 @@ class Data(Resource):
 class Email(Resource):
     """A POST-only resource for datapoints"""
 
-    decorators = [auth.login_required]
+    decorators = [auth.login_required, check_secret_header]
 
     def post(self):
         logging.debug(f"Email send req from {auth.username()}")
@@ -117,7 +117,7 @@ class Email(Resource):
 class Status(Resource):
     """A resource with some basic info"""
 
-    decorators = [auth.login_required]
+    decorators = [auth.login_required, check_secret_header]
 
     def get(self):
         logging.debug(f"Status get req de {auth.username()}")
@@ -134,7 +134,7 @@ class Status(Resource):
 class CodeUpdate(Resource):
     """A resource for teams to update code.py on their circuitpython cubes"""
 
-    decorators = [auth.login_required]
+    decorators = [auth.login_required, check_secret_header]
 
     def get(self):
         team = Team.find_by_name(auth.username())
