@@ -264,6 +264,15 @@ DEFAULT_CONFIG["System"].add_field(
     )
 )
 
+DEFAULT_CONFIG["System"].add_field(
+    GroupedConfigField(
+        name="AP Secret Check Disable",
+        description="If True, the secret normally added in production by the Cube API access point / proxy will not be required, even if the environment variables given to the server indicate this must be checked. This should almost always stay false.",
+        default_value=False,
+        input_type=FieldInputType.CHECKBOX,
+    )
+)
+
 
 # Profanity
 # ===========

@@ -3,21 +3,23 @@
 
 from datetime import datetime
 from time import time
-import logging
 
 from flask import request
 from flask_restful import Resource
 from json import dumps, loads, decoder
 from base64 import encodebytes
+from loguru import logger
 
 from cubeserver_common.models.config.rules import Rules
-from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.team import Team, TeamStatus
 from cubeserver_common.models.beaconmessage import BeaconMessage, SentStatus
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 from cubeserver_common import config
 
-from .auth import auth, internal, check_secret_header
+from ..auth import auth, internal, check_secret_header
+
+
+__all__ = ["NextMessage", "Message"]
 
 
 class NextMessage(Resource):
@@ -33,13 +35,8 @@ class NextMessage(Resource):
 
     @internal
     def get(self):
-        logging.debug(f"Next message get req from {auth.username()}")
+        logger.debug(f"Next message get req from {auth.username()}")
         team: Team = Team.find_by_name(auth.username())
-        # data_str = request.get_json()
-        # logging.debug(f"Request: {data_str}")
-        # if data_str is None:
-        #     data_str = loads(request.form['data'])
-
         message: BeaconMessage = BeaconMessage.find_one_queued()
         if message is None:
             return None, 404
@@ -72,9 +69,9 @@ class Message(Resource):
 
     @internal
     def put(self, message_id: str):
-        logging.debug(f"Message put req from {auth.username()}")
+        logger.debug(f"Message put req from {auth.username()}")
         data_str = request.get_json()
-        logging.debug(f"Request: {data_str}")
+        logger.debug(f"Request: {data_str}")
         if data_str is None:
             data_str = loads(request.form["data"])
         message: BeaconMessage = BeaconMessage.find_by_id(message_id)
@@ -83,7 +80,7 @@ class Message(Resource):
                 data_str["status"]
             )  # TODO: Support other fields
         except ValueError:
-            logging.debug("Attempted to set invalid status")
+            logger.debug("Attempted to set invalid status")
             return None, 400
         message.save()
         return {
@@ -98,8 +95,11 @@ class Message(Resource):
 
     @internal
     def get(self, message_id: str):
-        logging.debug(f"Message get req from {auth.username()}")
-        message: BeaconMessage = BeaconMessage.find_by_id(message_id)
+        logger.debug(f"Message get req from {auth.username()}")
+        message: BeaconMessage | None = BeaconMessage.find_by_id(message_id)
+        if message is None:
+            return {}, 404
+        assert message is not None
         return {
             "id": str(message.id),
             "timestamp": message.send_at.timestamp(),

@@ -3,6 +3,7 @@
 
 from enum import Enum
 from typing import Self
+from copy import deepcopy
 
 from cubeserver_common.utils import classproperty
 from cubeserver_common.models import PyMongoModel
@@ -138,6 +139,14 @@ class GroupedConfig(PyMongoModel):
 
     def __iter__(self):
         return iter(self.categories)
+
+    def clone(self) -> Self:
+        new_obj: Self = self.decode(
+            deepcopy(self.encode())
+        )
+        new_obj._id = None
+        new_obj.name = f"Clone of {self.name}"
+        return new_obj
 
     @classmethod
     @classproperty

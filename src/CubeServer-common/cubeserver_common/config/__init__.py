@@ -1,9 +1,10 @@
 """Environment variables and database-stored configuration"""
 
-import logging
 from typing import Any
 import traceback
 import time
+
+from loguru import logger
 
 from .environ import EnvConfig, EnvConfigError
 from ..models.grouped_config import GroupedConfig
@@ -29,13 +30,16 @@ class _DynamicConfig_meta(dict[str, dict[str, Any]]):
         try:
             conf = GroupedConfig.selected
         except Exception:
-            logging.error("Dynamic config could not be loaded:")
-            logging.error(traceback.format_exc())
-            logging.warn("Using default config instead.")
+            logger.error("Dynamic config could not be loaded:")
+            logger.error(traceback.format_exc())
+            logger.warn("Using default config instead of loading from db.")
             return DEFAULT_CONFIG
         if conf is None:
-            logging.error("No dynamic config selected in the database!")
-            logging.warn("Using default config instead.")
+            logger.error("No dynamic config selected in the database!")
+            logger.warn("Saving default config to db.")
+            new_config = DEFAULT_CONFIG.clone()
+            new_config.selected = True
+            new_config.save()
             return DEFAULT_CONFIG
         return conf
 
@@ -50,8 +54,7 @@ class _DynamicConfig_meta(dict[str, dict[str, Any]]):
                 for category in new_config
             }
         )
-        logging.debug("Loaded config")
-        logging.debug(self)
+        logger.debug(f"Loaded config \"{new_config.name}\"")
 
     def __setitem__(self, __key: str, __value: Any) -> None:
         raise TypeError(

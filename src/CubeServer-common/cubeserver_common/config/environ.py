@@ -51,10 +51,11 @@ class EnvConfig:
     CS_DEVCCONTAINER: bool = (
         __bool_from_str(environ.get("CS_DEVCONTAINER", "FALSE")) or False
     )
-    CS_LOGLEVEL: str = environ.get("CS_LOGLEVEL", "info").upper()
-    CS_LOGFORMAT: str = environ.get(
-        "CS_LOGFORMAT", "%(asctime)s : %(levelname)s : %(process)d => %(message)s"
+    CS_LOGLEVEL: str = environ.get("CS_ALTLOGLEVEL", "info").upper()
+    CS_LOGCOLORS: bool = __sad_if_none(
+        __bool_from_str(environ.get("CS_ALTLOGCOLORS", "TRUE"))
     )
+    CS_LOGOUTPUT: str | None = environ.get("CS_ALTLOGOUTPUT", None)
 
     CS_DOMAIN: str = environ.get("CS_DOMAIN", "localhost")
 
@@ -116,14 +117,15 @@ class EnvConfig:
 
     CS_COMMIT_HASH: str = environ.get("CS_COMMIT_HASH", "undefined")
 
+    # API location id secret
+    CS_API_LOCATION_SECRET: str = environ.get("CS_API_LOCATION_SECRET", "")
+
     @classmethod
     def validate(cls) -> None:
         """Ensures valid configuration.
         Should be run at init.
         @raises EnvConfigError
         """
-
-        print(cls.CS_DEV)
 
         # Base
         if cls.CS_RELEASE == "":

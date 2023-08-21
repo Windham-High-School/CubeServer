@@ -3,33 +3,23 @@
 
 from datetime import datetime
 from time import time
-import logging
 
 from flask import request
 from flask_restful import Resource
-from flask_httpauth import HTTPBasicAuth
-from json import dumps, loads, decoder
+from json import loads
 from base64 import encodebytes
+from loguru import logger
 
 from cubeserver_common.models.config.rules import Rules
-from cubeserver_common.models.config.conf import Conf
+from cubeserver_common.config import DynamicConfig
 from cubeserver_common.models.team import Team
-from cubeserver_common.models.beaconmessage import BeaconMessage
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 from cubeserver_common import config
 
-from .auth import auth, check_secret_header
+from ..auth import auth, check_secret_header
 
 
-@auth.get_password
-def get_team_secret(team_name: str) -> str:
-    """Returns the secret code of a team by name
-    (The digest username is the team name)"""
-    team = Team.find_by_name(team_name)
-    logging.debug(f"Request from {team_name}")
-    if team and team.status.is_active:
-        return team.secret
-    return None
+__all__ = ["Data", "Email", "Status", "CodeUpdate"]
 
 
 class Data(Resource):
@@ -38,37 +28,40 @@ class Data(Resource):
     decorators = [auth.login_required, check_secret_header]
 
     def post(self):
-        logging.debug(f"Data post req from {auth.username()}")
+        logger.debug(f"Data post req from {auth.username()}")
         team = Team.find_by_name(auth.username())
-        logging.info(f"Data submission de {team.name}")
+        logger.info(f"Data submission de {team.name}")
         # Get DataClass and cast the value:
         data_str = request.get_json()
-        logging.debug(f"Request: {data_str}")
+        logger.debug(f"Request: {data_str}")
         if data_str is None:
             data_str = loads(request.form["data"])
         data_class = DataClass(data_str["type"])
         if (
-            not Conf.retrieve_instance().competition_on
+            DynamicConfig["Competition"]["Competition Freeze"]
             and data_class in DataClass.measurable
         ):
-            logging.info("Data submission rejected; competition is not running.")
+            logger.info("Data submission rejected; competition is frozen.")
             return request.form, 423
         if data_class in DataClass.manual:
-            logging.debug("Manually-determined- Rejecting")
-            return request.form, 400  # If this should be manually-determined..
+            logger.debug("Manually-determined- Rejecting")
+            return (
+                request.form,
+                400,
+            )  # If this should be manually-determined and not submitted directly..
         data_value = data_class.datatype(data_str["value"])
-        logging.debug(f"Value: {data_value}")
+        logger.debug(f"Value: {data_value}")
         # Create the DataPoint object:
         point = DataPoint(
             team_identifier=team.id, category=data_class, value=data_value
         )
-        logging.debug(f"DataPoint object: {point}")
-        logging.info("Posting data")
+        logger.debug(f"DataPoint object: {point}")
+        logger.info("Posting data")
         if Rules.retrieve_instance().post_data(point):
-            logging.info("Success!")
+            logger.info("Success!")
             return request.form, 201
-        logging.info("Something happened suboptimally.")
-        return request.form, 400  # TODO: Support better response codes?
+        logger.info("Something happened suboptimally.")
+        return request.form, 400
 
 
 class Email(Resource):
@@ -77,19 +70,19 @@ class Email(Resource):
     decorators = [auth.login_required, check_secret_header]
 
     def post(self):
-        logging.debug(f"Email send req from {auth.username()}")
+        logger.debug(f"Email send req from {auth.username()}")
         team = Team.find_by_name(auth.username())
-        logging.info(f"Email submission from: {team.name}")
+        logger.info(f"Email submission from: {team.name}")
         # Get DataClass and cast the value:
         data_str = request.get_json()
         subject = data_str["subject"]
         message = data_str["message"]
-        logging.debug(f"Subject: {subject}")
-        logging.debug(message)
-        logging.info("Sending...")
+        logger.debug(f"Subject: {subject}")
+        logger.debug(message)
+        logger.info("Sending...")
 
         def send_team_email():
-            if team.emails_sent >= Conf.retrieve_instance().team_email_quota:
+            if team.emails_sent >= DynamicConfig["Email"]["Team Quota"]:
                 return False
             import cubeserver_common.models.mail
 
@@ -108,10 +101,10 @@ class Email(Resource):
             return False
 
         if send_team_email():
-            logging.info("Success!")
+            logger.info("Success!")
             return request.form, 201
-        logging.warning("Failed to send email.")
-        return request.form, 400  # TODO: Support better response codes?
+        logger.warning("Failed to send email.")
+        return request.form, 400
 
 
 class Status(Resource):
@@ -120,9 +113,9 @@ class Status(Resource):
     decorators = [auth.login_required, check_secret_header]
 
     def get(self):
-        logging.debug(f"Status get req de {auth.username()}")
+        logger.debug(f"Status get req de {auth.username()}")
         team = Team.find_by_name(auth.username())
-        logging.info(f"Status req de {team.name}")
+        logger.info(f"Status req de {team.name}")
         return {
             "datetime": datetime.now().isoformat(),
             "unix_time": int(time()),
@@ -138,7 +131,7 @@ class CodeUpdate(Resource):
 
     def get(self):
         team = Team.find_by_name(auth.username())
-        logging.info(f"Code update req de {team.name}")
+        logger.info(f"Code update req de {team.name}")
         return {
             "datetime": datetime.now().isoformat(),
             "unix_time": int(time()),

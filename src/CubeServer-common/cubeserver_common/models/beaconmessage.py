@@ -1,11 +1,12 @@
 """Handling messages sent and to be sent by the beacon
 """
 
-import logging
 from enum import Enum, unique
 from typing import Optional, Mapping, Self
 from datetime import datetime, timedelta
 from pprint import pformat
+
+from loguru import logger
 
 from .utils.modelutils import PyMongoModel
 from .team import TeamLevel
@@ -52,7 +53,7 @@ class BeaconMessageEncoding(Enum):
         Args:
             message (str | bytes): The message to encode
         """
-        if type(message) == bytes:
+        if isinstance(message, bytes):
             return message
         if self in [self.UTF8, self.ASCII]:
             return message.encode(self.value)
@@ -69,6 +70,7 @@ class BeaconMessageEncoding(Enum):
             raise OverflowError(
                 f"Could not fit specified integer in {MAX_INT_BYTES} bytes."
             )
+        return b''
 
 
 class BeaconMessage(PyMongoModel):
@@ -103,7 +105,7 @@ class BeaconMessage(PyMongoModel):
         intensity: int = 255,
         past: bool = False,
         misfire_grace: int = 30,
-        status: Optional[SentStatus] = None,
+        status: SentStatus = SentStatus.QUEUED,
         prefix: bytes = b"",
     ):
         """
@@ -138,14 +140,14 @@ class BeaconMessage(PyMongoModel):
         self.full_message_bytes_stored = self.full_message_bytes
 
         self.status = status
-        if self.status is None:
+        if self.status == SentStatus.QUEUED:
             self.set_untransmitted()
 
         # self.register_field('full_message_bytes_stored', self.full_message_bytes)
 
     def set_untransmitted(self):
         """Automatically determines if this message has been missed"""
-        logging.debug("Setting message as untransmitted...")
+        logger.debug("Setting message as untransmitted...")
         self.status = (
             SentStatus.MISSED
             if (
@@ -154,14 +156,17 @@ class BeaconMessage(PyMongoModel):
             )
             else SentStatus.QUEUED
         )
-        logging.debug(f"+Now: {datetime.now()}; Scheduled for: {self.send_at}")
-        logging.debug(f"+-> Status: {self.status}")
+        logger.debug(f"+Now: {datetime.now()}; Scheduled for: {self.send_at}")
+        logger.debug(f"+-> Status: {self.status}")
 
     @property
     def message_bytes(self) -> bytes:
         """Returns the message, given as bytes"""
         if self.message_encoding is None:
-            return self.message
+            if isinstance(self.message, bytes):
+                return self.message
+            else:
+                raise TypeError("Message cannot have encoding of \"None\" and a string message")
         return self.message_encoding.encode(self.message)
 
     @property

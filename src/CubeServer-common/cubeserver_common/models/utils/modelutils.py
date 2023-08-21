@@ -4,26 +4,27 @@ This is not thread safe. Exercise caution if accessing the same instance from mu
 """
 
 from abc import ABC, abstractmethod
-from enum import Enum
-from typing import Any, List, Mapping, Optional, Tuple, Type, cast, Self
+from typing import Any, Optional, Self
 from functools import lru_cache
-import warnings
+
 from bson import ObjectId
-from json import loads
-from bson.codec_options import TypeCodec, TypeRegistry
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from pymongo.collection import Collection
+from loguru import logger
 
 from cubeserver_common.utils import classproperty
 
-from .codecs.dummycodec import DummyCodec
-from .codecs.enumcodec import EnumCodec
 from .autoencodable import AutoEncodable
 
 
-__all__ = ["PyMongoModel", "ASCENDING", "DESCENDING"]
+__all__ = ["PyMongoModel", "UninitializedCollectionError", "ASCENDING", "DESCENDING"]
 
 
+class UninitializedCollectionError(ValueError):
+    pass
+
+
+# TODO: Remove if unneeded-
 def _locatable_name(type_to_name: type) -> str:
     """Returns a string that can be used in reverse with pydoc.locate"""
     module = type_to_name.__module__
@@ -32,33 +33,31 @@ def _locatable_name(type_to_name: type) -> str:
     return module + "." + type_to_name.__name__
 
 
-@property
-def _collection_def() -> Collection:
-    """Define the Mongodb collection in your class.
-    Use the PyMongoModel.model_type_registry as the type registry.
-    """
-    raise ValueError(
-        "The mongo client has not been given to this class.\nPlease call update_mongo_client."
-    )
-
-
 class PyMongoModel(AutoEncodable, ABC):
     """A class for easy object-mapping to bson.
     Extend this class for any classes that describe a type of document."""
 
-    mongo: Optional[MongoClient] = None
-    collection: Collection = _collection_def
+    mongo: MongoClient | None = None
 
-    __collection_name: Optional[str] = None
+    __collection_name: str | None = None
 
-    @classmethod
-    def update_mongo_client(cls, mongo_client: Optional[MongoClient]):
+    @staticmethod
+    def _get_static_mongo_client() -> MongoClient:
+        """Returns a mongo client to be used by all models"""
+        return PyMongoModel.mongo
+
+    @staticmethod
+    def update_mongo_client(mongo_client: Optional[MongoClient]):
         """Sets the MongoClient reference in PyMongoModel, which is then
         used by any models that extend this class."""
-        cls.mongo = mongo_client
-        # If this method is called post-__init_subclass__
-        if cls.__collection_name is not None:
-            cls.set_collection_name(cls.__collection_name)
+        PyMongoModel.mongo = mongo_client
+
+    @classmethod
+    @classproperty
+    def collection(cls) -> Collection:
+        return PyMongoModel._get_static_mongo_client().db.get_collection(
+            cls.__collection_name
+        )
 
     @classmethod
     def set_collection_name(cls, collection_name: str):
@@ -106,6 +105,10 @@ class PyMongoModel(AutoEncodable, ABC):
 
     def save(self):
         """Saves this document to the collection"""
+        if self.collection is None:
+            raise UninitializedCollectionError(
+                "Please initialize the collection attribute or run update_mongo_client"
+            )
         if not self._id:
             self.collection.insert_one(self.encode(add_id=True))
         else:
@@ -113,6 +116,10 @@ class PyMongoModel(AutoEncodable, ABC):
 
     def remove(self):
         """Removes this document from the collection"""
+        if self.collection is None:
+            raise UninitializedCollectionError(
+                "Please initialize the collection attribute or run update_mongo_client"
+            )
         if self._id:
             self.collection.delete_one({"_id": self._id})
 
@@ -127,6 +134,11 @@ class PyMongoModel(AutoEncodable, ABC):
 
         Or, specify no positional arguments and all kwargs- In this way you can query where field=val
         """
+        if cls.collection is None:
+            raise UninitializedCollectionError(
+                "Please initialize the collection attribute or run update_mongo_client"
+            )
+
         if len(args) == 0:  # Supports new query type
             return cls.find(cls._encode_query(kwargs))
 
@@ -138,6 +150,11 @@ class PyMongoModel(AutoEncodable, ABC):
     @classmethod
     def find_sorted(cls, *args, key: str, order=ASCENDING, **kwargs):
         """Same a find(), but with sorting!"""
+        if cls.collection is None:
+            raise UninitializedCollectionError(
+                "Please initialize the collection attribute or run update_mongo_client"
+            )
+
         if len(args) == 0:  # Supports new query type
             return cls.find_sorted(cls._encode_query(kwargs), key=key, order=order)
         return [
@@ -149,6 +166,11 @@ class PyMongoModel(AutoEncodable, ABC):
     def find_one(cls, *args, **kwargs):
         """Finds a document from the collection
         Arguments are the same as those for PyMongo's find_one()."""
+        if cls.collection is None:
+            raise UninitializedCollectionError(
+                "Please initialize the collection attribute or run update_mongo_client"
+            )
+
         if len(args) == 0:  # Supports new query type
             return cls.find_one(cls._encode_query(kwargs))
         results = cls.collection.find_one(*args, **kwargs)
@@ -167,4 +189,9 @@ class PyMongoModel(AutoEncodable, ABC):
 
     @classmethod
     def find_safe(cls, *args, **kwargs):
+        if cls.collection is None:
+            raise UninitializedCollectionError(
+                "Please initialize the collection attribute or run update_mongo_client"
+            )
+
         return cls.collection.find(*args, **kwargs)
