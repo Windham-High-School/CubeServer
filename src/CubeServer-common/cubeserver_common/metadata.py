@@ -12,7 +12,7 @@ SERVER_NAME = "CubeServer 2023-24 Edition"
 AUTHORS: dict = {
     "Joseph R. Freeston": {
         "role": "The Architect",
-        "contributions": "Primary CubeServer Developer\nLead software developer 2022-present",
+        "contributions": "Primary CubeServer Developer\nLead software developer 2022-2023",
         "link": "https://github.com/snorklerjoe",
     },
     "Heather Brayer": {
