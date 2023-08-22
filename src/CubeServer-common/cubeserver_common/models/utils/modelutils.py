@@ -10,11 +10,10 @@ from functools import lru_cache
 from bson import ObjectId
 from pymongo import MongoClient, ASCENDING, DESCENDING
 from pymongo.collection import Collection
-from loguru import logger
 
 from cubeserver_common.utils import classproperty
 
-from .autoencodable import AutoEncodable
+from .autoencodable import AutoEncodable, EncodedDict
 
 
 __all__ = ["PyMongoModel", "UninitializedCollectionError", "ASCENDING", "DESCENDING"]
@@ -60,14 +59,14 @@ class PyMongoModel(AutoEncodable, ABC):
         )
 
     @classmethod
-    def set_collection_name(cls, collection_name: str):
+    def set_collection_name(cls, collection_name: str) -> None:
         """Define the Mongodb collection in your class.
         Use the PyMongoModel.model_type_registry as the type registry."""
         cls.__collection_name = collection_name
         if PyMongoModel.mongo is not None:
             cls.collection = PyMongoModel.mongo.db.get_collection(collection_name)
 
-    def __init_subclass__(cls):
+    def __init_subclass__(cls) -> None:
         """Note that subclasses must implement a constructor or a __new__()
         which initializes all attributes with the proper values."""
 
@@ -77,7 +76,7 @@ class PyMongoModel(AutoEncodable, ABC):
         super().__init_subclass__()
 
     @abstractmethod
-    def __init__(self):
+    def __init__(self) -> None:
         """Initializes the PyMongoModel overhead"""
         super().__init__()
 
@@ -89,7 +88,7 @@ class PyMongoModel(AutoEncodable, ABC):
         return cls()
 
     @property
-    def id(self):
+    def id(self) -> ObjectId:
         """The internal document identifier"""
         return self._id
 
@@ -97,13 +96,13 @@ class PyMongoModel(AutoEncodable, ABC):
         return hash(self._id)
 
     @property
-    def id_secondary(self):
+    def id_secondary(self) -> ObjectId:
         """A dummy property; always equal to id
         Used to have multiple id-driven columns in a Flask-tables table
         """
         return self.id
 
-    def save(self):
+    def save(self) -> None:
         """Saves this document to the collection"""
         if self.collection is None:
             raise UninitializedCollectionError(
@@ -114,7 +113,7 @@ class PyMongoModel(AutoEncodable, ABC):
         else:
             self.collection.replace_one({"_id": self._id}, self.encode())
 
-    def remove(self):
+    def remove(self) -> None:
         """Removes this document from the collection"""
         if self.collection is None:
             raise UninitializedCollectionError(
@@ -128,7 +127,7 @@ class PyMongoModel(AutoEncodable, ABC):
         return {key: cls.default.encode_value(value) for key, value in query.items()}
 
     @classmethod
-    def find(cls, *args, **kwargs):
+    def find(cls, *args, **kwargs) -> list[Self]:
         """Finds documents from the collection
         Arguments are the same as those for PyMongo.collection's find(), by default.
 
@@ -148,7 +147,7 @@ class PyMongoModel(AutoEncodable, ABC):
         ]
 
     @classmethod
-    def find_sorted(cls, *args, key: str, order=ASCENDING, **kwargs):
+    def find_sorted(cls, *args, key: str, order=ASCENDING, **kwargs) -> list[Self]:
         """Same a find(), but with sorting!"""
         if cls.collection is None:
             raise UninitializedCollectionError(
@@ -163,7 +162,7 @@ class PyMongoModel(AutoEncodable, ABC):
         ]
 
     @classmethod
-    def find_one(cls, *args, **kwargs):
+    def find_one(cls, *args, **kwargs) -> Self:
         """Finds a document from the collection
         Arguments are the same as those for PyMongo's find_one()."""
         if cls.collection is None:
@@ -178,17 +177,17 @@ class PyMongoModel(AutoEncodable, ABC):
             return None
         return cls.decode(results)
 
-    def find_self(self):
+    def find_self(self) -> Self:
         """Returns the database's version of self"""
         return self.find_by_id(self.id)
 
     @classmethod
-    def find_by_id(cls, identifier):
+    def find_by_id(cls, identifier) -> Self:
         """Finds a document from the collection, given the id"""
         return cls.find_one({"_id": ObjectId(identifier)}) or None
 
     @classmethod
-    def find_safe(cls, *args, **kwargs):
+    def find_safe(cls, *args, **kwargs) -> list[EncodedDict]:
         if cls.collection is None:
             raise UninitializedCollectionError(
                 "Please initialize the collection attribute or run update_mongo_client"
