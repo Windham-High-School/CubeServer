@@ -294,7 +294,7 @@ DEFAULT_CONFIG["Profanity"].add_field(
 
 DEFAULT_CONFIG["Profanity"].add_field(
     GroupedConfigField(
-        name="Censor comments",
+        name="Censor Comments",
         description="Whether or not to censor profanity in cube-posted comments to the server",
         default_value=True,
         input_type=FieldInputType.CHECKBOX,
@@ -303,7 +303,7 @@ DEFAULT_CONFIG["Profanity"].add_field(
 
 DEFAULT_CONFIG["Profanity"].add_field(
     GroupedConfigField(
-        name="Censor names",
+        name="Censor Names",
         description="Whether or not to censor profanity in team names during registration",
         default_value=True,
         input_type=FieldInputType.CHECKBOX,

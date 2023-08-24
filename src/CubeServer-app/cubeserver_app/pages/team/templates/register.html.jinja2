@@ -1,0 +1,23 @@
+{% extends "base/base.html.jinja2" %}
+{% block title %}Sign-Up{% endblock %}
+
+{% block header %}
+<h4>Register a Team!</h4>
+<p>
+    Please make sure this information is correct <i>before</i> submitting-
+    This information <i>cannot</i> be changed afterwards without contacting an admin user.
+</p>
+{% endblock %}
+
+{% block content %}
+{# TODO: Make this form render prettier: #}
+{{ wtf.quick_form(form, button_map={'submit_button': 'primary'}) }}
+
+{% if form.team_name.errors %}
+<ul class="alert alert-danger errors">
+    {% for error in form.team_name.errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+</ul>
+{% endif %}
+{% endblock %}

@@ -1,12 +1,13 @@
 """Models users, teams, and privilege data"""
 
 from enum import Enum, unique
-from typing import Optional, cast
+from typing import Optional, cast, Self
 from secrets import token_urlsafe
 from bcrypt import hashpw, gensalt, checkpw
 from flask_login import UserMixin
 from secrets import token_urlsafe
 
+from cubeserver_common.config import EnvConfig
 from cubeserver_common.models.utils import PyMongoModel
 
 __all__ = ["UserLevel", "User"]
@@ -82,15 +83,13 @@ class User(PyMongoModel, UserMixin):
     @staticmethod
     def _hashpwd(pwd: str) -> bytes:
         """Runs the bcrypt hash algorithm on the given string."""
-        return hashpw(pwd.encode("utf-8"), gensalt())
-        # return HMAC(gensecret.check_secrets().encode(config.ENCODING),
-        #    msg=pwd.encode(config.ENCODING), digestmod=config.CRYPTO_HASH_ALGORITHM).digest()
+        return hashpw(pwd.encode(EnvConfig.CS_STR_ENCODING), gensalt())
 
     def __str__(self) -> str:
         return self.name + (f" ({self.email})" if self.email else "")
 
     @property
-    def is_active(self):
+    def is_active(self) -> bool:
         return (
             self.activated == UserActivation.ACTIVATED
             and self.level != UserLevel.SUSPENDED
@@ -105,7 +104,7 @@ class User(PyMongoModel, UserMixin):
 
     def verify_pwd(self, pwd) -> bool:
         """Checks the supplied password against the stored hash"""
-        result = checkpw(pwd.encode("utf-8"), self.pwd)
+        result = checkpw(pwd.encode(EnvConfig.CS_STR_ENCODING), self.pwd)
         if not result:
             if self.name not in recent_bad_login_attempts:
                 recent_bad_login_attempts[self.name] = 0
@@ -121,31 +120,27 @@ class User(PyMongoModel, UserMixin):
     @property
     def verification_token(self) -> str:
         """A bcrypt token for email verification"""
-        # Why use bcrypt for a one-time token?
-        # return urlsafe_b64encode(
-        #    User._hashpwd(self._verification_token_raw)
-        # )
         return self._verification_token_raw
 
     def verify(self, token: str) -> bool:
         """Verifies this user's email, returning True on success"""
-        # Why use bcrypt for a one-time token?
-        # if checkpw(
-        #    urlsafe_b64decode(token),
-        #    self._verification_token_raw.encode('utf-8')
-        # ):
         if token == self._verification_token_raw:
             self.verified = True
         return self.verified
 
     @classmethod
-    def find_by_username(cls, name):
+    def find_by_username(cls, name: str) -> Self:
         """Returns the first known user with that username"""
         return cast(User, super().find_one({"name": name}))
 
     @classmethod
-    def find_by_email(cls, email):
+    def find_by_email(cls, email: str) -> Self | None:
         """Returns the first known user with that email"""
         if len(email) < 1:
             return None
         return cast(User, super().find_one({"email": email}))
+
+    @classmethod
+    def loader(cls, id: str) -> Self | None:
+        """LoginManager user loader"""
+        return cls.find_by_id(id)

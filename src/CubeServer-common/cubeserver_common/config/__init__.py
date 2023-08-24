@@ -2,7 +2,6 @@
 
 from typing import Any
 import traceback
-import time
 
 from loguru import logger
 
@@ -32,11 +31,11 @@ class _DynamicConfig_meta(dict[str, dict[str, Any]]):
         except Exception:
             logger.error("Dynamic config could not be loaded:")
             logger.error(traceback.format_exc())
-            logger.warn("Using default config instead of loading from db.")
+            logger.warning("Using default config instead of loading from db.")
             return DEFAULT_CONFIG
         if conf is None:
             logger.error("No dynamic config selected in the database!")
-            logger.warn("Saving default config to db.")
+            logger.warning("Saving default config to db.")
             new_config = DEFAULT_CONFIG.clone()
             new_config.selected = True
             new_config.save()
@@ -54,7 +53,7 @@ class _DynamicConfig_meta(dict[str, dict[str, Any]]):
                 for category in new_config
             }
         )
-        logger.debug(f"Loaded config \"{new_config.name}\"")
+        logger.debug(f'Loaded config "{new_config.name}"')
 
     def __setitem__(self, __key: str, __value: Any) -> None:
         raise TypeError(

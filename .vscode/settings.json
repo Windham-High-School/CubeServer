@@ -13,7 +13,6 @@
         "/code/"
     ],
     "python.defaultInterpreterPath": "/code/.venv-dev/bin/python",
-    "python.formatting.provider": "none",
     "python.testing.cwd": "/code/",
     "ruff.enable": true,
     "ruff.interpreter": [
@@ -24,5 +23,14 @@
     "python.testing.pytestPath": "/code/.venv-dev/bin/python -m pytest",
     "ruff.args": [
         "--check-untyped-defs"
-    ]
+    ],
+    "python.formatting.provider": "none",
+    "black-formatter.interpreter": [
+        "/code/.venv-dev/bin/python"
+    ],
+    "html.format.enable": true,
+    "html.suggest.html5": true,
+    "files.associations": {
+        "*.html.jinja2": "jinja-html"
+    }
 }

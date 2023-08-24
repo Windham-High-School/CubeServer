@@ -1,4 +1,6 @@
 """An API for logging data into the database.
+
+This module is also the uWSGI endpoint for the api
 """
 
 from flask import Flask
@@ -13,20 +15,20 @@ from cubeserver_common import configure_db, init_logging
 init_logging()
 
 # Create app:
-logger.debug("Initializing Flask app")
+logger.info("Initializing Flask")
 app = Flask(__name__)
 
 app.config["SECRET_KEY"] = EnvConfig.CS_FLASK_SECRET
-logger.debug("Initializing Flask-Restful Api")
+logger.info("Initializing Flask-Restful Api")
 api = Api(app)
 
-logger.debug("Initializing db connection")
+logger.info("Initializing db connection")
 configure_db(app)
 
 # Email quota counting:
 from cubeserver_common.models.team import Team
 
-logger.debug("Initializing APScheduler")
+logger.info("Initializing APScheduler")
 scheduler = APScheduler()
 scheduler.init_app(app)
 
@@ -41,10 +43,11 @@ def reset_email_count():
     Team.reset_sent_emails()
 
 
-logger.debug("Starting scheduler")
+logger.info("Starting scheduler")
 scheduler.start()
 
 # Import AFTER init'ing the db:
+logger.info("Loading api resources")
 logger.debug("Loading team api resources")
 from cubeserver_api.resources.team_resources import *
 

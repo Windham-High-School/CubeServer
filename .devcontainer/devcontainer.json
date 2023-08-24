@@ -10,13 +10,11 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				// This could be used; taken out for now bc I'm too used to VSCode keyboard
-				//  shortcuts as they already are...
-				//				"lfs.vscode-emacs-friendly",
 				"ms-python.isort",
 				"ms-python.black-formatter",
 				"ms-python.mypy-type-checker",
-				"charliermarsh.ruff"
+				"charliermarsh.ruff",
+				"samuelcolvin.jinjahtml"
 			]
 		}
 	}

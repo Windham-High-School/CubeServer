@@ -11,7 +11,7 @@ from base64 import encodebytes
 from loguru import logger
 
 from cubeserver_common.models.config.rules import Rules
-from cubeserver_common.config import DynamicConfig
+from cubeserver_common.config import DynamicConfig, EnvConfig
 from cubeserver_common.models.team import Team
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 from cubeserver_common import config
@@ -137,5 +137,5 @@ class CodeUpdate(Resource):
             "unix_time": int(time()),
             "encoding": "base64",
             "new": not team.code_update_taken,
-            "code": encodebytes(team.get_code_update()).decode("utf-8"),
+            "code": encodebytes(team.get_code_update()).decode(EnvConfig.CS_STR_ENCODING),
         }, 200

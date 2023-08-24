@@ -1,0 +1,28 @@
+{# Redirects to the previous page; great for form endpoints #}
+
+{# This page is only shown briefly so skip any flashed messages #}
+{% set HOLD_FLASHED_MESSAGES = True %}
+
+{% extends "base.html.jinja2" %}
+{% block title %}Redirecting{% endblock %}
+
+{% block header %}
+    <h4 class="alert">Loading...</h4>
+{% endblock %}
+
+{% block content %}
+    <div class="ldx ld-ring ldx-spin" style="width: 100%; height: 100%;">
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        window.location.replace(document.referrer);
+
+        // Failsafe:
+        setTimeout(function() {
+                history.go(-1);
+            }, 1000);
+    </script>
+{{ super() }}
+{% endblock %}

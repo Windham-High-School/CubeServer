@@ -5,7 +5,6 @@ import secrets
 from enum import Enum, unique
 from typing import List, Optional, Any, Self
 from math import ceil
-from typing import Any, List, Optional
 
 from cubeserver_common import config
 from cubeserver_common.models.user import User
@@ -16,8 +15,8 @@ from .mail import Message
 __all__ = ["TeamLevel", "TeamStatus", "TeamHealth", "Team"]
 
 
-def _filter_nonetype_from_list(l: list[Any]) -> list:
-    return list(filter(lambda item: item is not None, l))
+def _filter_nonetype_from_list(list_to_filter: list[Any]) -> list:
+    return list(filter(lambda item: item is not None, list_to_filter))
 
 
 @unique
@@ -136,8 +135,7 @@ class Team(PyMongoModel):
 
     @classmethod
     def _gen_secret(cls, length: int) -> str:
-        """Generates a crypto-safe secret of the length defined by
-        config.TEAM_SECRET_LENGTH"""
+        """Generates a crypto-safe secret of the length specified"""
         return secrets.token_hex(ceil(length / 2))[:length]
 
     def __init__(
