@@ -10,6 +10,7 @@ https://cloud.google.com/build/docs/build-push-docker-image#create_a_docker_repo
 ---
 
 gcloud projects list
+# REPLACE IF PROJECT ID IS DIFFERENT
 export PROJECT_ID=global-approach-388801
 gcloud config set project $PROJECT_ID
 
@@ -22,7 +23,7 @@ export MONGODB_HOST=cluster0.dkt0odd.mongodb.net
 export MONGODB_USER=flask
 export MONGODB_NAME=flaskdb
 export MONGODB_DRIVER=mongodb+srv
-export MONGODB_OPTIONS=retryWrites=true&w=majority
+export MONGODB_OPTIONS="retryWrites=true&w=majority"
 
 export PROJECT_NAME=`gcloud projects describe $PROJECT_ID --format="value(name)"`
 export PROJECT_NUMBER=`gcloud projects describe $PROJECT_ID --format="value(projectNumber)"`
