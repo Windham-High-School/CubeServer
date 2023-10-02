@@ -3,18 +3,18 @@
 	"dockerComposeFile": "docker-compose.yml",
 	"service": "combined",
 	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-
 	"forwardPorts": [
 		8080,
 		8081
 	],
-  
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"lfs.vscode-emacs-friendly",
 				"ms-python.isort",
-				"ms-python.pylint"
+				"ms-python.black-formatter",
+				"ms-python.mypy-type-checker",
+				"charliermarsh.ruff",
+				"samuelcolvin.jinjahtml"
 			]
 		}
 	}

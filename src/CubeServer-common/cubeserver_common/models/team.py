@@ -3,21 +3,20 @@
 import logging
 import secrets
 from enum import Enum, unique
+from typing import List, Optional, Any, Self
 from math import ceil
-from typing import Any, List, Optional
 
 from cubeserver_common import config
 from cubeserver_common.models.user import User
 from cubeserver_common.models.utils import Encodable, PyMongoModel
 
-from .config.conf import Conf
 from .mail import Message
 
 __all__ = ["TeamLevel", "TeamStatus", "TeamHealth", "Team"]
 
 
-def _filter_nonetype_from_list(l: list[Any]) -> list:
-    return list(filter(lambda item: item is not None, l))
+def _filter_nonetype_from_list(list_to_filter: list[Any]) -> list:
+    return list(filter(lambda item: item is not None, list_to_filter))
 
 
 @unique
@@ -129,14 +128,14 @@ class TeamHealth(Encodable):
 class Team(PyMongoModel):
     """Models a team"""
 
-    RESERVED_NAMES = [config.BEACON_TEAM_NAME] + [
-        config.REFERENCE_TEAM_NAME.format(i) for i in range(10)
+    RESERVED_NAMES = [config.DynamicConfig["System"]["Beacon Team Name"]] + [
+        config.DynamicConfig["System"]["Reference Team Format"].format(i)
+        for i in range(config.DynamicConfig["System"]["Reference Team Number"])
     ]
 
     @classmethod
     def _gen_secret(cls, length: int) -> str:
-        """Generates a crypto-safe secret of the length defined by
-        config.TEAM_SECRET_LENGTH"""
+        """Generates a crypto-safe secret of the length specified"""
         return secrets.token_hex(ceil(length / 2))[:length]
 
     def __init__(
@@ -149,7 +148,7 @@ class Team(PyMongoModel):
         emails_sent_today: int = 0,
         code_update: bytes = b"",
         code_update_taken: bool = False,
-        _secret_length: int = config.TEAM_SECRET_LENGTH,
+        _secret_length: int = config.DynamicConfig["System"]["Team Secret Length"],
         _find_new_reference_port: bool = False,
     ):
         super().__init__()
@@ -242,9 +241,15 @@ class Team(PyMongoModel):
 
     def send_api_email(self, subject, message):
         """Send an email from their cube to them"""
-        if self.emails_sent >= Conf.retrieve_instance().team_email_quota:
+        if self.emails_sent >= config.DynamicConfig["Email"]["Team Quota"]:
             return False
-        msg = Message(config.FROM_NAME, config.FROM_ADDR, self.emails, subject, message)
+        msg = Message(
+            config.DynamicConfig["Email"]["Api Sender Name"],
+            config.DynamicConfig["Email"]["Api Sender Address"],
+            self.emails,
+            subject,
+            message,
+        )
         if msg.send():
             self.emails_sent += 1
             self.save()
@@ -271,15 +276,15 @@ class Team(PyMongoModel):
         return self._code_update
 
     @classmethod
-    def find_beacon(cls) -> "Team":
+    def find_beacon(cls) -> Self:
         """Finds the reserved team for the beacon.
         If it doesn't exist already, it will be created.
         """
-        beacon = cls.find_by_name(config.BEACON_TEAM_NAME)
+        beacon = cls.find_by_name(config.DynamicConfig["System"]["Beacon Team Name"])
         if beacon is not None:
             return beacon
         beacon = Team(
-            name=config.BEACON_TEAM_NAME,
+            name=config.DynamicConfig["System"]["Beacon Team Name"],
             weight_class=TeamLevel.REFERENCE,
             status=TeamStatus.INTERNAL,
             multiplier=DEFAULT_MULTIPLIER,
@@ -290,10 +295,11 @@ class Team(PyMongoModel):
     @classmethod
     def find_references(cls) -> List["Team"]:
         """Lists all reference "Team"s"""
+        # TODO: Look for teams that follow config.DynamicConfig['System']['Reference Team Format'] instead
         return cls.find(
             {
                 "status": TeamStatus.INTERNAL.value,
-                "name": {"$nin": [config.BEACON_TEAM_NAME]},
+                "name": {"$nin": [config.DynamicConfig["System"]["Beacon Team Name"]]},
             }
         )
 
@@ -302,7 +308,7 @@ class Team(PyMongoModel):
         """Returns True if this team is a reference team"""
         return (
             self.weight_class == TeamLevel.REFERENCE
-            and self.name != config.BEACON_TEAM_NAME
+            and self.name != config.DynamicConfig["System"]["Beacon Team Name"]
         )
 
     # TODO: Document that reference names must end in -<int>
@@ -311,35 +317,6 @@ class Team(PyMongoModel):
         if not self.is_reference:
             raise AttributeError("This team is not a reference team.")
         return int(self.name.split("-")[-1])
-
-    @property
-    def reference_port(self) -> int:
-        """Returns the port that the appropriate reference server is listening on"""
-        if self.weight_class != TeamLevel.REFERENCE:
-            raise AttributeError("This team is not a reference team.")
-        port: int = config.REFERENCE_PORT_RANGE[0] + self.reference_id
-        if port > config.REFERENCE_PORT_RANGE[1]:
-            raise ValueError("Reference port is out of range.")
-        return port
-
-    # TODO: Remove obsolete reference port stuff
-    @classmethod
-    def find_unused_port(cls) -> int:
-        """Returns a port within the range specified in the configuration"""
-        port_range = range(
-            config.REFERENCE_PORT_RANGE[0], config.REFERENCE_PORT_RANGE[1] + 1
-        )
-        all_references = cls.find_references()
-        for potential_port in port_range:
-            unused = True
-            for reference in all_references:
-                if hasattr(reference, "reference_port"):
-                    unused &= reference.reference_port != potential_port
-            if unused:
-                return potential_port
-        raise ValueError(
-            "The entire reserved port range for reference servers has already been assigned."
-        )
 
     def recompute_score(self):
         """Completely recompute the score for this team.

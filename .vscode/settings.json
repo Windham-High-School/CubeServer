@@ -1,8 +1,36 @@
 {
-    "python.formatting.provider": "none",
     "editor.formatOnSave": true,
     "files.autoSave": "off",
     "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter"
+        "editor.inlineSuggest.enabled": true,
+        "editor.defaultFormatter": "ms-python.black-formatter",
+    },
+    "python.autoComplete.extraPaths": [
+        "/code/"
+    ],
+    "editor.inlineSuggest.enabled": true,
+    "python.analysis.extraPaths": [
+        "/code/"
+    ],
+    "python.defaultInterpreterPath": "/code/.venv-dev/bin/python",
+    "python.testing.cwd": "/code/",
+    "ruff.enable": true,
+    "ruff.interpreter": [
+        "/code/.venv-dev/bin/python"
+    ],
+    "python.testing.promptToConfigure": false,
+    "python.testing.pytestEnabled": false,
+    "python.testing.pytestPath": "/code/.venv-dev/bin/python -m pytest",
+    "ruff.args": [
+        "--check-untyped-defs"
+    ],
+    "python.formatting.provider": "none",
+    "black-formatter.interpreter": [
+        "/code/.venv-dev/bin/python"
+    ],
+    "html.format.enable": true,
+    "html.suggest.html5": true,
+    "files.associations": {
+        "*.html.jinja2": "jinja-html"
     }
 }

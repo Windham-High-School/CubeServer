@@ -3,12 +3,9 @@
  * 
  */
 
-// Default popup window params:
-let win_params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=600,height=300,left=100,top=100`;
-
 // Toggle Theme:
-$("#toggleTheme").click(function() {
-    switch(Cookies.get('theme')) {
+$("#toggleTheme").click(function () {
+    switch (Cookies.get('theme')) {
         case 'light':
             Cookies.set('theme', 'dark', { expires: 1000 });
             break;
@@ -28,6 +25,7 @@ $("select").attr("aria-label", ".form-select-sm")
 
 // Open a new popup window with the specified address:
 // TODO: Replace with JQueryUI Dialog?
+let win_params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=600,height=300,left=100,top=100`;
 function open_popup(href) {
     window.open(href, "", win_params);
 }

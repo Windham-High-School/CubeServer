@@ -1,67 +1,67 @@
 """An API for logging data into the database.
+
+This module is also the uWSGI endpoint for the api
 """
-from os import environ
-import logging
 
 from flask import Flask
 from flask_restful import Api
 from flask_apscheduler import APScheduler
+from loguru import logger
 
-from cubeserver_common import configure_db, config, init_logging
-from cubeserver_common.gensecret import check_secrets
-from ._version import *
+from cubeserver_common.config import EnvConfig, DynamicConfig
+from cubeserver_common import configure_db, init_logging
 
 # Init logger:
 init_logging()
 
 # Create app:
-logging.debug("Initializing Flask app")
+logger.info("Initializing Flask")
 app = Flask(__name__)
-app.config['CONSTANTS'] = config
+
+app.config["SECRET_KEY"] = EnvConfig.CS_FLASK_SECRET
+logger.info("Initializing Flask-Restful Api")
+api = Api(app)
+
+logger.info("Initializing db connection")
+configure_db(app)
+
+# Email quota counting:
+from cubeserver_common.models.team import Team
+
+logger.info("Initializing APScheduler")
+scheduler = APScheduler()
+scheduler.init_app(app)
 
 
-if all(key in environ for key in [
-    'MONGODB_USERNAME',
-    'MONGODB_PASSWORD',
-    'MONGODB_HOSTNAME',
-    'MONGODB_DATABASE'
-]): # If we aren't in the docker container or cannot see the db credentials...\
-    app.config['SECRET_KEY'] = check_secrets()
-    logging.debug("Initializing Flask-Restful Api")
-    api = Api(app)
+@scheduler.task(
+    "cron",
+    id="email_cont_reset",
+    hour=str(DynamicConfig["Email"]["Team Quota Reset Hour"]),
+)
+def reset_email_count():
+    logger.debug("Resetting sent_emails counters")
+    Team.reset_sent_emails()
 
-    logging.debug("Initializing db connection")
-    configure_db(app)
 
-    # Email quota counting:
-    from cubeserver_common.models.team import Team
-    from cubeserver_common.models.config.conf import Conf
-    logging.debug("Initializing APScheduler")
-    scheduler = APScheduler()
-    scheduler.init_app(app)
-    @scheduler.task('cron', id='email_cont_reset', hour=str(Conf.retrieve_instance().quota_reset_hour))
-    def reset_email_count():
-        logging.debug("Resetting sent_emails counters")
-        Team.reset_sent_emails()
-    logging.debug("Starting scheduler")
-    scheduler.start()
+logger.info("Starting scheduler")
+scheduler.start()
 
-    # Import after init'ing the db:
-    logging.debug("Loading team api resources")
-    from cubeserver_api.team_resources import Data, Status, Email, CodeUpdate
-    logging.debug("Loading beacon api resources")
-    from cubeserver_api.beacon_resources import NextMessage, Message
+# Import AFTER init'ing the db:
+logger.info("Loading api resources")
+logger.debug("Loading team api resources")
+from cubeserver_api.resources.team_resources import *
 
-    # Attach resources:
-    logging.debug("Attaching team api resources")
-    api.add_resource(Data, '/data')  # TODO: Use as decorators?
-    api.add_resource(Status, '/status')
-    api.add_resource(Email, '/email')
-    api.add_resource(CodeUpdate, '/update')
-    #api.add_resource(BeaconMessages, '/test')  # A dummy api endpoint for db testing
+logger.debug("Loading beacon api resources")
+from cubeserver_api.resources.beacon_resources import *
 
-    logging.debug("Attaching beacon api resources")
-    api.add_resource(NextMessage, '/beacon/message/next_queued')
-    api.add_resource(Message, '/beacon/message/<string:message_id>')
-else:
-    logging.warn("API NOT INITIALIZED! (okay if this is a docs build)")
+# Attach resources:
+logger.debug("Attaching team api resources")
+api.add_resource(Data, "/data")  # TODO: Use as decorators?
+api.add_resource(Status, "/status")
+api.add_resource(Email, "/email")
+api.add_resource(CodeUpdate, "/update")
+# api.add_resource(BeaconMessages, '/test')  # A dummy api endpoint for db testing
+
+logger.debug("Attaching beacon api resources")
+api.add_resource(NextMessage, "/beacon/message/next_queued")
+api.add_resource(Message, "/beacon/message/<string:message_id>")

@@ -1,0 +1,12 @@
+{% extends "base/base.html.jinja2" %}
+{% block title %}Home{% endblock %}
+
+{% block header %}
+    <h4 class="text-light glow">{{ config['CONFIGURABLE']['Strings']['Long Title'] }}</h4>
+{% endblock %}
+
+{% block content %}
+    <p>
+        {{ config['CONFIGURABLE']['Strings']['Home Description'] }}
+    </p>
+{% endblock %}

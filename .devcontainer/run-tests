@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Runs pytest unit tests in .venv-test
+
+cd /code/
+./.venv-dev/bin/python -m pytest $@

@@ -1,0 +1,84 @@
+{# Base template for all pages #}
+
+{% import "bootstrap/wtf.html" as wtf %}
+{% import "bootstrap/fixes.html" as fixes %}
+{% import "bootstrap/utils.html" as util %}
+{% import "_macros.html.jinja2" as macros %}
+
+<!doctype html>
+<html>
+    <head>
+        {% block head %}
+            <title>{% block title %}{% endblock %} - {{ config['CONFIGURABLE']['Strings']['Short Title'] }}</title>
+
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+
+            <!-- Bootswatch theme: -->
+            {# Select a theme based on user preferences if available: #}
+            {% if 'theme' in request.cookies %}
+                <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename=('themes/%s/bootstrap.min.css' % request.cookies.get('theme'))) }}">
+            {% else %}
+                <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename=('themes/%s/bootstrap.min.css' % "dark")) }}">
+            {% endif %}
+
+            <!-- Stylesheet: -->
+            <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+
+            <!-- DataTables table styling: -->
+            <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.12.1/b-2.2.3/b-colvis-2.2.3/b-html5-2.2.3/b-print-2.2.3/cr-1.5.6/fh-3.2.4/r-2.3.0/sc-2.0.7/sp-2.0.2/datatables.min.css"/>
+
+            <!-- Loading.io Loading Animation -->
+            <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/loadingio/loading.css@v2.0.0/dist/loading.min.css">
+
+        {% endblock %}
+    </head>
+    <body>
+        {% include 'base/navbar.html.jinja2' %}
+
+
+        {% if config['CONFIGURABLE'].banner_message %}
+        <div class="alert alert-primary banner" role="alert">
+            {{config['CONFIGURABLE'].banner_message}}<a type="button" class="btn-close float-right" data-bs-dismiss="alert" aria-label="Close">X</a>
+        </div>
+        <hr>
+        {% endif %}
+
+        {% if HOLD_FLASHED_MESSAGES is not defined %}
+            {{util.flashed_messages()}}
+        {% endif %}
+
+        {% block body %}
+        <section class="container jumbotron content bg-dark" role="main">
+            <header class="container">
+                {% block header %}{% endblock %}
+            </header>
+
+            <div class="container content px-4">
+                {% block content %}{%endblock %}
+            </div>
+        </section>
+
+        {% endblock %}
+
+        {% include 'base/footer.html.jinja2' %}
+
+        {% block scripts %}
+            <!--Bootstrap and JQuery-->
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-pprn3073KE6tl6bjs2QrFaJGz5/SUsLqktiwsUTF55Jfv3qYSDhgCecCxMW52nD2" crossorigin="anonymous"></script>
+            
+            <!--js-cookie-->
+            <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js" integrity="sha256-0H3Nuz3aug3afVbUlsu12Puxva3CP4EhJtPExqs54Vg=" crossorigin="anonymous"></script>
+
+            <!--DataTables-->
+            <script type="text/javascript" src="https://cdn.datatables.net/v/bs5/jszip-2.5.0/dt-1.13.1/b-2.3.3/b-colvis-2.3.3/b-html5-2.3.3/b-print-2.3.3/cr-1.6.1/r-2.4.0/sc-2.0.7/sb-1.4.0/sp-2.1.0/datatables.min.js"></script>
+            <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+            <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+            <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/jhyland87/DataTables-Keep-Conditions@118c5e107f1f603b1b91475dc139df6f53917e38/dist/dataTables.keepConditions.min.js"></script>
+
+            <!--Base JavaScript-->
+            <script src="{{ url_for('static', filename='/js/common.js') }}"></script>
+            <script src="{{ url_for('static', filename='/js/table.js') }}"></script>
+        {% endblock %}
+    </body>
+</html>
