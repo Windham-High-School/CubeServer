@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  combined:
+    container_name: ${PROJECT_NAME}-combined
+    restart: unless-stopped
+    volumes:
+      - ../..:/workspaces:cached
+      - ./secret_key.txt:/secret/secret_key.txt:cached
+      - ../src/CubeServer-common/cubeserver_common:/code/cubeserver_common:cached
+      - ../src/CubeServer-common/requirements.txt:/code/requirements-common.txt:cached
+      - ../src/CubeServer-common/tests:/code/tests:cached
+      - ../src/CubeServer-api/cubeserver_api:/code/cubeserver_api:cached
+      - ../src/CubeServer-api/requirements.txt:/code/requirements-api.txt:cached
+      - ../src/CubeServer-app/cubeserver_app:/code/cubeserver_app:cached
+      - ../src/CubeServer-app/requirements.txt:/code/requirements-app.txt:cached
+      - ./api-server:/code/api-server:cached
+      - ./app-server:/code/app-server:cached
+      - ../Docker/CubeServer/CubeServer-app/package_internal.sh:/code/package_internal.sh:cached
+      - ../Docker/CubeServer/CubeServer-app/package_lib.sh:/code/package_lib.sh:cached
+    build:
+      context: ..
+      dockerfile: Docker/CubeServer/Dockerfile
+      target: base
+    environment:
+      # Connection stuff:
+      - AP_SSID=${AP_SSID}
+      - API_ADDR=${API_ADDR}
+      - API_ALT_ADDR=${API_ALT_ADDR}
+      - API_PORT=${API_PORT}
+      # MongoDB credentials:
+      - MONGODB_DATABASE=flaskdb
+      - MONGODB_USERNAME=flask
+      - MONGODB_HOSTNAME=mongodb
+      - MONGODB_PASSWORD=${MONGODB_PWD}
+      # Flask stuff:
+      - SERVER_NAME=${DOMAIN}
+      - FLASK_DEBUG=True
+    network_mode: service:mongodb
+    command: sleep infinity
+
+  mongodb:
+    container_name: ${PROJECT_NAME}-mongodb
+    image: ${MONGO_CONTAINER}:${MONGO_VERSION}
+    volumes:
+      - mongodb-data:/data/db
+    restart: unless-stopped
+    command: mongod --auth
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: flask
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PWD}
+      MONGO_INITDB_DATABASE: flaskdb
+      MONGODB_DATA_DIR: /data/db
+      MONDODB_LOG_DIR: /dev/null
+  
+volumes:
+  mongodb-data:

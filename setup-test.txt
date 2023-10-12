@@ -1,0 +1,43 @@
+gcloud projects list
+# REPLACE IF PROJECT ID IS DIFFERENT
+export PROJECT_ID=global-approach-388801
+gcloud config set project $PROJECT_ID
+
+---
+
+export REGION=us-central1
+export APP_SERVICE=test-app-service
+export API_SERVICE=test-api-service
+export MONGODB_HOST=cluster0.dkt0odd.mongodb.net
+export MONGODB_USER=flask
+export MONGODB_NAME=test-flaskdb
+export MONGODB_DRIVER=mongodb+srv
+export MONGODB_OPTIONS="retryWrites=true&w=majority"
+
+---
+
+export PROJECT_NUMBER=`gcloud projects describe $PROJECT_ID --format="value(projectNumber)"`
+export COMPUTE_SERVICE_ACCOUNT=$PROJECT_NUMBER-compute@developer.gserviceaccount.com
+
+---
+
+# SETUP APP SERVICE
+gcloud run deploy $APP_SERVICE \
+  --image us-docker.pkg.dev/cloudrun/container/hello:latest \
+  --region=$REGION \
+  --allow-unauthenticated \
+  --set-env-vars=MONGODB_HOSTNAME="$MONGODB_HOST",MONGODB_USERNAME="$MONGODB_USER",MONGODB_DATABASE="$MONGODB_NAME",LOGLEVEL=debug,MONGODB_DRIVER="$MONGODB_DRIVER",MONGODB_OPTIONS="$MONGODB_OPTIONS" \
+  --set-secrets=MONGODB_PASSWORD=MONGODB_PASSWORD:latest,/secret/secret_key.txt=SECRET_KEY:latest
+
+# SETUP API SERVICE
+gcloud run deploy $API_SERVICE \
+  --image us-docker.pkg.dev/cloudrun/container/hello:latest \
+  --region=$REGION \
+  --allow-unauthenticated \
+  --set-env-vars=MONGODB_HOSTNAME="$MONGODB_HOST",MONGODB_USERNAME="$MONGODB_USER",MONGODB_DATABASE="$MONGODB_NAME",LOGLEVEL=debug,MONGODB_DRIVER="$MONGODB_DRIVER",MONGODB_OPTIONS="$MONGODB_OPTIONS" \
+  --set-secrets=MONGODB_PASSWORD=MONGODB_PASSWORD:latest,/secret/secret_key.txt=SECRET_KEY:latest
+
+# SETUP CLOUD BUILD TRIGGER
+echo "Create Trigger for Continuous Builds"
+echo "NOTE: Make sure to select $COMPUTE_SERVICE_ACCOUNT as the service account to use on the trigger"
+echo "https://console.cloud.google.com/cloud-build/triggers?project=$PROJECT_ID"

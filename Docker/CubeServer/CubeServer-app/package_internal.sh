@@ -3,7 +3,7 @@
 # provided a git-clone-able url for the library's source, and the
 # path to the client configuration.
 #
-# Usage: package_lib.sh [GIT URL] [CLIENT_CONFIG_FILE_PATH] [OUTPUT_PATH]
+# Usage: package_internal.sh [GIT URL] [CLIENT_CONFIG_FILE_PATH] [OUTPUT_PATH]
 #
 
 WORKING_DIR=/tmp/INTERNAL-BUILD-$(echo $RANDOM | md5sum | head -c 16)/
@@ -20,4 +20,4 @@ cp ../*.pem ../*.key ./
 
 mv "$(bash package.sh | tail -n1)" "$2"
 cd /tmp
-rm -r $WORKING_DIR
+rm -rf $WORKING_DIR

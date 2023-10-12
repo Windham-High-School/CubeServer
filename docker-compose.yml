@@ -11,22 +11,14 @@ services:
       - api-ssl-cert:/api_cert/
     build:
       context: .
-      dockerfile: Docker/CubeServer-app/Dockerfile
+      dockerfile: Docker/CubeServer/Dockerfile
+      target: app
     environment:
       # MongoDB credentials stuff:
       - MONGODB_DATABASE=flaskdb
       - MONGODB_USERNAME=flask
       - MONGODB_HOSTNAME=mongodb
       - MONGODB_PASSWORD=${MONGODB_PWD}
-      # Wrapper packaging stuff:
-      - API_WRAPPER_GIT_URL_ARDUINO=${API_WRAPPER_GIT_URL_ARDUINO}
-      - API_WRAPPER_ZIP_FILENAME_ARDUINO=${API_WRAPPER_ZIP_FILENAME_ARDUINO}
-      - API_WRAPPER_GIT_URL_PYTHON=${API_WRAPPER_GIT_URL_PYTHON}
-      - API_WRAPPER_ZIP_FILENAME_PYTHON=${API_WRAPPER_ZIP_FILENAME_PYTHON}
-      - API_WRAPPER_GIT_URL_CIRCUITPYTHON=${API_WRAPPER_GIT_URL_CIRCUITPYTHON}
-      - API_WRAPPER_ZIP_FILENAME_CIRCUITPYTHON=${API_WRAPPER_ZIP_FILENAME_CIRCUITPYTHON}
-      - API_WRAPPER_PEM_FILENAME=${API_WRAPPER_PEM_FILENAME}
-      - BEACON_CODE_GIT_URL=${BEACON_CODE_GIT_URL}
       # Connection stuff:
       - AP_SSID=${AP_SSID}
       - API_ADDR=${API_ADDR}
@@ -36,8 +28,6 @@ services:
       - SERVER_NAME=${DOMAIN}
       # Logging Level for GUnicorn:
       - LOGLEVEL=${LOGLEVEL}
-    ports: # Bind the port for the web server
-      - ${DEVMODE+$WEBAPP_PORT}:80  # But only in dev mode
     depends_on:
       - mongodb
       - api
@@ -55,12 +45,8 @@ services:
       - api-ssl-cert:/etc/ssl/api_cert/
     build:
       context: .
-      dockerfile: Docker/CubeServer-api/Dockerfile
-      args:
-        CERT_SUBJ: "/C=${COUNTRY}/ST=/L=/O=/OU=/CN=${API_ADDR}/"
-#        CERT_SUBJ: "${API_ADDR}"
-        CERT_SUBJALTNAME: "${API_ALT_ADDR}"
-        CERT_EXP_DAYS: ${API_CERT_EXP_DAYS}
+      dockerfile: Docker/CubeServer/Dockerfile
+      target: api
     environment:
       # MongoDB credentials:
       - MONGODB_DATABASE=flaskdb

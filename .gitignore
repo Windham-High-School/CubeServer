@@ -8,6 +8,7 @@ pip-delete-this-directory.txt
 .venv/
 venv/
 .venv
+.env
 
 build/
 develop-eggs/
@@ -27,7 +28,6 @@ share/python-wheels/
 *.egg
 MANIFEST
 
-.vscode/
 .VSCodeCounter/
 files.exclude
 

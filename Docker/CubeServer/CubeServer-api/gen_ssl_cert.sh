@@ -32,6 +32,8 @@ if [ ! -f "/etc/ssl/build_api_cert/$4.pem" ]; then
     if [ $? != 0 ]; then
         echo "There's something wrong with the certificate."
         exit 1
+    else
+        echo "Everything looks good!"
     fi
 else
     echo "An SSL certificate already exists; leaving that one."
