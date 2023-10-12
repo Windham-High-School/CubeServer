@@ -17,4 +17,4 @@ cd "$(basename "$1" .git)"
 cp ../"$(basename "$2")" ./lib/ || cp ../"$(basename "$2")" ./
 mv "$(bash package.sh | tail -n1)" "$3"
 cd /tmp
-rm -r $WORKING_DIR
+rm -rf $WORKING_DIR

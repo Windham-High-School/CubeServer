@@ -1,0 +1,122 @@
+# DOCS
+---
+
+https://cloud.google.com/build/docs/deploying-builds/deploy-cloud-run?authuser=2
+https://cloud.google.com/sql/docs/postgres/connect-instance-cloud-run#python_1
+https://cloud.google.com/blog/topics/developers-practitioners/running-database-migrations-cloud-run-jobs
+https://cloud.google.com/run/docs/mapping-custom-domains#map
+https://cloud.google.com/build/docs/build-push-docker-image#create_a_docker_repository_in
+
+---
+
+gcloud projects list
+# REPLACE IF PROJECT ID IS DIFFERENT
+export PROJECT_ID=global-approach-388801
+gcloud config set project $PROJECT_ID
+
+---
+
+export REGION=us-central1
+export APP_SERVICE=app-service
+export API_SERVICE=api-service
+export MONGODB_HOST=cluster0.dkt0odd.mongodb.net
+export MONGODB_USER=flask
+export MONGODB_NAME=flaskdb
+export MONGODB_DRIVER=mongodb+srv
+export MONGODB_OPTIONS="retryWrites=true&w=majority"
+
+export PROJECT_NAME=`gcloud projects describe $PROJECT_ID --format="value(name)"`
+export PROJECT_NUMBER=`gcloud projects describe $PROJECT_ID --format="value(projectNumber)"`
+
+export COMPUTE_SERVICE_ACCOUNT=$PROJECT_NUMBER-compute@developer.gserviceaccount.com
+export CLOUD_BUILD_SERVICE_ACCOUNT=$PROJECT_NUMBER@cloudbuild.gserviceaccount.com
+
+---
+
+# Setup a service account instead of using the default compute service account (best practice)
+
+export CLOUD_RUN_SA_NAME=the-project-sa
+export CLOUD_RUN_SERVICE_ACCOUNT=$CLOUD_RUN_SA_NAME@$PROJECT_ID.iam.gserviceaccount.com
+gcloud iam service-accounts create $CLOUD_RUN_SA_NAME --description="The Project SA for cloudrun" --display-name="The Project SA"
+
+
+gcloud services enable \
+    artifactregistry.googleapis.com \
+    cloudbuild.googleapis.com \
+    cloudresourcemanager.googleapis.com \
+    compute.googleapis.com \
+    containerregistry.googleapis.com \
+    iam.googleapis.com \
+    run.googleapis.com \
+    secretmanager.googleapis.com \
+    servicenetworking.googleapis.com
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$CLOUD_BUILD_SERVICE_ACCOUNT" \
+    --role="roles/run.admin"
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$CLOUD_BUILD_SERVICE_ACCOUNT" \
+    --role="roles/logging.admin"
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$COMPUTE_SERVICE_ACCOUNT" \
+    --role="roles/iam.serviceAccountUser"
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$COMPUTE_SERVICE_ACCOUNT" \
+    --role="roles/secretmanager.secretAccessor"
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$COMPUTE_SERVICE_ACCOUNT" \
+    --role="roles/iam.serviceAccountTokenCreator"
+
+# Provide neccessary roles/permissions to CLOUD_RUN_SERVICE_ACCOUNT
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$CLOUD_RUN_SERVICE_ACCOUNT" \
+    --role="roles/run.admin"
+    
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$CLOUD_RUN_SERVICE_ACCOUNT" \
+    --role="roles/iam.serviceAccountUser"
+    
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$CLOUD_RUN_SERVICE_ACCOUNT" \
+    --role="roles/cloudsql.client"
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$CLOUD_RUN_SERVICE_ACCOUNT" \
+    --role="roles/secretmanager.secretAccessor"
+
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:$CLOUD_RUN_SERVICE_ACCOUNT" \
+    --role="roles/logging.logWriter"
+    
+
+# SETUP ARTIFACT REPO
+gcloud artifacts repositories create docker-repo --repository-format=docker \
+    --location=us-central1 --description="Docker repository"
+
+# SETUP APP SERVICE
+gcloud run deploy $APP_SERVICE \
+  --image us-docker.pkg.dev/cloudrun/container/hello:latest \
+  --region=$REGION \
+  --allow-unauthenticated \
+  --set-env-vars=MONGODB_HOSTNAME="$MONGODB_HOST",MONGODB_USERNAME="$MONGODB_USER",MONGODB_DATABASE="$MONGODB_NAME",LOGLEVEL=debug,MONGODB_DRIVER="$MONGODB_DRIVER",MONGODB_OPTIONS="$MONGODB_OPTIONS" \
+  --set-secrets=MONGODB_PASSWORD=MONGODB_PASSWORD:latest,/secret/secret_key.txt=SECRET_KEY:latest
+
+# SETUP API SERVICE
+gcloud run deploy $API_SERVICE \
+  --image us-docker.pkg.dev/cloudrun/container/hello:latest \
+  --region=$REGION \
+  --allow-unauthenticated \
+  --set-env-vars=MONGODB_HOSTNAME="$MONGODB_HOST",MONGODB_USERNAME="$MONGODB_USER",MONGODB_DATABASE="$MONGODB_NAME",LOGLEVEL=debug,MONGODB_DRIVER="$MONGODB_DRIVER",MONGODB_OPTIONS="$MONGODB_OPTIONS" \
+  --set-secrets=MONGODB_PASSWORD=MONGODB_PASSWORD:latest,/secret/secret_key.txt=SECRET_KEY:latest
+
+# SETUP CLOUD BUILD TRIGGER
+echo "Create Trigger for Continuous Builds"
+echo "NOTE: Make sure to select $COMPUTE_SERVICE_ACCOUNT as the service account to use on the trigger"
+echo "https://console.cloud.google.com/cloud-build/triggers?project=$PROJECT_ID"
+
+----
