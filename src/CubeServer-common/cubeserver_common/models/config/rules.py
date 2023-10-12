@@ -45,7 +45,7 @@ class RegularOccurrence(Encodable):
             (abs(seconds_since_hour - offset) <= self.tolerance)
             for offset in self.offsets
         ) or any(
-            (abs((seconds_since_hour - 60) - offset) <= self.tolerance)
+            (abs((seconds_since_hour - 60*60) - offset) <= self.tolerance)
             for offset in self.offsets
         )
 
