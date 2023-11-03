@@ -17,6 +17,20 @@ A live instance of this may or may not be available at https://whsproject.club/.
   **Cube**<br>
     - An individual team's station that will be mounted atop the roof of the school
 
+## Configuring email sending with GMail:
+
+### Create an App Password
+* Go to your Google Account.
+* Select Security.
+* Under "Signing in to Google," select 2-Step Verification.
+* At the bottom of the page, select App passwords.
+* Enter a name that helps you remember where you'll use the app password.
+* Select Generate.
+
+### Configure SMTP via admin
+* SMTP Server Address: smtp.gmail.com:587
+* SMTP Credentials as user:pass: [gmail email addresss]:[app password]
+
 ## Versioning:
 This project uses Semantic Versioning in the format major.minor.patch
 Versions 0.0.0 until 1.0.0 are development releases.
