@@ -59,7 +59,7 @@ def py_file():
         team_secret=team_secret,
         ssid=environ["AP_SSID"],
         common_name=environ["API_ALT_ADDR"],
-        base_url=environ["API_ALT_ADDR"],
+        base_url="https://" + environ["API_ALT_ADDR"],
         port=environ["API_PORT"],
         server_cert=pem_cert.replace("\n", "\\n") if pem_cert else None,
     )
