@@ -38,8 +38,13 @@ def check_secret_header(func: callable) -> callable:
     def wrapper(*args, **kwargs):
         API_SECRET = os.environ.get('API_SECRET') # TODO: Joe look this upf from the new config location
         if API_SECRET and request.headers.get('X-API-Secret') != API_SECRET:
-            team: Team = Team.find_by_name(auth.username())
-            logging.info(f"Unauthorized access attempt without API SECRET by {team.name}")
+            user_name = auth.username()
+            logging.info(f"Request from {user_name}")
+            team: Team = Team.find_by_name(user_name)
+            if team:
+                logging.info(f"Unauthorized access attempt without API SECRET by {team.name}")
+            else:
+                logging.info("Unauthorized access attempt without API SECRET")
             return None, 401
         return func(*args, **kwargs)
     return wrapper

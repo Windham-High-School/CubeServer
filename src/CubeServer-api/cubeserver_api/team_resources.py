@@ -21,16 +21,6 @@ from cubeserver_common.metadata import VERSION
 
 from .auth import auth, check_secret_header
 
-@auth.get_password
-def get_team_secret(team_name: str) -> str:
-    """Returns the secret code of a team by name
-    (The digest username is the team name)"""
-    team = Team.find_by_name(team_name)
-    logging.debug(f"Request from {team_name}")
-    if team and team.status.is_active:
-        return team.secret
-    return None
-
 class Data(Resource):
     """A POST-only resource for datapoints"""
 
