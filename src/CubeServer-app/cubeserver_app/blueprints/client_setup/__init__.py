@@ -54,43 +54,6 @@ def py_file():
     )
 
 
-# TODO: The library packaging could be written much better
-@bp.route("/Arduino_lib.zip")
-def package_arduino_lib():
-    """Packages and downloads the Arduino ZIP library"""
-    logging.info(f"Packing Arduino ZIP")
-    working_dir = f"/tmp/lib_pack_{str(randint(100,999))}"
-    mkdir(working_dir)
-    chdir(working_dir)
-    output_path = f"{working_dir}/download.zip"
-    client_config_path = f"{working_dir}/client_config.h"
-    with open(client_config_path, "w") as fh:
-        fh.write(header_file())
-    call(
-        [
-            "/code/package_lib.sh",
-            settings.API_WRAPPER_GIT_URL_ARDUINO,
-            client_config_path,
-            output_path,
-        ]
-    )
-    # TODO: avoid RAM overhead of loading file into memory?
-    output_raw = bytes()
-    with open(output_path, "rb") as fh:
-        output_raw = fh.read()
-    # Clean up:
-    rmtree(working_dir)
-    # Formulate response:
-    response = make_response(output_raw)
-    response.headers.set("Content-Type", "application/zip")
-    response.headers.set(
-        "Content-Disposition",
-        "attachment",
-        filename=settings.API_WRAPPER_ZIP_FILENAME_ARDUINO,
-    )
-    return response
-
-
 @bp.route("/CircuitPython_lib.zip")
 def package_circuitpython_lib():
     """Packages and downloads the CircuitPython ZIP library"""

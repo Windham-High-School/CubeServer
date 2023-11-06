@@ -1,12 +1,5 @@
 import os
 
-API_WRAPPER_GIT_URL_ARDUINO = os.environ.get(
-    "API_WRAPPER_GIT_URL_ARDUINO",
-    "https://github.com/snorklerjoe/CubeServer-api-arduino.git",
-)
-API_WRAPPER_ZIP_FILENAME_ARDUINO = os.environ.get(
-    "API_WRAPPER_ZIP_FILENAME_ARDUINO", "CubeServer-api-arduino.zip"
-)
 API_WRAPPER_GIT_URL_PYTHON = os.environ.get(
     "API_WRAPPER_GIT_URL_PYTHON",
     "https://github.com/snorklerjoe/CubeServer-api-python.git",
