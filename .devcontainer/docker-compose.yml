@@ -25,8 +25,7 @@ services:
     environment:
       # Connection stuff:
       - AP_SSID=${AP_SSID}
-      - API_ADDR=${API_ADDR}
-      - API_ALT_ADDR=${API_ALT_ADDR}
+      - API_HOST=${API_HOST}
       - API_PORT=${API_PORT}
       # MongoDB credentials:
       - MONGODB_DATABASE=flaskdb
