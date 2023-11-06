@@ -100,7 +100,7 @@ class Email(Resource):
 class Status(Resource):
     """A resource with some basic info"""
 
-    decorators = [auth.login_required, check_secret_header]
+    decorators = [check_secret_header, auth.login_required]
 
     def get(self):
         logging.debug(f"Status get req de {auth.username()}")
