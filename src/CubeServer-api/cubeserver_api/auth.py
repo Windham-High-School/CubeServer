@@ -28,7 +28,7 @@ def internal(func: callable) -> callable:
         if team.status != TeamStatus.INTERNAL:
             # Abort due to unauthorized access
             logging.info(f"Unauthorized access attempt to internal resource by {team.name}")
-            return None, 401
+            return "Unauthorized access attempt to internal resource", 403
         return func(*args, **kwargs)
     return wrapper
 
@@ -38,13 +38,8 @@ def check_secret_header(func: callable) -> callable:
     def wrapper(*args, **kwargs):
         API_SECRET = os.environ.get('API_SECRET') # TODO: Joe look this upf from the new config location
         if API_SECRET and request.headers.get('X-API-Secret') != API_SECRET:
-            user_name = auth.username()
-            logging.info(f"Request from {user_name}")
-            team: Team = Team.find_by_name(user_name)
-            if team:
-                logging.info(f"Unauthorized access attempt without API SECRET by {team.name}")
-            else:
-                logging.info("Unauthorized access attempt without API SECRET")
-            return None, 401
+            team: Team = Team.find_by_name(auth.username())
+            logging.info(f"Unauthorized access attempt without API SECRET by {team.name}")
+            return "Unauthorized access attempt without API SECRET", 403
         return func(*args, **kwargs)
     return wrapper
