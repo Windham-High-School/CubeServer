@@ -782,10 +782,6 @@ def package_beacon_code():
     os.chdir(working_dir)
     output_path = f"{working_dir}/download.zip"
 
-    from ..client_setup import pem_cert
-    if pem_cert:
-        with open(f"{working_dir}/cert.pem", "w") as fh:
-            fh.write(pem_cert)
     subprocess.call(
         [
             "/code/package_internal.sh",

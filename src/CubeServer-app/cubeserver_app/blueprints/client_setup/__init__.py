@@ -13,15 +13,6 @@ from flask import Blueprint, render_template, session, make_response
 
 bp = Blueprint("config", __name__, url_prefix="/setup", template_folder="templates")
 
-
-logging.debug("Loading server API certificates")
-try:
-    with open("/etc/ssl/api_cert/server.pem", "r", encoding="utf-8") as fh:
-        pem_cert = fh.read()
-except:
-    pem_cert = None
-
-
 @bp.route("/")
 def index():
     """Renders the main page for this blueprint"""
@@ -59,7 +50,7 @@ def py_file():
         ssid=environ["AP_SSID"],
         api_host=environ["API_HOST"],
         port=environ["API_PORT"],
-        server_cert=pem_cert.replace("\n", "\\n") if pem_cert else None,
+        server_cert=environ.get("API_CERT"),
     )
 
 
@@ -142,7 +133,8 @@ def api_cert():
     """Downloads the pem file for the cert of the api
     for server verification purposes"""
     logging.info("Downloading api_cert.pem")
-    response = make_response(pem_cert)
+    api_cert = os.environ.get('API_CERT', "undefined")
+    response = make_response(api_cert)
     response.headers.set("Content-Type", "application/x-pem-file")
     response.headers.set(
         "Content-Disposition",
