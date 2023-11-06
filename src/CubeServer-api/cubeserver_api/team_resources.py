@@ -24,7 +24,7 @@ from .auth import auth, check_secret_header
 class Data(Resource):
     """A POST-only resource for datapoints"""
 
-    decorators = [auth.login_required, check_secret_header]
+    decorators = [check_secret_header, auth.login_required]
 
     def post(self):
         logging.debug(f"Data post req from {auth.username()}")
@@ -61,7 +61,7 @@ class Data(Resource):
 class Email(Resource):
     """A POST-only resource for datapoints"""
 
-    decorators = [auth.login_required, check_secret_header]
+    decorators = [check_secret_header, auth.login_required]
 
     def post(self):
         logging.debug(f"Email send req from {auth.username()}")
@@ -117,7 +117,7 @@ class Status(Resource):
 class CodeUpdate(Resource):
     """A resource for teams to update code.py on their circuitpython cubes"""
 
-    decorators = [auth.login_required, check_secret_header]
+    decorators = [check_secret_header, auth.login_required]
 
     def get(self):
         team = Team.find_by_name(auth.username())
