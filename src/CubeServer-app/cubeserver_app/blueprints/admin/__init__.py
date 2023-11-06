@@ -615,27 +615,6 @@ def beacon_tx():
     flash("Invalid input.", category="danger")
     return abort(500)
 
-
-@bp.route("/beacon.pem")
-@login_required
-def beacon_pem():
-    """Downloads public key for the beacon"""
-    # Check admin status:
-    if current_user.level != UserLevel.ADMIN:
-        return abort(403)
-    return send_file("/api_cert/beacon.pem")
-
-
-@bp.route("/beacon.key")
-@login_required
-def beacon_key():
-    """Downloads private key for the beacon"""
-    # Check admin status:
-    if current_user.level != UserLevel.ADMIN:
-        return abort(403)
-    return send_file("/api_cert/beacon.key")
-
-
 @bp.route("/beacontable")
 @login_required
 def beacon_table():

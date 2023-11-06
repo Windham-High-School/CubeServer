@@ -128,11 +128,6 @@ REFERENCE_PORT_RANGE: tuple[int] = (32770, 32870)
 REFERENCE_COMMAND_PORT: int = 32769
 """The port to which reference commands are sent to be dispatched to stations"""
 
-# This parameter is set by config.env:
-# TODO: Combine or better differentiate configuration files
-#BEACON_PORT: int = 32768
-#"""The port the beacon server listens on to establish a persistent connection to the beacon"""
-
 
 # Cubes:
 
