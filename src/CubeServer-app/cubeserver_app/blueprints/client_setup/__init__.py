@@ -18,24 +18,6 @@ def index():
     """Renders the main page for this blueprint"""
     return render_template("index.html.jinja2", rand=random())
 
-
-@bp.route("/client_config.h")
-def header_file():
-    """Renders a configuration header file"""
-    team_name = session["team_name"] if "team_name" in session else None
-    team_secret = session["team_secret"] if "team_secret" in session else None
-    logging.info(f"Rendering client_config.h for {team_name}")
-    return render_template(
-        "client_config.h.jinja2",
-        timestamp=datetime.now().isoformat(),
-        team_name=team_name,
-        team_secret=team_secret,
-        ssid=environ["AP_SSID"],
-        api_host=environ["API_HOST"],
-        port=environ["API_PORT"],
-    )
-
-
 @bp.route("/client_config.py")
 def py_file():
     """Renders a configuration python file"""

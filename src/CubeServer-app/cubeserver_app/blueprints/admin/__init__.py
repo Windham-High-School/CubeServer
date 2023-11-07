@@ -752,35 +752,6 @@ def gen_reserved(name: str = ""):
     return render_template("redirect_back.html.jinja2")
 
 
-@bp.route("/beacon_code.zip")
-def package_beacon_code():
-    """Packages and downloads the a ZIP file containing the beacon code"""
-    logging.info(f"Packing beacon code ZIP")
-    working_dir = f"/tmp/beacon_pack_{str(randint(100,999))}"
-    os.mkdir(working_dir)
-    os.chdir(working_dir)
-    output_path = f"{working_dir}/download.zip"
-
-    subprocess.call(
-        [
-            "/code/package_internal.sh",
-            settings.BEACON_CODE_GIT_URL,
-            output_path,
-        ]
-    )
-    # TODO: avoid RAM overhead of loading file into memory?
-    output_raw = bytes()
-    with open(output_path, "rb") as fh:
-        output_raw = fh.read()
-    # Clean up:
-    shutil.rmtree(working_dir)
-    # Formulate response:
-    response = make_response(output_raw)
-    response.headers.set("Content-Type", "application/zip")
-    response.headers.set("Content-Disposition", "attachment")
-    return response
-
-
 @bp.route("/referencetest/<station_id>")
 @login_required
 def referencetest(station_id: str | int = ""):
