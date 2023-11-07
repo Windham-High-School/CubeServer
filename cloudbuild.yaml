@@ -59,5 +59,10 @@ steps:
   - '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_API_IMAGE_NAME:$COMMIT_SHA'
   - '--region'
   - '$_REGION'
+images:
+- '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_APP_IMAGE_NAME:$COMMIT_SHA'
+- '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_APP_IMAGE_NAME:latest'
+- '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_API_IMAGE_NAME:$COMMIT_SHA'
+- '$_REGION-docker.pkg.dev/$PROJECT_ID/$_REPO_NAME/$_API_IMAGE_NAME:latest'
 options:
   logging: CLOUD_LOGGING_ONLY
