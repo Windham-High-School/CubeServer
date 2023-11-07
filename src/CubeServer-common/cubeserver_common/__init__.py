@@ -24,7 +24,6 @@ def configure_db(app=None):
     uri = driver + '://' + os.environ['MONGODB_USERNAME'] \
         + ':' + os.environ['MONGODB_PASSWORD'] + '@' + os.environ['MONGODB_HOSTNAME'] \
             + port + os.environ['MONGODB_DATABASE'] + extra + '?' + options
-    print('!! URI', uri)
     if app is not None:
         app.config["MONGO_URI"] = uri
         mongo = PyMongo(app, uri=uri)
