@@ -190,9 +190,7 @@ class BeaconMessage(PyMongoModel):
         return self.prefix + b'CSMSG/1.1' + self.line_term + \
             self.line_term.join([
                 self.headers_bytes,
-                self.line_term,
                 self.message_bytes,
-                self.line_term
             ])
     
     @property
