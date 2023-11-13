@@ -1,0 +1,23 @@
+version: '3.7'
+services:
+  api:
+    restart: always
+    build:
+      context: .
+      dockerfile: Docker/CubeServer/Dockerfile
+      target: api
+    volumes:
+      - ./config/secret_key.txt:/secret/secret_key.txt
+      - ./config/server.key:/etc/ssl/api_cert/server.key
+      - ./config/server.pem:/etc/ssl/api_cert/server.pem
+    ports:
+      - "443:443"
+    environment:
+      - MONGODB_HOSTNAME=${MONGODB_HOSTNAME}
+      - MONGODB_USERNAME=${MONGODB_USERNAME:-flask}
+      - MONGODB_DATABASE=${MONGODB_DATABASE:-flaskdb}
+      - LOGLEVEL=${LOGLEVEL:-DEBUG}
+      - MONGODB_DRIVER=${MONGODB_DRIVER:-mongodb+srv}
+      - MONGODB_OPTIONS=${MONGODB_OPTIONS:-retryWrites=true&w=majority}
+      - MONGODB_PASSWORD=${MONGODB_PASSWORD}
+
