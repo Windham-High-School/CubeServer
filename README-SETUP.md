@@ -11,3 +11,7 @@
 
 ## Start so that it will restart on device restart
   * docker compose up -d
+
+## Create Crontab
+  * crontab -e
+  * `*/5 * * * cd /home/admin/code/CubeServer && bash deploy.sh api`
