@@ -1,3 +1,4 @@
+config/*
 src/.mysql-data/*
 src/app/secret_key.txt
 *.pyc
