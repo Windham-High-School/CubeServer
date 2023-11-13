@@ -14,4 +14,4 @@
 
 ## Create Crontab
   * crontab -e
-  * `*/5 * * * cd /home/admin/code/CubeServer && bash deploy.sh api`
+  * `* * * * * cd code/CubeServer && bash deploy.sh api 2> /home/admin/error.txt`
