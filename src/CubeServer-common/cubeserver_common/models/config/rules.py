@@ -52,12 +52,12 @@ class RegularOccurrence(Encodable):
     def encode(self) -> dict:
         """Encodes an Encodable object into a plain old, bson-able
         dictionary"""
-        return {"offsets": self.offsets}
+        return {"offsets": self.offsets, "tolerance": self.tolerance}
 
     @classmethod
     def decode(cls, value: dict) -> Encodable:
         """Decodes a dictionary into an Encodable object"""
-        return cls(value['offsets'])
+        return cls(offsets=value['offsets'], tolerance=value['tolerance'])
 
 class Rules(PyMongoModel):
     """Defines the exact rules for a game.
