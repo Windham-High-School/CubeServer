@@ -148,7 +148,7 @@ class Team(PyMongoModel):
         multiplier: Multiplier = DEFAULT_MULTIPLIER,
         emails_sent_today: int = 0,
         code_update: bytes = b"",
-        code_update_taken: bool = False,
+        code_update_taken: bool = True,
         _secret_length: int = config.TEAM_SECRET_LENGTH,
         _find_new_reference_port: bool = False,
     ):
