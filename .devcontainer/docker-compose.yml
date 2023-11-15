@@ -22,6 +22,8 @@ services:
       context: ..
       dockerfile: Docker/CubeServer/Dockerfile
       target: base
+      args:
+        - BASE_IMAGE=mcr.microsoft.com/devcontainers/python:0-3.11
     environment:
       # Connection stuff:
       - AP_SSID=${AP_SSID}
