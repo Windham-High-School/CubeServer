@@ -228,7 +228,7 @@ class Rules(PyMongoModel):
            datapoint.category not in DataClass.measurable:
             return
         try:
-            tol = self.accuracy_tolerance[team, datapoint.category]
+            tol = self.accuracy_tolerance[team.weight_class][datapoint.category]
             points_possible = self.point_menu[team.weight_class][datapoint.category]
             reference = Reference.get_window_point(self.reference_window)
             reference_val = reference.of(datapoint.category).value
