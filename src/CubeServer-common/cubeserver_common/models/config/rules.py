@@ -227,7 +227,6 @@ class Rules(PyMongoModel):
            datapoint.category in DataClass.manual or \
            datapoint.category not in DataClass.measurable:
             return
-        datapoint.multiplier = team.multiplier.amount
         try:
             tol = self.accuracy_tolerance[team, datapoint.category]
             points_possible = self.point_menu[team.weight_class][datapoint.category]
