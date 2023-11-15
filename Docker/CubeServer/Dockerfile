@@ -1,4 +1,6 @@
-FROM mcr.microsoft.com/devcontainers/python:0-3.11 as base
+ARG BASE_IMAGE=python:3.11-slim
+
+FROM ${BASE_IMAGE} as base
 
 ENV APP_HOME /code
 
