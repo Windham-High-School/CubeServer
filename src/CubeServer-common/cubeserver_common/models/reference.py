@@ -140,11 +140,11 @@ class Reference:
     def get_window_point(cls, window: int) -> ReferencePoint:
         """Just returns a ReferencePoint object from the last most recent DataPoints"""
         try:
-            temp_point = DataPoint.find_one_sorted({'team_reference': ObjectId(Team.find_references()[0].id), 'category': DataClass.TEMPERATURE.value}, key='moment', order=DESCENDING)
-            pres_point = DataPoint.find_one_sorted({'team_reference': ObjectId(Team.find_references()[0].id), 'category': DataClass.PRESSURE.value}, key='moment', order=DESCENDING)
+            temp_point = DataPoint.find_one({'team_reference': ObjectId(Team.find_references()[0].id), 'category': DataClass.TEMPERATURE.value}, sort=[('moment', DESCENDING)])
+            pres_point = DataPoint.find_one({'team_reference': ObjectId(Team.find_references()[0].id), 'category': DataClass.PRESSURE.value}, sort=[('moment', DESCENDING)])
             return ReferencePoint(
-                temp=temp_point.value,
-                pressure=pres_point.value,
+                temp=temp_point,
+                pressure=pres_point,
             )
         except Exception as e:
             logging.error(e)
