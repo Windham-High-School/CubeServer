@@ -18,4 +18,4 @@
 
 ## Have the raspberry pi restart nightly
   * sudo crontab -e
-  * 15 0 * * * reboot
+  * 15 6 * * * reboot
