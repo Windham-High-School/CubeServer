@@ -7,10 +7,7 @@
 
 {% block content %}
     <h3>Data:</h3>
-    <div class="btn-group" role="group">
-        <a href={{ url_for('admin.data_table') }} class="btn bg-info">See All Logged Data</a>
-        <a href={{ url_for('admin.reference_data_table') }} class="btn bg-info">Browse Reference Data</a>
-    </div>
+    <a href={{ url_for('admin.data_table') }} class="btn bg-info">See All Logged Data</a>
     <br><br><br>
     <h3>Teams:</h3>
     <div>
@@ -172,7 +169,7 @@ Box number ten.
         function updateUptimeCounter(){
             $.get("/admin/uptime", function(data) {
                 $("#uptime_counter").html(data);
-                setTimeout(updateUptimeCounter, 1000);
+                //setTimeout(updateUptimeCounter, 1000);
             });
         }
         updateUptimeCounter();

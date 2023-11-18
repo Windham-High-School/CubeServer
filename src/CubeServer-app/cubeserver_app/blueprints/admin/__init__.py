@@ -25,6 +25,7 @@ from flask import (
     session,
     send_file,
     redirect,
+    request,
 )
 from werkzeug.utils import secure_filename
 from flask_login import current_user, login_required
@@ -36,6 +37,7 @@ import jsonpickle
 from json import loads, dumps
 from pprint import pformat
 from datetime import datetime
+import re
 
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.datapoint import DataPoint, DataClass
@@ -67,6 +69,7 @@ from cubeserver_common.config import (
 )
 
 from flask_table import Table
+import pymongo
 from cubeserver_app import settings
 from cubeserver_app.tables.columns import PreCol, OptionsCol
 
@@ -92,6 +95,30 @@ __STR_COLLECTION_MAPPING = {
 }
 
 bp = Blueprint("admin", __name__, url_prefix="/admin", template_folder="templates")
+
+order_re = re.compile("^order\[(?P<index>[0-9]+)\]\[(?P<name>.*)\]$")
+
+ORDER_MAPPING = {"asc": pymongo.ASCENDING, "desc": pymongo.DESCENDING}
+
+
+def parse_query(cls, cols, args, filter=None):
+    # order[0][column]=0&order[0][dir]=desc&start=0&length=5
+    order = [
+        (int(a[0].groups()[0]), a[0].groups()[1], a[1])
+        for a in [(order_re.match(x[0]), x[1]) for x in args.items()]
+        if a[0]
+    ]
+    order.sort(key=lambda x: x[0])
+    order = [{x[1]: x[2] for x in order}]
+    col_keys = list(cols.keys())
+    sort = [(col_keys[int(x["column"])], ORDER_MAPPING[x["dir"]]) for x in order]
+
+    limit = int(args.get("length", 5))
+    if limit == -1:
+        limit = 0
+    return cls.find(
+        filter=filter, skip=int(args.get("start", 0)), limit=limit, sort=sort
+    )
 
 
 @bp.route("/")
@@ -434,21 +461,23 @@ def data_table():
     # Check admin status:
     if current_user.level != UserLevel.ADMIN:
         return abort(403)
-    table = AdminDataTable(DataPoint.find())
-    # Render the template:
-    return render_template("data_table.html.jinja2", table=table.__html__())
-
-
-@bp.route("/refdata")
-@login_required
-def reference_data_table():
-    """Shows all of the reference data in a big table"""
-    # Check admin status:
-    if current_user.level != UserLevel.ADMIN:
-        return abort(403)
-    table = AdminDataTable(ReferencePoint.find())
-    # Render the template:
-    return render_template("data_table.html.jinja2", table=table.__html__())
+    table = AdminDataTable([])
+    if request.args.get("ajax") == "true":
+        results = parse_query(DataPoint, table._cols, request.args)
+        data = [
+            [c.td_contents(item, [attr]) for attr, c in table._cols.items() if c.show]
+            for item in results
+        ]
+        count = len(DataPoint.find())
+        return {
+            "draw": int(request.args.get("draw", 0)) + 1,
+            "recordsTotal": count,
+            "recordsFiltered": count,
+            "data": data,
+        }
+    else:
+        # Render the template:
+        return render_template("data_table.html.jinja2", table=table.__html__())
 
 
 @bp.route("/settings")
@@ -495,21 +524,41 @@ def team_info(team_name: str = ""):
     if team is None:
         return abort(400)
     # Generate data table:
-    data_table = AdminDataTable(DataPoint.find_by_team(team))
-    # Multiplier editing form:
-    form = MultiplierForm()
-    form.team_id.data = str(team._id)
-    # form.size.data = team.multiplier.vol_mult.amt
-    # form.cost.data = team.multiplier.cost_mult.amt
-    form.mass.data = team.multiplier.mass_mult.amt
-    # Render the template
-    return render_template(
-        "team_edit.html.jinja2",
-        team=team,
-        table=data_table.__html__(),
-        mult_form=form,
-        emails=base64.urlsafe_b64encode(", ".join(team.emails).encode()),
-    )
+    table = AdminDataTable([])
+    if request.args.get("ajax") == "true":
+        # order[0][column]=0&order[0][dir]=desc&start=0&length=5
+        results = parse_query(
+            DataPoint,
+            table._cols,
+            request.args,
+            filter={"team_reference": ObjectId(team.id)},
+        )
+        data = [
+            [c.td_contents(item, [attr]) for attr, c in table._cols.items() if c.show]
+            for item in results
+        ]
+        count = len(DataPoint.find())
+        return {
+            "draw": int(request.args.get("draw", 0)) + 1,
+            "recordsTotal": count,
+            "recordsFiltered": count,
+            "data": data,
+        }
+    else:
+        # Multiplier editing form:
+        form = MultiplierForm()
+        form.team_id.data = str(team._id)
+        # form.size.data = team.multiplier.vol_mult.amt
+        # form.cost.data = team.multiplier.cost_mult.amt
+        form.mass.data = team.multiplier.mass_mult.amt
+        # Render the template
+        return render_template(
+            "team_edit.html.jinja2",
+            team=team,
+            table=table.__html__(),
+            mult_form=form,
+            emails=base64.urlsafe_b64encode(", ".join(team.emails).encode()),
+        )
 
 
 @bp.route("/multiplier", methods=["POST"])
@@ -614,6 +663,7 @@ def beacon_tx():
         return render_template("beacon_tx_done.html.jinja2")
     flash("Invalid input.", category="danger")
     return abort(500)
+
 
 @bp.route("/beacontable")
 @login_required

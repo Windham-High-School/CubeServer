@@ -12,11 +12,13 @@ from cubeserver_common.models.utils import PyMongoModel
 from cubeserver_common.models.team import Team
 
 
-__all__ = ['DataPoint', 'DataClass']
+__all__ = ["DataPoint", "DataClass"]
+
 
 @unique
 class DataClass(Enum):
     """Enumerates the different data categories"""
+
     TEMPERATURE = "temperature"
     PRESSURE = "pressure"
     COMMENT = "comment"
@@ -35,7 +37,7 @@ class DataClass(Enum):
             DataClass.SIGNAL_LIGHT: bool,
             DataClass.BATTERY_REMAINING: int,
             DataClass.BATTERY_VOLTAGE: float,
-            DataClass.BEACON_CHALLENGE: str
+            DataClass.BEACON_CHALLENGE: str,
         }[self]
 
     @property
@@ -49,9 +51,9 @@ class DataClass(Enum):
             DataClass.BEACON_CHALLENGE: "",
             DataClass.SIGNAL_LIGHT: "",
             DataClass.BATTERY_REMAINING: "%",
-            DataClass.BATTERY_VOLTAGE: "V"
+            DataClass.BATTERY_VOLTAGE: "V",
         }[self]
-    
+
     @classmethod
     @property
     def measurable(cls):
@@ -68,14 +70,18 @@ class DataClass(Enum):
         """Returns all types of data that are determined manually"""
         return [cls.SIGNAL_LIGHT]
 
+
 class DataPoint(PyMongoModel):
     """Models a datapoint"""
 
-    def __init__(self, team_identifier: ObjectId = ObjectId(),
-                 category: DataClass = DataClass.COMMENT,
-                 value: Any = "",
-                 date: Optional[datetime] = None,
-                 is_reference: bool = False):
+    def __init__(
+        self,
+        team_identifier: ObjectId = ObjectId(),
+        category: DataClass = DataClass.COMMENT,
+        value: Any = "",
+        date: Optional[datetime] = None,
+        is_reference: bool = False,
+    ):
         """Creates a DataPoint object from a category and value
         Specify a team_identifier (the id of the team that posted these data)
         A date value of None or unspecified will result in the time at
@@ -92,7 +98,7 @@ class DataPoint(PyMongoModel):
             self.moment = datetime.now()
         self.is_reference = is_reference
         self.rawscore = 0.0
-    
+
     @property
     def multiplier(self) -> float:
         return Team.find_by_id(self.team_reference).multiplier.amount
@@ -101,22 +107,24 @@ class DataPoint(PyMongoModel):
     def value_with_unit(self):
         """Returns a string with the value and unit"""
         return (
-            f"{self.value:0.2f}{self.category.unit}"
-        ) if isinstance(self.value, float) else (
-            f"{self.value}{self.category.unit}"
+            (f"{self.value:0.2f}{self.category.unit}")
+            if isinstance(self.value, float)
+            else (f"{self.value}{self.category.unit}")
         )
 
     def __str__(self) -> str:
         return self.value_with_unit
 
     @classmethod
-    def find_by_team(cls, team: 'Team'):
+    def find_by_team(cls, team: "Team"):
         """Returns a list of datapoints by a team"""
-        return cls.find({'team_reference': ObjectId(team.id)})
+        return cls.find({"team_reference": ObjectId(team.id)})
 
     @classmethod
     def find(cls, *args, **kwargs):
-        return cls.find_sorted(*args, **kwargs, key="moment", order=DESCENDING)
+        if "sort" not in kwargs:
+            kwargs["sort"] = [("moment", DESCENDING)]
+        return super().find(*args, **kwargs)
 
     @property
     def team_str(self):
@@ -128,6 +136,7 @@ class DataPoint(PyMongoModel):
 
     def recalculate_score(self, _init_contrib_score: Optional[float | int] = ...):
         from cubeserver_common.models.config.rules import Rules
+
         logging.debug("Recalculating points...")
         logging.debug(f"Original rawscore: {self.rawscore}")
         team: Team = Team.find_by_id(self.team_reference)
@@ -139,7 +148,6 @@ class DataPoint(PyMongoModel):
         Rules.retrieve_instance().post_data(self, _force=True)
 
     def censor(self):
-        """Removes bad words.
-        """
+        """Removes bad words."""
         if isinstance(self.value, str):
             self.value = profanity.censor(self.value)
