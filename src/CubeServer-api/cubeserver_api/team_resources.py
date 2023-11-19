@@ -53,7 +53,7 @@ class Data(Resource):
             team_identifier=team.id,
             category=data_class,
             value=data_value,
-            is_reference=(team.weight_class == TeamLevel.REFERENCE),
+            is_reference=team.is_reference,
         )
         logging.debug(f"DataPoint object: {point}")
         logging.info("Posting data")

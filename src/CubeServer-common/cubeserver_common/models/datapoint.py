@@ -162,7 +162,7 @@ class DataPoint(PyMongoModel):
         data_point = DataPoint.find_one(
             {
                 "team_reference": {"$in": [ObjectId(x.id) for x in reference_teams]},
-                "category": category,
+                "category": category.value,
                 "moment": {"$lte": moment},
             },
             sort=[("moment", DESCENDING)],
