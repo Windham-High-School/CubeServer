@@ -13,7 +13,7 @@ from base64 import encodebytes
 
 from cubeserver_common.models.config.rules import Rules
 from cubeserver_common.models.config.conf import Conf
-from cubeserver_common.models.team import Team
+from cubeserver_common.models.team import Team, TeamLevel
 from cubeserver_common.models.beaconmessage import BeaconMessage
 from cubeserver_common.models.datapoint import DataClass, DataPoint
 from cubeserver_common import config
@@ -50,7 +50,10 @@ class Data(Resource):
         logging.debug(f"Value: {data_value}")
         # Create the DataPoint object:
         point = DataPoint(
-            team_identifier=team.id, category=data_class, value=data_value
+            team_identifier=team.id,
+            category=data_class,
+            value=data_value,
+            is_reference=(team.weight_class == TeamLevel.REFERENCE),
         )
         logging.debug(f"DataPoint object: {point}")
         logging.info("Posting data")
