@@ -171,5 +171,7 @@ class DataPoint(PyMongoModel):
         if data_point:
             data_point_age = (moment - data_point.moment).total_seconds()
 
-            return data_point if data_point_age < window else None
+            # TODO: need to determine the right window since values are captured async from reference cubes
+            if True or data_point_age < window:
+                return data_point
         return None
