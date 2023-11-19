@@ -131,9 +131,7 @@ def admin_home():
                 (
                     name,
                     None,
-                    url_for(".referencetest", station_id=team.reference_id)
-                    if team.is_reference
-                    else None,
+                    None,
                 )
             ]
         else:
