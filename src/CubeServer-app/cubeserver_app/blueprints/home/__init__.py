@@ -86,7 +86,7 @@ def team_info(team_name: str = ""):
     table = LeaderboardDataTable([])
     if request.args.get("ajax") == "true":
         # order[0][column]=0&order[0][dir]=desc&start=0&length=5
-        results = util.parse_query(
+        count, results = util.parse_query(
             DataPoint,
             table._cols,
             request.args,
@@ -96,7 +96,6 @@ def team_info(team_name: str = ""):
             [c.td_contents(item, [attr]) for attr, c in table._cols.items() if c.show]
             for item in results
         ]
-        count = len(DataPoint.find())
         return {
             "draw": int(request.args.get("draw", 0)) + 1,
             "recordsTotal": count,

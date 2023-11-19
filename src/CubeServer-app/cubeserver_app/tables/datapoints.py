@@ -26,12 +26,14 @@ class AdminDataTable(Table):
     allow_empty = True
 
     moment = Col("Datetime")
-    team_str = Col("Team")
-    category = EnumCol("Category")
-    value_with_unit = Col("Value")
+    team_str = Col("Team", th_html_attrs={"data-orderable": "false"})
+    category = EnumCol("Category", allow_sort="category._val")
+    value_with_unit = Col("Value", allow_sort="value")
     rawscore = TextEditCol("Raw Point Value", model_type="DataPoint")
-    score = FloatCol("Score")
-    id = OptionsCol("Options", model_type="DataPoint")
+    score = FloatCol("Score", allow_sort="rawscore")
+    id = OptionsCol(
+        "Options", model_type="DataPoint", th_html_attrs={"data-orderable": "false"}
+    )
 
     def __init__(self, items: List[DataPoint], **kwargs):
         """Initializes the table"""
@@ -53,10 +55,10 @@ class LeaderboardDataTable(Table):
     allow_empty = True
 
     moment = Col("Datetime")
-    category = EnumCol("Category")
-    value_with_unit = Col("Value")
+    category = EnumCol("Category", th_html_attrs={"data-orderable": "false"})
+    value_with_unit = Col("Value", allow_sort="value")
     rawscore = FloatCol("Point Value")
-    score = FloatCol("Score")
+    score = FloatCol("Score", allow_sort="rawscore")
 
     def __init__(self, items: List[DataPoint], **kwargs):
         """Initializes the table"""

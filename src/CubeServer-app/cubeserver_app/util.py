@@ -26,14 +26,19 @@ def parse_query(cls, cols, args, filter=None):
     sorted_groups.sort(key=lambda x: x[0])
 
     col_keys = list(cols.keys())
-    sort = [
-        (col_keys[int(x["column"])], ORDER_MAPPING[x["dir"]])
-        for idx, x in sorted_groups
-    ]
+    sort = []
+    for _, x in sorted_groups:
+        field_name, direction = col_keys[int(x["column"])], ORDER_MAPPING[x["dir"]]
+        col = cols[field_name]
+        if col.allow_sort is not True and col.allow_sort:
+            field_name = col.allow_sort
+        sort.append((field_name, direction))
 
     limit = int(args.get("length", 5))
     if limit == -1:
         limit = 0
-    return cls.find(
+
+    count = cls.collection.count_documents(filter or {})
+    return count, cls.find(
         filter=filter, skip=int(args.get("start", 0)), limit=limit, sort=sort
     )
