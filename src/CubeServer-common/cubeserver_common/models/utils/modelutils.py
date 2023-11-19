@@ -257,7 +257,7 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
             else:  # If no TypeCodec was specified, just leave the value raw:
                 value = getattr(self, field)
                 # dictionary[field] = (_locatable_name(type(value)), value)
-                dictionary[field] = value
+                dictionary[field] = {"_type": "None", "_val": value}
         dictionary["_id"] = self._id
         return dictionary
 
@@ -283,13 +283,11 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
         new_object = cls()
         new_object._id = value.pop("_id")
         for field_name, x in zip(value, value.values()):
-            if isinstance(x, (tuple, list)) and len(x) == 2:
-                field_type_name, val = x
-            elif isinstance(x, dict) and "_type" in x:
+            if isinstance(x, dict) and "_type" in x:
                 field_type_name = x["_type"]
                 val = x["_val"]
             else:
-                field_type_name, val = ("None", x)
+                field_type_name, val = x
 
             if field_type_name == "None":
                 new_object._setattr_shady(field_name, val)
