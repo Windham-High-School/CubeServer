@@ -10,7 +10,8 @@ from typing import Type
 from bson import _BUILT_IN_TYPES as BSON_TYPES
 from bson.codec_options import TypeCodec
 
-__all__ = ['EnumCodec']
+__all__ = ["EnumCodec"]
+
 
 class EnumCodec(TypeCodec):
     """Codec for encoding a generic Enum into bson
@@ -23,10 +24,12 @@ class EnumCodec(TypeCodec):
         The value class MUST be DIRECTLY bson-compatible!"""
         if value_class is ...:  # If we need to figure that out...
             value_class = type(next(iter(enum_class)).value)
-        assert value_class in BSON_TYPES, \
-            "Enum values must be DIRECTLY bson-compatible."
-        assert all(isinstance(val.value, value_class) for val in enum_class), \
-            "Enum values must all have the same type, as specified."
+        assert (
+            value_class in BSON_TYPES
+        ), "Enum values must be DIRECTLY bson-compatible."
+        assert all(
+            isinstance(val.value, value_class) for val in enum_class
+        ), "Enum values must all have the same type, as specified."
 
         self.enum_class = enum_class
         self.value_class = value_class

@@ -13,12 +13,17 @@ from cubeserver_common.models import PyMongoModel, Encodable
 from cubeserver_common.models.team import Team, TeamLevel
 from cubeserver_common.models.datapoint import DataPoint, DataClass
 from cubeserver_common.models.reference import ReferencePoint, Reference
-from cubeserver_common.models.utils import ComplexDictCodec, EnumCodec, EncodableCodec, DummyCodec
+from cubeserver_common.models.utils import (
+    ComplexDictCodec,
+    EnumCodec,
+    EncodableCodec,
+    DummyCodec,
+)
 
 
 class RegularOccurrence(Encodable):
     """Defines a patterned occurrence
-    
+
     This entails datetimes occuring at a set of offsets from the hour in seconds
     """
 
@@ -26,16 +31,16 @@ class RegularOccurrence(Encodable):
         self,
         offsets: List[int] = [],
         interval: Optional[int] = None,
-        tolerance: int = 0
+        tolerance: int = 0,
     ):
         """Provide a tolerance in seconds AND either:
-         a list of offsets from the hour or an interval from the hour,
-         both in seconds"""
+        a list of offsets from the hour or an interval from the hour,
+        both in seconds"""
         self.tolerance = tolerance
         if interval is None:
             self.offsets = offsets
         else:
-            self.offsets = list(range(0, 60*60, interval))
+            self.offsets = list(range(0, 60 * 60, interval))
 
     def follows(self, moment: datetime) -> bool:
         """Determines if a given datetime follows this pattern
@@ -45,7 +50,7 @@ class RegularOccurrence(Encodable):
             (abs(seconds_since_hour - offset) <= self.tolerance)
             for offset in self.offsets
         ) or any(
-            (abs((seconds_since_hour - 60*60) - offset) <= self.tolerance)
+            (abs((seconds_since_hour - 60 * 60) - offset) <= self.tolerance)
             for offset in self.offsets
         )
 
@@ -57,7 +62,8 @@ class RegularOccurrence(Encodable):
     @classmethod
     def decode(cls, value: dict) -> Encodable:
         """Decodes a dictionary into an Encodable object"""
-        return cls(offsets=value['offsets'], tolerance=value['tolerance'])
+        return cls(offsets=value["offsets"], tolerance=value["tolerance"])
+
 
 class Rules(PyMongoModel):
     """Defines the exact rules for a game.
@@ -79,7 +85,7 @@ class Rules(PyMongoModel):
                 DataClass.COMMENT: 0,
                 DataClass.PRESSURE: 1,
                 DataClass.SIGNAL_LIGHT: 25,
-                DataClass.TEMPERATURE: 1
+                DataClass.TEMPERATURE: 1,
             },
             TeamLevel.VARSITY: {
                 DataClass.COMMENT: 0,
@@ -87,47 +93,36 @@ class Rules(PyMongoModel):
                 DataClass.SIGNAL_LIGHT: 25,
                 DataClass.TEMPERATURE: 1,
                 DataClass.BEACON_CHALLENGE: 10,
-            }
+            },
         },
         # Times data should be posted, measured in offsets from the hour in seconds:
         post_times: Mapping[TeamLevel, Mapping[DataClass, RegularOccurrence]] = {
             TeamLevel.JUNIOR_VARSITY: {
                 DataClass.PRESSURE: RegularOccurrence(
-                    offsets=[30*60],
-                    tolerance=3*60
+                    offsets=[30 * 60], tolerance=3 * 60
                 ),
-                DataClass.TEMPERATURE: RegularOccurrence(
-                    offsets=[0],
-                    tolerance=3*60
-                )
+                DataClass.TEMPERATURE: RegularOccurrence(offsets=[0], tolerance=3 * 60),
             },
             TeamLevel.VARSITY: {
-                DataClass.PRESSURE: RegularOccurrence(
-                    interval=6*60,
-                    tolerance=60
-                ),
+                DataClass.PRESSURE: RegularOccurrence(interval=6 * 60, tolerance=60),
                 DataClass.TEMPERATURE: RegularOccurrence(
-                    interval=15*60,
-                    tolerance=60
-                )
-            }
+                    interval=15 * 60, tolerance=60
+                ),
+            },
         },
         # % error expressed as a decimal, no longer absolute error
         accuracy_tolerance: Mapping[TeamLevel, Mapping[DataClass, float]] = {
             TeamLevel.JUNIOR_VARSITY: {
                 DataClass.PRESSURE: 0.10,
-                DataClass.TEMPERATURE: 0.10
+                DataClass.TEMPERATURE: 0.10,
             },
-            TeamLevel.VARSITY: {
-                DataClass.PRESSURE: 0.10,
-                DataClass.TEMPERATURE: 0.10
-            }
+            TeamLevel.VARSITY: {DataClass.PRESSURE: 0.10, DataClass.TEMPERATURE: 0.10},
         },
         reference_window: int = 30,
-        selected: bool = True
+        selected: bool = True,
     ):
         """
-            reference_window is the number of seconds old a reference point can be for it to be used in scoring.
+        reference_window is the number of seconds old a reference point can be for it to be used in scoring.
         """
         super().__init__()
 
@@ -137,37 +132,30 @@ class Rules(PyMongoModel):
         self.reference_window: int = reference_window
         # Manually spell out how to deal with these fields:
         super().register_field(
-            'point_menu',
+            "point_menu",
             value=point_menu,
             custom_codec=ComplexDictCodec(
                 EnumCodec(TeamLevel),
-                ComplexDictCodec(
-                    EnumCodec(DataClass),
-                    DummyCodec(float)
-                )
-            )
+                ComplexDictCodec(EnumCodec(DataClass), DummyCodec(float)),
+            ),
         )
         super().register_field(
-            'times',
+            "times",
             value=post_times,
             custom_codec=ComplexDictCodec(
                 EnumCodec(TeamLevel),
                 ComplexDictCodec(
-                    EnumCodec(DataClass),
-                    EncodableCodec(RegularOccurrence)
-                )
-            )
+                    EnumCodec(DataClass), EncodableCodec(RegularOccurrence)
+                ),
+            ),
         )
         super().register_field(
-            'accuracy_tolerance',
+            "accuracy_tolerance",
             value=accuracy_tolerance,
             custom_codec=ComplexDictCodec(
                 EnumCodec(TeamLevel),
-                ComplexDictCodec(
-                    EnumCodec(DataClass),
-                    DummyCodec(float)
-                )
-            )
+                ComplexDictCodec(EnumCodec(DataClass), DummyCodec(float)),
+            ),
         )
 
     def post_data(self, datapoint: DataPoint, _force: bool = False) -> bool:
@@ -185,10 +173,16 @@ class Rules(PyMongoModel):
             datapoint.censor()
 
         # TODO: Make this more Pythonic
-        if datapoint.category in DataClass.manual \
-           and datapoint.category in DataClass.measurable:
-            if bool(datapoint.value):  # If this is a manually scored datapoint that is being manually scored:
-                datapoint.rawscore = self.point_menu[team.weight_class][datapoint.category]
+        if (
+            datapoint.category in DataClass.manual
+            and datapoint.category in DataClass.measurable
+        ):
+            if bool(
+                datapoint.value
+            ):  # If this is a manually scored datapoint that is being manually scored:
+                datapoint.rawscore = self.point_menu[team.weight_class][
+                    datapoint.category
+                ]
             else:
                 datapoint.rawscore = 0.0
         else:
@@ -205,7 +199,7 @@ class Rules(PyMongoModel):
             except KeyError:  # If this type of datapoint doesn't get scored:
                 logging.debug("Not a scored data category for this weight class.")
                 datapoint.rawscore = 0
-        
+
         # Score the datapoint:
         team.health.change(datapoint.score)
         team.save()
@@ -213,19 +207,17 @@ class Rules(PyMongoModel):
         datapoint.save()
         return True
 
-    def _score(
-        self,
-        team: Team,
-        datapoint: DataPoint,
-        force=False
-    ):
+    def _score(self, team: Team, datapoint: DataPoint, force=False):
         """Scores the datapoint, storing the score in the datapoint.
         Set force to True to recalculate an already-scored datapoint
         THIS MAKES THE *ASS*UMPTION* THAT THE TIME WINDOW IS VALID!"""
         # Make sure the point is scoreable:
-        if datapoint.rawscore != 0 and not force or \
-           datapoint.category in DataClass.manual or \
-           datapoint.category not in DataClass.measurable:
+        if (
+            datapoint.rawscore != 0
+            and not force
+            or datapoint.category in DataClass.manual
+            or datapoint.category not in DataClass.measurable
+        ):
             return
         try:
             tol = self.accuracy_tolerance[team.weight_class][datapoint.category]
@@ -241,9 +233,9 @@ class Rules(PyMongoModel):
 
     # The initial instance is created in cubeserver_common/__init__.py
     @staticmethod
-    def retrieve_instance() -> 'Rules':
+    def retrieve_instance() -> "Rules":
         """Retrieves the current ruleset"""
-        return Rules.find_one({'selected': True})
+        return Rules.find_one({"selected": True})
 
     def to_json(self) -> str:
         """Turns this document into a json string"""

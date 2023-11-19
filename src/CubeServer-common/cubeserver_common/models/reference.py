@@ -12,18 +12,16 @@ from cubeserver_common.models.utils.modelutils import PyMongoModel
 from pymongo import DESCENDING
 from bson import ObjectId
 
+
 class ReferencePoint(PyMongoModel):
     """Holds a set of reference measurements from a point in time"""
 
     def __init__(
-        self,
-        temp: DataPoint,
-        pressure: DataPoint,
-        moment: Optional[datetime] = None
+        self, temp: DataPoint, pressure: DataPoint, moment: Optional[datetime] = None
     ):
         if (
-            temp.category != DataClass.TEMPERATURE or \
-            pressure.category != DataClass.PRESSURE
+            temp.category != DataClass.TEMPERATURE
+            or pressure.category != DataClass.PRESSURE
         ):
             raise ValueError("Params MUST be of their respective DataClasses")
         super().__init__()
@@ -44,15 +42,10 @@ class ReferencePoint(PyMongoModel):
             "Temperature: \t" + self.temp.__str__() + "\n"
             "Pressure: \t" + self.pressure.__str__() + "\n"
         )
-    
+
     def find_most_recent(self) -> PyMongoModel:
         """Returns the most recent db entry"""
-        return super().find_one(
-            {},
-            {
-                'sort': { 'control.max.timestamp': -1 }
-            }
-        )
+        return super().find_one({}, {"sort": {"control.max.timestamp": -1}})
 
     def of(self, data_type: DataClass) -> DataPoint:
         """Returns a reference datapoint with the specified dataclass
@@ -63,7 +56,7 @@ class ReferencePoint(PyMongoModel):
             return self.pressure
         else:
             raise ValueError(f"No reference of type {data_type}")
-        
+
 
 class Reference:
     """Manages the reference stations"""
@@ -72,11 +65,11 @@ class Reference:
     def collect(cls, team: Team) -> ReferencePoint:
         """Collects a reference point and stores it to the database.
         This should be run periodically."""
-        
-        #temps = []
-        #pressures = []
-        #for reference_cube in Team.find_references():
-        #    data = 
+
+        # temps = []
+        # pressures = []
+        # for reference_cube in Team.find_references():
+        #    data =
         # temp_request = ref_protocol.ReferenceRequest(
         #     id = b'\x00',
         #     signal=ref_protocol.ReferenceSignal.ENQ,
@@ -94,36 +87,30 @@ class Reference:
         #     response_pres = client.request(pres_request)
 
         ref_pt = ReferencePoint(
-            DataPoint(
-                category=DataClass.TEMPERATURE,
-                value=32  # TODO: Use real data
-            ),
-            DataPoint(
-                category=DataClass.PRESSURE,
-                value=0  # TODO: Use real data
-            )
+            DataPoint(category=DataClass.TEMPERATURE, value=32),  # TODO: Use real data
+            DataPoint(category=DataClass.PRESSURE, value=0),  # TODO: Use real data
         )
         ref_pt.save()
         return ref_pt
 
     @classmethod
-    def trimmed_mean(cls, values: List[int|float]) -> float:
+    def trimmed_mean(cls, values: List[int | float]) -> float:
         """Calculates a trimmed mean (of sorts) of a set of values.
         The furthest from the median is trimmed, and the average of remaining values is returned.
         """
         median = statistics.median(values)
         return sum(values) - max(value - median for value in values) + median
-    
+
     @classmethod
     def collect_avg(cls) -> ReferencePoint:
         """Collects the trimmed mean reference point as discussed earlier"""
         raise NotImplementedError("Not implemented yet")
         for station in Team.find_references():
             ref = cls.collect(station)
-        #return ReferencePoint(
+        # return ReferencePoint(
         #    cls.trimmed_mean(),
         #    cls.trimmed_mean()
-        #)
+        # )
 
     # @classmethod
     # def get_window_point(cls, window: int) -> ReferencePoint:
@@ -140,8 +127,20 @@ class Reference:
     def get_window_point(cls, window: int) -> ReferencePoint:
         """Just returns a ReferencePoint object from the last most recent DataPoints"""
         try:
-            temp_point = DataPoint.find_one({'team_reference': ObjectId(Team.find_references()[0].id), 'category': DataClass.TEMPERATURE.value}, sort=[('moment', DESCENDING)])
-            pres_point = DataPoint.find_one({'team_reference': ObjectId(Team.find_references()[0].id), 'category': DataClass.PRESSURE.value}, sort=[('moment', DESCENDING)])
+            temp_point = DataPoint.find_one(
+                {
+                    "team_reference": ObjectId(Team.find_references()[0].id),
+                    "category": DataClass.TEMPERATURE.value,
+                },
+                sort=[("moment", DESCENDING)],
+            )
+            pres_point = DataPoint.find_one(
+                {
+                    "team_reference": ObjectId(Team.find_references()[0].id),
+                    "category": DataClass.PRESSURE.value,
+                },
+                sort=[("moment", DESCENDING)],
+            )
             return ReferencePoint(
                 temp=temp_point,
                 pressure=pres_point,

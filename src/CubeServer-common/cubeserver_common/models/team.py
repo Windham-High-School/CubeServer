@@ -271,7 +271,7 @@ class Team(PyMongoModel):
         return self._code_update
 
     @classmethod
-    def find_beacon(cls) -> 'Team':
+    def find_beacon(cls) -> "Team":
         """Finds the reserved team for the beacon.
         If it doesn't exist already, it will be created.
         """

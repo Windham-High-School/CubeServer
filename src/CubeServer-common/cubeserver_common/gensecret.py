@@ -13,10 +13,12 @@ from sys import argv
 
 from cubeserver_common.config import SECRET_KEY_FILE, SECRET_KEY_FILE_ENCODING
 
+
 def write_new_key():
     """Writes a new key to the key file"""
     with open(SECRET_KEY_FILE, "w", encoding=SECRET_KEY_FILE_ENCODING) as file:
         file.write(token_hex(128))
+
 
 @cache
 def check_secrets():

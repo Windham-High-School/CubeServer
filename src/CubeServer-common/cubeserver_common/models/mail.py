@@ -10,7 +10,9 @@ from bson.objectid import ObjectId
 from cubeserver_common.models.config.conf import Conf
 from cubeserver_common.models.utils.modelutils import PyMongoModel
 from cubeserver_common.models.utils.dummycodec import DummyCodec
-#from cubeserver_common.models.team import Team  # Creates circular import; removed
+
+# from cubeserver_common.models.team import Team  # Creates circular import; removed
+
 
 class Message(PyMongoModel):
     """Describes an email to be sent"""
@@ -22,7 +24,7 @@ class Message(PyMongoModel):
         recipients: list[str] = [],
         subject: str = "",
         message: str = "",
-        team_identifier: Optional[ObjectId] = None
+        team_identifier: Optional[ObjectId] = None,
     ) -> None:
         super().__init__()
         self.from_addr = from_addr
@@ -32,8 +34,8 @@ class Message(PyMongoModel):
         self.message = message
         self.team_reference = team_identifier
 
-        self.register_field('sent_at', custom_codec=DummyCodec(datetime))
-        self._ignored += ['_mimetext']
+        self.register_field("sent_at", custom_codec=DummyCodec(datetime))
+        self._ignored += ["_mimetext"]
 
     @property
     def sender_str(self) -> str:
@@ -48,9 +50,9 @@ class Message(PyMongoModel):
             raise TypeError("Cannot send empty message")
 
         self._mimetext = MIMEText(self.message)
-        self._mimetext['Subject'] = self.subject
-        self._mimetext['From'] = self.sender_str
-        self._mimetext['To'] = ', '.join(self.recipients)
+        self._mimetext["Subject"] = self.subject
+        self._mimetext["From"] = self.sender_str
+        self._mimetext["To"] = ", ".join(self.recipients)
 
         success = True
         config: Conf = Conf.retrieve_instance()
@@ -58,7 +60,7 @@ class Message(PyMongoModel):
         try:
             s.ehlo_or_helo_if_needed()
             s.starttls()
-            if config.smtp_user is not None and config.smtp_user.strip() != '':
+            if config.smtp_user is not None and config.smtp_user.strip() != "":
                 s.login(config.smtp_user, config.smtp_pass)
             s.sendmail(self.from_addr, self.recipients, self._mimetext.as_string())
             self.sent_at = datetime.now()
@@ -73,12 +75,12 @@ class Message(PyMongoModel):
         return success
 
     @classmethod  # TODO: Structure other "find_by..."'s similarly to reduce repetitive code:
-    def find_by_team(cls, team: ObjectId | str | None) -> List['Message']:
+    def find_by_team(cls, team: ObjectId | str | None) -> List["Message"]:
         """Returns a list of Messages sent by this team"""
         if isinstance(team, ObjectId):
             team_id = team
-#        elif isinstance(team, Team):  # Circular import; removed.
-#            team_id = team.id         # TODO: Add back in with issue #134
+        #        elif isinstance(team, Team):  # Circular import; removed.
+        #            team_id = team.id         # TODO: Add back in with issue #134
         elif isinstance(team, str):
             team_id = ObjectId(team)
         elif team is None:

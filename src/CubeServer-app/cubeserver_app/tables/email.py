@@ -6,7 +6,8 @@ from flask_table import Table, Col
 from cubeserver_common.models.mail import Message
 from cubeserver_app.tables.columns import PreCol
 
-__all__ = ['AdminEmailTable']
+__all__ = ["AdminEmailTable"]
+
 
 class AdminEmailTable(Table):
     """Allows a group of Message objects to be displayed in an HTML table"""
@@ -16,11 +17,11 @@ class AdminEmailTable(Table):
     thead_classes = ["thead-dark"]
     border = True
 
-    sent_at    = Col("Time")
+    sent_at = Col("Time")
     sender_str = Col("From")
     recipients = Col("Recipient(s)")
-    subject    = Col("Subject")
-    message    = PreCol("Message")
+    subject = Col("Subject")
+    message = PreCol("Message")
 
     def sort_url(self, col_id, reverse=False):
         pass

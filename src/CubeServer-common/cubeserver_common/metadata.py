@@ -5,13 +5,7 @@
 from yaml import safe_load
 from .config import CONTRIBUTORS_YAML
 
-__all__ = [
-    'LICENSE',
-    'LICENSE_FULL',
-    'VERSION',
-    'TIMESTAMP',
-    'AUTHORS'
-]
+__all__ = ["LICENSE", "LICENSE_FULL", "VERSION", "TIMESTAMP", "AUTHORS"]
 
 from ._license import __license__ as LICENSE
 from ._license import __full_license__ as LICENSE_FULL

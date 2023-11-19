@@ -8,6 +8,7 @@ from cubeserver_common.models.utils.complexdictcodec import ComplexDictCodec
 from cubeserver_common.models.utils.enumcodec import EnumCodec
 from cubeserver_common.models.utils.listcodec import ListCodec
 
+
 class TestDummyCodec:
     def test_python_type(self):
         codec = DummyCodec(type_class=str)
@@ -19,34 +20,49 @@ class TestDummyCodec:
 
     def test_transform_python(self):
         codec = DummyCodec(type_class=str)
-        value = 'foo'
+        value = "foo"
         assert codec.transform_python(value) == value
 
     def test_transform_bson(self):
         codec = DummyCodec(type_class=str)
-        value = 'foo'
+        value = "foo"
         assert codec.transform_bson(value) == value
+
 
 class TestComplexDictCodec:
     def test_python_type(self):
-        codec = ComplexDictCodec(key_codec=DummyCodec(ObjectId), value_codec=DummyCodec(str))
+        codec = ComplexDictCodec(
+            key_codec=DummyCodec(ObjectId), value_codec=DummyCodec(str)
+        )
         assert codec.python_type == Dict[ObjectId, str]
 
     def test_bson_type(self):
-        codec = ComplexDictCodec(key_codec=DummyCodec(ObjectId), value_codec=DummyCodec(str))
+        codec = ComplexDictCodec(
+            key_codec=DummyCodec(ObjectId), value_codec=DummyCodec(str)
+        )
         assert codec.bson_type == dict
 
     def test_transform(self):
-        codec = ComplexDictCodec(key_codec=DummyCodec(ObjectId), value_codec=DummyCodec(str))
-        bson_value = {ObjectId('5f9d7f3c8b4b4f0d9c7d3c6f'): 'foo', ObjectId('5f9d7f3c8b4b4f0d9c7d3c70'): 'bar'}
-        python_value = {ObjectId('5f9d7f3c8b4b4f0d9c7d3c6f'): 'foo', ObjectId('5f9d7f3c8b4b4f0d9c7d3c70'): 'bar'}
+        codec = ComplexDictCodec(
+            key_codec=DummyCodec(ObjectId), value_codec=DummyCodec(str)
+        )
+        bson_value = {
+            ObjectId("5f9d7f3c8b4b4f0d9c7d3c6f"): "foo",
+            ObjectId("5f9d7f3c8b4b4f0d9c7d3c70"): "bar",
+        }
+        python_value = {
+            ObjectId("5f9d7f3c8b4b4f0d9c7d3c6f"): "foo",
+            ObjectId("5f9d7f3c8b4b4f0d9c7d3c70"): "bar",
+        }
         assert codec.transform_bson(bson_value) == python_value
         assert codec.transform_python(python_value) == bson_value
+
 
 class Color(Enum):
     RED = 1
     GREEN = 2
     BLUE = 3
+
 
 class TestEnumCodec:
     def test_python_type(self):
@@ -66,6 +82,7 @@ class TestEnumCodec:
         codec = EnumCodec(enum_class=Color)
         value = 2
         assert codec.transform_bson(value) == Color.GREEN
+
 
 class TestListCodec:
     def test_python_type(self):

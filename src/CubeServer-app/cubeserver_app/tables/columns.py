@@ -10,14 +10,15 @@ from abc import ABCMeta, abstractmethod
 
 from cubeserver_common.models.datapoint import DataClass
 
-__all__ = ['EnumCol', 'DropDownEnumCol', 'OptionsCol', 'ManualScoring']
+__all__ = ["EnumCol", "DropDownEnumCol", "OptionsCol", "ManualScoring"]
+
 
 def _render_form(
     form: FlaskForm,
     action: str = "table_endpoint",
     form_id: Optional[str] = None,
     form_attributes: List[Tuple[str]] = None,
-    auto_submit: Optional[bool] = None
+    auto_submit: Optional[bool] = None,
 ) -> str:
     """Renders a form into HTML.
     If there is no submit field in the form, any field changes will
@@ -29,46 +30,51 @@ def _render_form(
     # Decide whether or not to auto-submit:
     field_attributes: Mapping[str, str] = {}
     if auto_submit or (  # If not explicitly given, check the form for SubmitFields:
-        auto_submit is None and
-        not any(isinstance(field, SubmitField) for field in form)
+        auto_submit is None
+        and not any(isinstance(field, SubmitField) for field in form)
     ):
         field_attributes["onchange"] = "this.form.submit()"
     # List of (name, value) HTML attributes for the form:
-    attributes = (form_attributes if form_attributes else []) + \
-                 [('action', action),
-                  ('method', "POST")]
+    attributes = (form_attributes if form_attributes else []) + [
+        ("action", action),
+        ("method", "POST"),
+    ]
     if form_id:
-        attributes.append(('id', form_id))
-    attributes_string = ' '.join(
-        [f"{key}=\"{val}\"" for key, val in attributes]
-    )
+        attributes.append(("id", form_id))
+    attributes_string = " ".join([f'{key}="{val}"' for key, val in attributes])
     html = f"<form {attributes_string}>"
-    html += '\n'.join(["\t"+field(**field_attributes) for field in form])
+    html += "\n".join(["\t" + field(**field_attributes) for field in form])
     html += "</form>"
     return html
 
 
 class EnumCol(Col):
     """A Column for Enums, hence the name, EnumCol.
-    :) """
+    :)"""
 
     def td_format(self, content: Enum):
         if content:
             return content.value
         return ""
 
+
 class FloatCol(Col):
     """A column for rendering floats"""
+
     def td_format(self, content):
         return f"{content:.2f}"
 
+
 class TeamNameCol(Col):
     """A column for team names"""
+
     def td_format(self, content):
         return f"<b><a href='{url_for('home.team_info', team_name=content)}'>{content}</a></b>"
 
+
 class AdminTeamNameCol(Col):
     """A column for team names"""
+
     def td_format(self, content):
         return f"<b><a href='{url_for('admin.team_info', team_name=content)}'>{content}</a></b>"
 
@@ -77,12 +83,7 @@ class HTMLCol(Col):
     """A Column with custom HTML"""
 
     @abstractmethod
-    def generate_html(
-        self,
-        content: Any,
-        identifier: str,
-        attr_list: List[str]
-    ) -> str:
+    def generate_html(self, content: Any, identifier: str, attr_list: List[str]) -> str:
         """An abstract method for generating a cell's HTML
 
         Args:
@@ -94,10 +95,7 @@ class HTMLCol(Col):
             str: HTML for this cell
         """
 
-    def generate_attrs(
-        self,
-        content: Any
-    ) -> Mapping[str, str]:
+    def generate_attrs(self, content: Any) -> Mapping[str, str]:
         """Generate any attributes to the td element
 
         Args:
@@ -106,34 +104,24 @@ class HTMLCol(Col):
         Returns:
             Mapping[str, str]
         """
-        return {
-            'data-search': str(content),
-            'data-order': str(content)
-        }
+        return {"data-search": str(content), "data-order": str(content)}
 
     def __init__(self, name, *args, **kwargs):
         """Specify the column name"""
         super().__init__(name, *args, **kwargs)
         self.constructor_kwargs = kwargs
 
-    def custom_td_format(
-        self,
-        content: Any,
-        identifier: str,
-        attr_list: List[str]
-    ):
+    def custom_td_format(self, content: Any, identifier: str, attr_list: List[str]):
         """A custom version of td_format, renamed to avoid
         PyLint from getting upset from the different parameter list
         This creates a form for each cell."""
         return self.generate_html(content, identifier, attr_list)
 
     def td_contents(self, item, attr_list):
-        return (
-            self.custom_td_format(
-                self.from_attr_list(item, attr_list=attr_list),
-                str(item.id) if item.id else None,
-                attr_list
-            )
+        return self.custom_td_format(
+            self.from_attr_list(item, attr_list=attr_list),
+            str(item.id) if item.id else None,
+            attr_list,
         )
 
     def td(self, item, attr):
@@ -141,18 +129,15 @@ class HTMLCol(Col):
         item: Any = self.from_attr_list(item, attr_list=attr)
         td_attrs = self.generate_attrs(item)
         return html.element(
-            'td',
+            "td",
             content=content,
             escape_content=False,
-            attrs=td_attrs | self.td_html_attrs)
+            attrs=td_attrs | self.td_html_attrs,
+        )
+
 
 class DateTimeCol(HTMLCol):
-    def generate_html(
-        self,
-        content: Any,
-        identifier: str,
-        attr_list: List[str]
-    ) -> str:
+    def generate_html(self, content: Any, identifier: str, attr_list: List[str]) -> str:
         """An abstract method for generating a cell's HTML
 
         Args:
@@ -164,10 +149,8 @@ class DateTimeCol(HTMLCol):
             str: HTML for this cell
         """
         return f"<span class='datetime'>{content}</span>"
-    def generate_attrs(
-        self,
-        content: Any
-    ) -> Mapping[str, str]:
+
+    def generate_attrs(self, content: Any) -> Mapping[str, str]:
         """Generate any attributes to the td element
 
         Args:
@@ -177,37 +160,42 @@ class DateTimeCol(HTMLCol):
             Mapping[str, str]
         """
         return {
-            'data-search': str(content.isoformat()),
-            'data-order': str(content.timestamp())
+            "data-search": str(content.isoformat()),
+            "data-order": str(content.timestamp()),
         }
+
 
 class DropDownEnumCol(Col):
     """A Column with a drop-down box to select an option from an Enum"""
 
     # TODO: Neaten this constructor:
-    def __init__(self, name, enum_class, *args, model_type: str="Team", exclude_option=None, **kwargs):
+    def __init__(
+        self,
+        name,
+        enum_class,
+        *args,
+        model_type: str = "Team",
+        exclude_option=None,
+        **kwargs,
+    ):
         """Specify the column name and the class of the Enum"""
         super().__init__(name, *args, **kwargs)
         self.model_type = model_type
         self.enum_class = enum_class
         options = [(option.value, option.value) for option in enum_class]
         if exclude_option is not None:
-            options.remove(
-                (exclude_option.value, exclude_option.value)
-            )
+            options.remove((exclude_option.value, exclude_option.value))
+
         class ColDropDownForm(FlaskForm):
             """A custom form for just this column"""
+
             item = SelectField(choices=options)
             parameter = HiddenField()
             identifier = HiddenField()
+
         self.form = ColDropDownForm
 
-    def custom_td_format(
-        self,
-        content: Enum,
-        identifier: str,
-        attr_list: List[str]
-    ):
+    def custom_td_format(self, content: Enum, identifier: str, attr_list: List[str]):
         """A custom version of td_format, renamed to avoid
         PyLint from getting upset from the different parameter list
         This creates a form for each cell."""
@@ -220,49 +208,42 @@ class DropDownEnumCol(Col):
         )
 
     def td_contents(self, item, attr_list):
-        return (
-            self.custom_td_format(
-                self.from_attr_list(item, attr_list=attr_list),
-                str(item.id),
-                attr_list
-            )
+        return self.custom_td_format(
+            self.from_attr_list(item, attr_list=attr_list), str(item.id), attr_list
         )
 
     def td(self, item, attr):
         content = self.td_contents(item, self.get_attr_list(attr))
         item: Enum = self.from_attr_list(item, attr_list=attr)
-        td_attrs = {
-            'data-search': item.value,
-            'data-order': item.value
-        }
+        td_attrs = {"data-search": item.value, "data-order": item.value}
         return html.element(
-            'td',
+            "td",
             content=content,
             escape_content=False,
-            attrs=td_attrs | self.td_html_attrs)
+            attrs=td_attrs | self.td_html_attrs,
+        )
+
 
 # TODO: Eliminate repetitive code from DropDownEnumCol
 class TextEditCol(Col):
     """A Column with a text box to edit a string"""
 
     # TODO: Neaten this constructor:
-    def __init__(self, name, *args, model_type: str="Team", **kwargs):
+    def __init__(self, name, *args, model_type: str = "Team", **kwargs):
         """Specify the column name and the class of the Enum"""
         super().__init__(name, *args, **kwargs)
         self.model_type = model_type
+
         class ColTextBoxForm(FlaskForm):
             """A custom form for just this column"""
+
             item = StringField()
             parameter = HiddenField()
             identifier = HiddenField()
+
         self.form = ColTextBoxForm
 
-    def custom_td_format(
-        self,
-        content: str,
-        identifier: str,
-        attr_list: List[str]
-    ):
+    def custom_td_format(self, content: str, identifier: str, attr_list: List[str]):
         """A custom version of td_format, renamed to avoid
         PyLint from getting upset from the different parameter list
         This creates a form for each cell."""
@@ -275,69 +256,72 @@ class TextEditCol(Col):
         )
 
     def td_contents(self, item, attr_list):
-        return (
-            self.custom_td_format(
-                self.from_attr_list(item, attr_list=attr_list),
-                str(item.id),
-                attr_list
-            )
+        return self.custom_td_format(
+            self.from_attr_list(item, attr_list=attr_list), str(item.id), attr_list
         )
 
     def td(self, item, attr):
         content = self.td_contents(item, self.get_attr_list(attr))
         item: Enum = self.from_attr_list(item, attr_list=attr)
-        td_attrs = {
-            'data-search': item,
-            'data-order': item
-        }
+        td_attrs = {"data-search": item, "data-order": item}
         return html.element(
-            'td',
+            "td",
             content=content,
             escape_content=False,
-            attrs=td_attrs | self.td_html_attrs)
+            attrs=td_attrs | self.td_html_attrs,
+        )
+
 
 # TODO: Add more options? Perhaps the ability to make custom BSON modifications
 class OptionsCol(HTMLCol):
     """A Column with a menu of options
     Requires the inclusion of static/js/admin.js to communcate with the api"""
 
-    def __init__(self, *args, model_type: str="Team", **kwargs):
+    def __init__(self, *args, model_type: str = "Team", **kwargs):
         super().__init__(*args, **kwargs)
         self.model_type = model_type
 
-    def generate_html(
-        self,
-        content: Any,
-        identifier: str,
-        attr_list: List[str]
-    ) -> str:
+    def generate_html(self, content: Any, identifier: str, attr_list: List[str]) -> str:
         return render_template_string(
             (
                 (
                     "<div>\n"
-                    "<button title=\"delete\" "
+                    '<button title="delete" '
                     f"onclick=\"deleteItem('{self.model_type}', '{{{{id}}}}')\" "
-                    "class=\"btn btn-danger\">&#10060;</button>\n"
-                    +((
-                        "<button title=\"Adjust Score\" "
-                        f"onclick=\"adjustScore('{self.model_type}', '{{{{id}}}}')\" "
-                        "class=\"btn btn-info\">&#x2696;</button>\n"
-                    ) if self.model_type == "Team" else "")
-                    +((
-                        "<button title=\"Force-verify their email\" "
-                        f"onclick=\"verify('{self.model_type}', '{{{{id}}}}')\" "
-                        "class=\"btn btn-info\">Force Verify</button>\n"
-                    ) if self.model_type == "User" else "")
-                    +((
-                        "<button title=\"Force-recompute the score value\" "
-                        f"onclick=\"recompute_score('{self.model_type}', '{{{{id}}}}')\" "
-                        "class=\"btn btn-warning\">Rescore</button>\n"
-                    ) if self.model_type == "DataPoint" else "")
-                ) +
-                "</div>\n"
+                    'class="btn btn-danger">&#10060;</button>\n'
+                    + (
+                        (
+                            '<button title="Adjust Score" '
+                            f"onclick=\"adjustScore('{self.model_type}', '{{{{id}}}}')\" "
+                            'class="btn btn-info">&#x2696;</button>\n'
+                        )
+                        if self.model_type == "Team"
+                        else ""
+                    )
+                    + (
+                        (
+                            '<button title="Force-verify their email" '
+                            f"onclick=\"verify('{self.model_type}', '{{{{id}}}}')\" "
+                            'class="btn btn-info">Force Verify</button>\n'
+                        )
+                        if self.model_type == "User"
+                        else ""
+                    )
+                    + (
+                        (
+                            '<button title="Force-recompute the score value" '
+                            f"onclick=\"recompute_score('{self.model_type}', '{{{{id}}}}')\" "
+                            'class="btn btn-warning">Rescore</button>\n'
+                        )
+                        if self.model_type == "DataPoint"
+                        else ""
+                    )
+                )
+                + "</div>\n"
             ),
-            id=identifier
+            id=identifier,
         )
+
 
 class ManualScoring(HTMLCol):
     """A Column for manually scoring"""
@@ -345,28 +329,29 @@ class ManualScoring(HTMLCol):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def generate_html(
-        self,
-        content: Any,
-        identifier: str,
-        attr_list: List[str]
-    ) -> str:
+    def generate_html(self, content: Any, identifier: str, attr_list: List[str]) -> str:
         return render_template_string(
             (
-                '\n'.join([(
-                    "<div>\n"
-                    "<button title=\"add datapoint\" "
-                    f"onclick=\"add_datapoint('{{{{id}}}}', '{dataclass.value}', {str(dataclass.datatype == bool).lower()})\" "
-                    f"class=\"btn btn-info\">{dataclass.value}</button>\n"
-                    "</div>\n"
-                ) for dataclass in DataClass.manual])
+                "\n".join(
+                    [
+                        (
+                            "<div>\n"
+                            '<button title="add datapoint" '
+                            f"onclick=\"add_datapoint('{{{{id}}}}', '{dataclass.value}', {str(dataclass.datatype == bool).lower()})\" "
+                            f'class="btn btn-info">{dataclass.value}</button>\n'
+                            "</div>\n"
+                        )
+                        for dataclass in DataClass.manual
+                    ]
+                )
             ),
-            id=identifier
+            id=identifier,
         )
+
 
 class ScoreDeltaCol(HTMLCol):
     """A Column that has class text-success if content is positive, otherwise text-danger"""
-    
+
     def generate_html(self, content: Any, identifier: str, attr_list: List[str]) -> str:
         number = int(content)
         text_class = "text-warning"
@@ -374,53 +359,58 @@ class ScoreDeltaCol(HTMLCol):
             text_class = "text-success"
         elif number < 0:
             text_class = "text-danger"
-        prefix = '+' if number >= 0 else '-'
+        prefix = "+" if number >= 0 else "-"
         return (
-                f"<span class=\"{text_class}\">\n",
-                f"{prefix} {abs(content):.2f}\n",
-                "</span>\n"
+            f'<span class="{text_class}">\n',
+            f"{prefix} {abs(content):.2f}\n",
+            "</span>\n",
         )
+
 
 class PreCol(HTMLCol):
     """A Column that displays its contents between <pre /> tags"""
 
     def __init__(self, name, pre_classes="", *args, **kwargs):
         super().__init__(name, *args, **kwargs)
-        self.pre_classes=pre_classes
+        self.pre_classes = pre_classes
 
     def generate_html(self, content: Any, identifier: str, attr_list: List[str]) -> str:
-        return (
-                f"<pre class=\"{self.pre_classes}\">\n",
-                f"{content}\n",
-                "</pre>\n"
-        )
+        return (f'<pre class="{self.pre_classes}">\n', f"{content}\n", "</pre>\n")
 
 
 # TODO: Finish BoolCol implementation with pretty coloring!
-#class BoolCol(HTMLCol):
+# class BoolCol(HTMLCol):
 #    """A Column for displaying boolean values"""
 #
 #    def generate_html(self, content: Any, identifier: str, attr_list: List[str]) -> str:
 #        return ""
 #
 
-#class EmergencyDeleteCol(OptionsCol):
+# class EmergencyDeleteCol(OptionsCol):
 #    """A column for the database repair tool that allows deleting bad documents
 #    The content would otherwise be the objectid"""
 #    def __init__(self, name, *args, **kwargs):
 #        super().__init__(name, *args, model_type="Any", **kwargs)
 
+
 class CustomLinkCol(HTMLCol):
     """A column for links :)"""
 
-    def __init__(self, name, *args, link_text:Optional[str]=None, a_classes:str="", **kwargs):
+    def __init__(
+        self,
+        name,
+        *args,
+        link_text: Optional[str] = None,
+        a_classes: str = "",
+        **kwargs,
+    ):
         super().__init__(name, *args, **kwargs)
         self.link_name = link_text
         self.a_classes = a_classes
 
     def generate_html(self, content: Any, identifier: str, attr_list: List[str]) -> str:
         return (
-            f"<a class=\"{self.a_classes}\" href=\"{content}\">"
+            f'<a class="{self.a_classes}" href="{content}">'
             f"{content if self.link_name is None else self.link_name}"
             f"</a>"
         )

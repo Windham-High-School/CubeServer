@@ -13,10 +13,12 @@ from flask import Blueprint, render_template, session, make_response
 
 bp = Blueprint("config", __name__, url_prefix="/setup", template_folder="templates")
 
+
 @bp.route("/")
 def index():
     """Renders the main page for this blueprint"""
     return render_template("index.html.jinja2", rand=random())
+
 
 @bp.route("/client_config.py")
 def py_file():
@@ -78,7 +80,7 @@ def api_cert():
     """Downloads the pem file for the cert of the api
     for server verification purposes"""
     logging.info("Downloading api_cert.pem")
-    api_cert = environ.get('API_CERT', "undefined")
+    api_cert = environ.get("API_CERT", "undefined")
     response = make_response(api_cert)
     response.headers.set("Content-Type", "application/x-pem-file")
     response.headers.set(

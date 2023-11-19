@@ -3,7 +3,8 @@
 from typing import Any, Type
 from bson.codec_options import TypeCodec
 
-__all__ = ['DummyCodec']
+__all__ = ["DummyCodec"]
+
 
 class DummyCodec(TypeCodec):
     """Dummy Codec.

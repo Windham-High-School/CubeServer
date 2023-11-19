@@ -25,7 +25,6 @@ LOGGING_FORMAT: str = "%(asctime)s : %(levelname)s : %(process)d => %(message)s"
 """The format for logging stuff, see Python's `logging` library"""
 
 
-
 # Default Credentials:
 
 DEFAULT_ADMIN_USERNAME: str = "admin"
@@ -42,10 +41,11 @@ DEFAULT_THEME: str = "dark"
 """The *default* theme to use (users can change this individually)"""
 
 
-
 # Defaults changable by the admin panel:
 
-DEFAULT_HOME_DESCRIPTION: str = "Thunder. Time. Tech.<br>\nTeams compete with data to win."
+DEFAULT_HOME_DESCRIPTION: str = (
+    "Thunder. Time. Tech.<br>\nTeams compete with data to win."
+)
 """A brief description of this whole thing which will appear on the home page
 This can be changed by an admin user at any point during the competition!"""
 
@@ -56,11 +56,9 @@ DEFAULT_EMAIL_QUOTA: int = 2
 """The default maximum number of daily emails that can be sent by a team"""
 
 
-
 # Scoring Scheme:
 # For more config, check out the cubeserver_common.scoring package
 #   and cubeserver_common.models.config.rules
-
 
 
 # Emails:
@@ -72,7 +70,6 @@ FROM_ADDR: str = "noreply@whsproject.club"
 """The address from which most emails will be sent"""
 
 
-
 # Contest names:
 
 SHORT_TITLE: str = "CubeServer"
@@ -82,12 +79,10 @@ LONG_TITLE: str = "The Project"
 """A longer name that describes the prize. This should still be succinct."""
 
 
-
 # Beacon:
 
 DEFAULT_BEACON_POLLING_PERIOD: int = 10
 """The default period of the BeaconMessage collection polling in seconds"""
-
 
 
 # Teams:
@@ -98,9 +93,11 @@ TEAM_MAX_CHARS: int = 30
 CHECK_PROFANITY: bool = True
 """Whether to check names, etc. for profanity."""
 
-PROFANITY_MESSAGE: str = "Not Funny. \n" \
-                         "We think you used some bad words in your input. \n" \
-                         "Profanity is not allowed by the administrator."
+PROFANITY_MESSAGE: str = (
+    "Not Funny. \n"
+    "We think you used some bad words in your input. \n"
+    "Profanity is not allowed by the administrator."
+)
 """The message to use if profanity is detected in the user's input"""
 
 TEAM_SECRET_LENGTH: int = 16
@@ -111,7 +108,6 @@ INTERNAL_SECRET_LENGTH: int = 32
 
 TEAM_MAX_UPDATE_LENGTH: int = 32768  # 32KiB
 """Maximum length of a team's code update"""
-
 
 
 # Internal Teams (for extending api functionality for behind-the-scenes use):
@@ -133,7 +129,6 @@ REFERENCE_COMMAND_PORT: int = 32769
 
 COMMENT_FILTER_PROFANITY: bool = True
 """Whether to filter profanity from comments posted by the cubes"""
-
 
 
 # Behind-the-scenes stuff - this could easily make stuff break -
@@ -166,7 +161,6 @@ This *MUST* be present in hashlib.algorithms_available or things will break!"""
 
 TEMP_PATH: str = "/tmp/"
 """A path to a temporary directory that will not be persistent"""
-
 
 
 ########################

@@ -20,13 +20,14 @@ from cubeserver_common.metadata import VERSION
 
 from .auth import auth, internal, check_secret_header
 
+
 class NextMessage(Resource):
     """
     For the beacon API, a GET request to /beacon/message/next_queued with proper credentials should yield a json response along the lines of
     {"id": <hex string representing the object id>, "timestamp": <epoch timestamp as a decimal>, "offset": <seconds from request until instant>, "destination": <"Infrared"|"Visible">, "intensity": <8-bit integer>, "message": <the message as a UTF-8 str>}
     I think the message for the purposes of simplicity in the short term can be conveyed as a string but this might be changed in the long term for sending other data over the beacon.
     Other than the timestamp and offset, the other items are the same values as what would be transferred by the command system.
-    The response will only have information for the next soonest beacon message that has the status of "queued" in the database. 
+    The response will only have information for the next soonest beacon message that has the status of "queued" in the database.
     """
 
     decorators = [auth.login_required, check_secret_header]
@@ -50,9 +51,10 @@ class NextMessage(Resource):
             "offset": (message.send_at - datetime.now()).total_seconds(),
             "destination": message.destination.value,
             "intensity": message.intensity,
-            "message": message.full_message_bytes.decode('utf-8'),
-            "status": message.status.value
+            "message": message.full_message_bytes.decode("utf-8"),
+            "status": message.status.value,
         }, 200
+
 
 class Message(Resource):
     """
@@ -60,7 +62,7 @@ class Message(Resource):
     {"id": <hex string representing the object id>, "timestamp": <epoch timestamp as a decimal>, "offset": <seconds from request until instant>, "destination": <"Infrared"|"Visible">, "intensity": <8-bit integer>, "message": <the message as a UTF-8 str>}
     I think the message for the purposes of simplicity in the short term can be conveyed as a string but this might be changed in the long term for sending other data over the beacon.
     Other than the timestamp and offset, the other items are the same values as what would be transferred by the command system.
-    The response will only have information for the next soonest beacon message that has the status of "queued" in the database. 
+    The response will only have information for the next soonest beacon message that has the status of "queued" in the database.
 
     A particular message (endpoint /beacon/message/<id>) can be updated with a PUT request with proper credentials. The request should have a json body with the following format:
     {"status": <"Queued"|"Scheduled"|"Transmitting..."|"Transmitted"|"Failed">}
@@ -75,10 +77,12 @@ class Message(Resource):
         data_str = request.get_json()
         logging.debug(f"Request: {data_str}")
         if data_str is None:
-            data_str = loads(request.form['data'])
+            data_str = loads(request.form["data"])
         message: BeaconMessage = BeaconMessage.find_by_id(message_id)
         try:
-            message.status = SentStatus(data_str['status'])  # TODO: Support other fields
+            message.status = SentStatus(
+                data_str["status"]
+            )  # TODO: Support other fields
         except ValueError:
             logging.debug("Attempted to set invalid status")
             return None, 400
@@ -89,8 +93,8 @@ class Message(Resource):
             "offset": (message.send_at - datetime.now()).total_seconds(),
             "destination": message.destination.value,
             "intensity": message.intensity,
-            "message": message.full_message_bytes.decode('utf-8'),
-            "status": message.status.value
+            "message": message.full_message_bytes.decode("utf-8"),
+            "status": message.status.value,
         }, 200
 
     @internal
@@ -103,6 +107,6 @@ class Message(Resource):
             "offset": (message.send_at - datetime.now()).total_seconds(),
             "destination": message.destination.value,
             "intensity": message.intensity,
-            "message": message.full_message_bytes.decode('utf-8'),
-            "status": message.status.value
+            "message": message.full_message_bytes.decode("utf-8"),
+            "status": message.status.value,
         }, 200

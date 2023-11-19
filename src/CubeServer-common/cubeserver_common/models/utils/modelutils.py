@@ -15,7 +15,8 @@ from pymongo.collection import Collection
 from .dummycodec import DummyCodec
 from .enumcodec import EnumCodec
 
-__all__ = ['PyMongoModel', 'Encodable', 'EncodableCodec', 'ASCENDING', 'DESCENDING']
+__all__ = ["PyMongoModel", "Encodable", "EncodableCodec", "ASCENDING", "DESCENDING"]
+
 
 def _locatable_name(type_to_name: type) -> str:
     """Returns a string that can be used in reverse with pydoc.locate"""
@@ -23,6 +24,7 @@ def _locatable_name(type_to_name: type) -> str:
     if "builtin" in module:
         return type_to_name.__name__
     return module + "." + type_to_name.__name__
+
 
 class _Encoder(ABC):
     @abstractmethod
@@ -34,6 +36,7 @@ class _Encoder(ABC):
     @abstractmethod
     def decode(cls, value: dict):
         """Decodes a dictionary into an Encodable object"""
+
 
 class EncodableCodec(TypeCodec):
     """A TypeCodec for PyMongoModel objects"""
@@ -55,6 +58,7 @@ class EncodableCodec(TypeCodec):
     def transform_bson(self, value: dict) -> _Encoder:
         """Decodes a dictionary into a PyMongoModel object"""
         return self.python_type.decode(value)
+
 
 class Encodable(_Encoder):
     """An abstract class for classes that contain codec data"""
@@ -81,10 +85,11 @@ class Encodable(_Encoder):
             return False
         return self.encode() == __value.encode()
 
+
 class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
-                                #  AutoEncodable superclass that implements
-                                #  encode() and decode() for non-document
-                                #  objects.
+    #  AutoEncodable superclass that implements
+    #  encode() and decode() for non-document
+    #  objects.
     """A class for easy object-mapping to bson.
     Extend this class for any classes that describe a type of document."""
 
@@ -123,17 +128,19 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
         which initializes all attributes with the proper values."""
 
         if PyMongoModel.mongo is None:
-            warnings.warn("Buddy, you forgot to initialize PyMongoModel"
-                                "with the MongoClient!\n"
-                                "You can ignore this if it is a part of the"
-                                "Sphinx-api build process.")
+            warnings.warn(
+                "Buddy, you forgot to initialize PyMongoModel"
+                "with the MongoClient!\n"
+                "You can ignore this if it is a part of the"
+                "Sphinx-api build process."
+            )
 
         cls._ignored: List[str] = [
             "_id",
             "type_codec",
             "_codecs",
             "_fields",
-            "_ignored"
+            "_ignored",
         ]
 
         # Registered TypeCodecs:
@@ -154,7 +161,7 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
         self._id: Optional[ObjectId] = None
         super().__init__()
 
-    def register_codec(self, type_codec: TypeCodec, replace = False):
+    def register_codec(self, type_codec: TypeCodec, replace=False):
         """Register a TypeCodec for use in the PyMongoModelCodec
         Specify whether to replace an existing one if applicable,
         with the default being False."""
@@ -173,20 +180,26 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
     def locate_codec(self, data_type: type) -> Optional[TypeCodec]:
         """Tries to find a TypeCodec for the specified type if possible."""
         codec: Optional[TypeCodec] = None
-        if issubclass(data_type, Encodable): # Use the one specified:
+        if issubclass(data_type, Encodable):  # Use the one specified:
             codec = EncodableCodec(cast(Encodable, data_type()))
         elif issubclass(data_type, TypeCodec):
             codec = data_type()
-        elif issubclass(data_type, Enum): # Use the EnumCodec class:
+        elif issubclass(data_type, Enum):  # Use the EnumCodec class:
             codec = EnumCodec(data_type, type(list(cast(Enum, data_type))[0]))
         else:
-            raise TypeError(f"No TypeCodec is registered for type "
-                            f"{data_type}. "
-                            f"Please register one before setting.")
+            raise TypeError(
+                f"No TypeCodec is registered for type "
+                f"{data_type}. "
+                f"Please register one before setting."
+            )
         return codec
 
-    def register_field(self, attr_name: str, value: Optional[Any] = None,
-                       custom_codec: Optional[TypeCodec] = None):
+    def register_field(
+        self,
+        attr_name: str,
+        value: Optional[Any] = None,
+        custom_codec: Optional[TypeCodec] = None,
+    ):
         """Register each attribute of the model for the database.
         Optionally specify with a custom codec prior to setting the attribute.
         If a codec is specified optionally here, it will not be automatically
@@ -206,21 +219,25 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
             return
         codec = custom_codec
         # TODO: Check recursively for bson compat- there can be dicts of enums for ex
-        if codec is None and \
-           value is not None and \
-           type(value) not in BSON_TYPES and \
-           not type(value) in self._codecs:    # if a TypeCodec is required:
+        if (
+            codec is None
+            and value is not None
+            and type(value) not in BSON_TYPES
+            and not type(value) in self._codecs
+        ):  # if a TypeCodec is required:
             # Find or make a TypeCodec for this field:
-            if isinstance(value, Encodable): # Use the one specified:
+            if isinstance(value, Encodable):  # Use the one specified:
                 codec = EncodableCodec(type(value))
             elif isinstance(value, TypeCodec):
                 codec = value
-            elif isinstance(value, Enum): # Use the EnumCodec class:
+            elif isinstance(value, Enum):  # Use the EnumCodec class:
                 codec = EnumCodec(type(value), type(value.value))
             else:
-                raise TypeError(f"No TypeCodec is registered for type " 
-                                f"{type(value)}, for attribute {attr_name}. "
-                                f"Please register one before setting.")
+                raise TypeError(
+                    f"No TypeCodec is registered for type "
+                    f"{type(value)}, for attribute {attr_name}. "
+                    f"Please register one before setting."
+                )
             self.register_codec(codec)
         if codec is None and type(value) in self._codecs:
             codec = self._codecs[type(value)]
@@ -228,27 +245,27 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
 
     def encode(self) -> dict:
         """Encodes this into a dictionary for BSON to be happy"""
-        if '_id' not in vars(self) or self._id is None:
+        if "_id" not in vars(self) or self._id is None:
             self._id = ObjectId()
         dictionary: Mapping[str, Tuple[str, Any]] = {}
-        for (field, codec) in zip(self._fields, self._fields.values()):
+        for field, codec in zip(self._fields, self._fields.values()):
             if codec:  # Encode each field:
-                dictionary[field] = (_locatable_name(codec.python_type),
-                    codec.transform_python(
-                        getattr(self, field)
-                    )
+                dictionary[field] = (
+                    _locatable_name(codec.python_type),
+                    codec.transform_python(getattr(self, field)),
                 )
             else:  # If no TypeCodec was specified, just leave the value raw:
                 value = getattr(self, field)
-                #dictionary[field] = (_locatable_name(type(value)), value)
+                # dictionary[field] = (_locatable_name(type(value)), value)
                 dictionary[field] = ("None", value)
-        dictionary['_id'] = self._id
+        dictionary["_id"] = self._id
         return dictionary
 
     @classmethod
     def find_codec(cls, field_name: str, field_type_name: str) -> TypeCodec:
         """Finds a codec for a given field (w/ name and type name specified)"""
-        return ( cls._fields[field_name]
+        return (
+            cls._fields[field_name]
             if field_name in cls._fields
             else (
                 cls._codecs[locate(field_type_name)]
@@ -273,9 +290,7 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
                 # or else try to fall back on the codecs registry
                 # or, if that fails, try the fallback dummy codec:
                 codec: TypeCodec = cls.find_codec(field_name, field_type_name)
-                new_object._setattr_shady(field_name,
-                    codec.transform_bson(val)
-                )
+                new_object._setattr_shady(field_name, codec.transform_bson(val))
         return new_object
 
     def __delattr__(self, __name: str):
@@ -284,9 +299,11 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
         super().__delattr__(__name)
 
     def __setattr__(self, __name: str, __value: Any):
-        if __name not in self._ignored and \
-           __value is not None and \
-           __name not in self._fields:
+        if (
+            __name not in self._ignored
+            and __value is not None
+            and __name not in self._fields
+        ):
             self.register_field(__name, __value)
         super().__setattr__(__name, __value)
 
@@ -325,10 +342,7 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
         if not self._id:
             self.collection.insert_one(self.encode())
         else:
-            self.collection.replace_one(
-                {"_id": self._id},
-                self.encode()
-            )
+            self.collection.replace_one({"_id": self._id}, self.encode())
 
     def remove(self):
         """Removes this document from the collection"""
@@ -340,26 +354,25 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
         """Finds documents from the collection
         Arguments are the same as those for PyMongo.collection's find()."""
         return [
-            cls.decode(document)
-            for document in cls.collection.find(*args, **kwargs)
+            cls.decode(document) for document in cls.collection.find(*args, **kwargs)
         ]
-    
+
     @classmethod
-    def find_sorted(cls, *args, key: str=..., order=ASCENDING, **kwargs):
+    def find_sorted(cls, *args, key: str = ..., order=ASCENDING, **kwargs):
         """Same a find(), but with sorting!"""
         if key is ...:
             raise ValueError("No sorting key was specified")
         return [
-                    cls.decode(document)
-                    for document in cls.collection.find(*args, **kwargs).sort(key, order)
-                ]
+            cls.decode(document)
+            for document in cls.collection.find(*args, **kwargs).sort(key, order)
+        ]
 
     @classmethod
     def find_one(cls, *args, **kwargs):
         """Finds a document from the collection
         Arguments are the same as those for PyMongo's find_one()."""
         return cls.decode(cls.collection.find_one(*args, **kwargs))
-    
+
     def find_self(self):
         """Returns the database's version of self"""
         return self.find_by_id(self.id)
@@ -367,19 +380,17 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
     @classmethod
     def find_by_id(cls, identifier):
         """Finds a document from the collection, given the id"""
-        return cls.find_one({'_id': ObjectId(identifier)})
+        return cls.find_one({"_id": ObjectId(identifier)})
 
     def set_attr_from_string(self, field_name: str, value: str):
         """Decodes and updates a single string value to the document object"""
         if self._fields[field_name] is not None:
             self._setattr_shady(
-                field_name,
-                self._fields[field_name].transform_bson(value)
+                field_name, self._fields[field_name].transform_bson(value)
             )
         else:  # None means the value is already bson-serializable
             self._setattr_shady(
-                field_name,
-                type(self.__getattribute__(field_name))(value)
+                field_name, type(self.__getattribute__(field_name))(value)
             )
 
     @classmethod

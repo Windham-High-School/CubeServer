@@ -10,16 +10,14 @@ from bson.codec_options import TypeCodec
 
 from .dummycodec import DummyCodec
 
-__all__ = ['ComplexDictCodec']
+__all__ = ["ComplexDictCodec"]
+
 
 class ComplexDictCodec(TypeCodec):
-    """Codec for encoding a complex dictionary into bson
-    """
+    """Codec for encoding a complex dictionary into bson"""
 
     def __init__(
-        self,
-        key_codec: TypeCodec = DummyCodec,
-        value_codec: TypeCodec = DummyCodec
+        self, key_codec: TypeCodec = DummyCodec, value_codec: TypeCodec = DummyCodec
     ):
         """Provide codecs for the key and values"""
 
@@ -37,11 +35,11 @@ class ComplexDictCodec(TypeCodec):
     def transform_python(self, value: dict):
         return {
             self.key_codec.transform_python(k): self.value_codec.transform_python(v)
-            for k,v in value.items()
+            for k, v in value.items()
         }
 
     def transform_bson(self, value) -> dict:
         return {
             self.key_codec.transform_bson(k): self.value_codec.transform_bson(v)
-            for k,v in value.items()
+            for k, v in value.items()
         }
