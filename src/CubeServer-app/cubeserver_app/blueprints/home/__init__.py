@@ -1,6 +1,16 @@
 """Flask blueprint to manage the home page"""
 
-from flask import abort, Blueprint, flash, redirect, render_template, request, session, url_for
+from bson.objectid import ObjectId
+from flask import (
+    abort,
+    Blueprint,
+    flash,
+    redirect,
+    render_template,
+    request,
+    session,
+    url_for,
+)
 from flask_login import login_required, login_user, logout_user, current_user
 from is_safe_url import is_safe_url
 
@@ -9,23 +19,29 @@ from cubeserver_common.models.team import Team, TeamStatus, TeamLevel
 from cubeserver_common.models.user import User, UserLevel
 from cubeserver_common.models.datapoint import DataPoint
 from cubeserver_common.models.config.conf import Conf
+from cubeserver_app import util
 from cubeserver_app.tables.team import LeaderboardTeamTable
 from cubeserver_app.blueprints.home.activation_form import UserActivationForm
 from cubeserver_app.blueprints.home.login_form import LoginForm
 from cubeserver_app.tables.datapoints import LeaderboardDataTable
 
-bp = Blueprint('home', __name__, url_prefix='/', template_folder='templates')
+bp = Blueprint("home", __name__, url_prefix="/", template_folder="templates")
 
-@bp.route('/')
+
+@bp.route("/")
 def home():
     """Renders the home page"""
-    if current_user and current_user.is_authenticated \
-       and current_user.level == UserLevel.ADMIN:
-        return redirect(url_for('admin.admin_home'))
-    return render_template('home.html.jinja2')
+    if (
+        current_user
+        and current_user.is_authenticated
+        and current_user.level == UserLevel.ADMIN
+    ):
+        return redirect(url_for("admin.admin_home"))
+    return render_template("home.html.jinja2")
 
-@bp.route('/stats', defaults={'sel_div': "all"})
-@bp.route('/stats/<sel_div>')
+
+@bp.route("/stats", defaults={"sel_div": "all"})
+@bp.route("/stats/<sel_div>")
 def leaderboard(sel_div: str = ""):
     """Renders the leaderboard/stats"""
     # Figure out which division is selected:
@@ -33,38 +49,67 @@ def leaderboard(sel_div: str = ""):
     if sel_div in [l.value for l in TeamLevel]:
         selected_division = TeamLevel(sel_div)
     # Fetch teams from database and populate a table:
-    team_objects = [Team.decode(team) for team in Team.collection.find(
-        {"status": {"$nin":[TeamStatus.UNAPPROVED.value, TeamStatus.INTERNAL.value]}} \
-            if selected_division is None else \
-                {
-                    "status": {"$nin":[TeamStatus.UNAPPROVED.value, TeamStatus.INTERNAL.value]},
-                    "weight_class": selected_division.value
+    team_objects = [
+        Team.decode(team)
+        for team in Team.collection.find(
+            {
+                "status": {
+                    "$nin": [TeamStatus.UNAPPROVED.value, TeamStatus.INTERNAL.value]
                 }
-    )]
+            }
+            if selected_division is None
+            else {
+                "status": {
+                    "$nin": [TeamStatus.UNAPPROVED.value, TeamStatus.INTERNAL.value]
+                },
+                "weight_class": selected_division.value,
+            }
+        )
+    ]
     teams_table = LeaderboardTeamTable(team_objects)
     # Render the template:
     return render_template(
-        'leaderboard.html.jinja2',
-        teams_table = teams_table.__html__(),
-        divisions = [TeamLevel.JUNIOR_VARSITY, TeamLevel.VARSITY],
-        selected_division = selected_division
+        "leaderboard.html.jinja2",
+        teams_table=teams_table.__html__(),
+        divisions=[TeamLevel.JUNIOR_VARSITY, TeamLevel.VARSITY],
+        selected_division=selected_division,
     )
 
-@bp.route('/team/<team_name>')
+
+@bp.route("/team/<team_name>")
 def team_info(team_name: str = ""):
     """A page showing team info & score tally"""
     # Look-up the team:
     team = Team.find_by_name(team_name)
     if team is None:
         return abort(400)
-    data_table = LeaderboardDataTable(DataPoint.find_by_team(team))
-    return render_template(
-        'team_info.html.jinja2',
-        team=team,
-        table=data_table.__html__()
-    )
+    table = LeaderboardDataTable([])
+    if request.args.get("ajax") == "true":
+        # order[0][column]=0&order[0][dir]=desc&start=0&length=5
+        results = util.parse_query(
+            DataPoint,
+            table._cols,
+            request.args,
+            filter={"team_reference": ObjectId(team.id)},
+        )
+        data = [
+            [c.td_contents(item, [attr]) for attr, c in table._cols.items() if c.show]
+            for item in results
+        ]
+        count = len(DataPoint.find())
+        return {
+            "draw": int(request.args.get("draw", 0)) + 1,
+            "recordsTotal": count,
+            "recordsFiltered": count,
+            "data": data,
+        }
+    else:
+        return render_template(
+            "team_info.html.jinja2", team=team, table=table.__html__()
+        )
 
-@bp.route('/activate', methods=['GET', 'POST'])
+
+@bp.route("/activate", methods=["GET", "POST"])
 def activation():
     """Activates a user invitation
     When the HTTP method is GET, this assumes it is from the
@@ -78,20 +123,18 @@ def activation():
     form = UserActivationForm()
     user = None
     updating = False
-    if current_user and current_user.is_authenticated \
-       and current_user.is_active:
+    if current_user and current_user.is_authenticated and current_user.is_active:
         user = current_user
         updating = True
     else:
-        inactive_username = request.args.get('user')
-        activation_token = request.args.get('token')
+        inactive_username = request.args.get("user")
+        activation_token = request.args.get("token")
         if not (inactive_username and activation_token):
             return abort(400)
         user = User.find_by_username(inactive_username)
         if not user.verify_pwd(activation_token):
             return abort(403)
-    if user.is_active or \
-       user is not None and user.verify_pwd(activation_token):
+    if user.is_active or user is not None and user.verify_pwd(activation_token):
         if form.validate_on_submit():
             new_email = form.email.data
             new_username = form.username.data
@@ -102,20 +145,18 @@ def activation():
             if current_user and current_user.is_authenticated:
                 logout_user()
                 session.clear()
-            flash('Successfully reset account. Try logging in.')
-            return redirect(url_for('home.login'))
+            flash("Successfully reset account. Try logging in.")
+            return redirect(url_for("home.login"))
         if updating:
             form.username.data = user.name
             form.email.data = user.email
-        return render_template(
-            'activation_form.html.jinja2',
-            form=form
-        )
+        return render_template("activation_form.html.jinja2", form=form)
     else:
         return abort(403)
 
+
 # TODO: Add a forgot-password that emails a reactivation link
-@bp.route('/login', methods=['GET', 'POST'])
+@bp.route("/login", methods=["GET", "POST"])
 def login():
     """The login page
     Users must be activated to be able to log in.
@@ -129,11 +170,12 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():  # If the input is validated, the pwd is good
         user = User.find_by_username(form.username.data)
-        assert user.verify_pwd(form.password.data), \
-            "The LoginForm validations aren't working!"
+        assert user.verify_pwd(
+            form.password.data
+        ), "The LoginForm validations aren't working!"
         # Log the user in:
-        login_user(user) # , remember=form.remember_me.data)
-        session['username'] = user.name
+        login_user(user)  # , remember=form.remember_me.data)
+        session["username"] = user.name
         if user.is_active and user.is_authenticated:
             flash("Logged in successfully.")
         else:
@@ -141,25 +183,28 @@ def login():
             logout_user()
             session.clear()
             return abort(403)
-        next_loc = request.args.get('next')
+        next_loc = request.args.get("next")
         if next_loc is None and user.level == UserLevel.ADMIN:
-            next_loc = url_for('admin.admin_home')
-        if next_loc is not None and \
-           not is_safe_url(next_loc, {request.headers['Host']}):
+            next_loc = url_for("admin.admin_home")
+        if next_loc is not None and not is_safe_url(
+            next_loc, {request.headers["Host"]}
+        ):
             return abort(400)
-        return redirect(next_loc or url_for('home.home'))
-    return render_template('login.html.jinja2', form=form)
+        return redirect(next_loc or url_for("home.home"))
+    return render_template("login.html.jinja2", form=form)
 
-@bp.route('/logout')
+
+@bp.route("/logout")
 @login_required
 def logout():
     """Logs out the user"""
     logout_user()
     session.clear()
-    return render_template('logout.html.jinja2')
+    return render_template("logout.html.jinja2")
 
-@bp.route('/my_profile')
+
+@bp.route("/my_profile")
 @login_required
 def settings():
     """User settings/profile"""
-    return render_template('settings.html.jinja2')
+    return render_template("settings.html.jinja2")

@@ -50,6 +50,7 @@ class LeaderboardDataTable(Table):
     classes = ["table", "table-striped", "datatable", "display", "datapoints-table"]
     thead_classes = ["thead-dark"]
     border = True
+    allow_empty = True
 
     moment = Col("Datetime")
     category = EnumCol("Category")

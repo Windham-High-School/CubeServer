@@ -122,7 +122,7 @@ class DataPoint(PyMongoModel):
 
     @classmethod
     def find(cls, *args, **kwargs):
-        if "sort" not in kwargs:
+        if "sort" not in kwargs or not kwargs["sort"]:
             kwargs["sort"] = [("moment", DESCENDING)]
         return super().find(*args, **kwargs)
 

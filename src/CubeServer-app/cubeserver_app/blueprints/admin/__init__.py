@@ -69,8 +69,7 @@ from cubeserver_common.config import (
 )
 
 from flask_table import Table
-import pymongo
-from cubeserver_app import settings
+from cubeserver_app import settings, util
 from cubeserver_app.tables.columns import PreCol, OptionsCol
 
 from cubeserver_app.tables.team import AdminTeamTable
@@ -95,30 +94,6 @@ __STR_COLLECTION_MAPPING = {
 }
 
 bp = Blueprint("admin", __name__, url_prefix="/admin", template_folder="templates")
-
-order_re = re.compile("^order\[(?P<index>[0-9]+)\]\[(?P<name>.*)\]$")
-
-ORDER_MAPPING = {"asc": pymongo.ASCENDING, "desc": pymongo.DESCENDING}
-
-
-def parse_query(cls, cols, args, filter=None):
-    # order[0][column]=0&order[0][dir]=desc&start=0&length=5
-    order = [
-        (int(a[0].groups()[0]), a[0].groups()[1], a[1])
-        for a in [(order_re.match(x[0]), x[1]) for x in args.items()]
-        if a[0]
-    ]
-    order.sort(key=lambda x: x[0])
-    order = [{x[1]: x[2] for x in order}]
-    col_keys = list(cols.keys())
-    sort = [(col_keys[int(x["column"])], ORDER_MAPPING[x["dir"]]) for x in order]
-
-    limit = int(args.get("length", 5))
-    if limit == -1:
-        limit = 0
-    return cls.find(
-        filter=filter, skip=int(args.get("start", 0)), limit=limit, sort=sort
-    )
 
 
 @bp.route("/")
@@ -463,7 +438,7 @@ def data_table():
         return abort(403)
     table = AdminDataTable([])
     if request.args.get("ajax") == "true":
-        results = parse_query(DataPoint, table._cols, request.args)
+        results = util.parse_query(DataPoint, table._cols, request.args)
         data = [
             [c.td_contents(item, [attr]) for attr, c in table._cols.items() if c.show]
             for item in results
@@ -527,7 +502,7 @@ def team_info(team_name: str = ""):
     table = AdminDataTable([])
     if request.args.get("ajax") == "true":
         # order[0][column]=0&order[0][dir]=desc&start=0&length=5
-        results = parse_query(
+        results = util.parse_query(
             DataPoint,
             table._cols,
             request.args,
