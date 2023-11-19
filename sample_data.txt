@@ -2,6 +2,6 @@ from cubeserver_common.models.datapoint import DataPoint, DataClass
 from cubeserver_common.models.team import Team
 team = Team.find_by_name('CubeServer-reference-0')
 
-for i in range(500):
-  point = DataPoint(team_identifier=team.id, category=DataClass.TEMPERATURE, value=32)
+for i in range(30):
+  point = DataPoint(team_identifier=team.id, category=DataClass.TEMPERATURE, value=32+i)
   point.save()

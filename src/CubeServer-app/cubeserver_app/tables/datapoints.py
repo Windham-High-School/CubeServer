@@ -27,7 +27,7 @@ class AdminDataTable(Table):
 
     moment = Col("Datetime")
     team_str = Col("Team", th_html_attrs={"data-orderable": "false"})
-    category = EnumCol("Category", allow_sort="category._val")
+    category = EnumCol("Category", allow_sort="category")
     value_with_unit = Col("Value", allow_sort="value")
     rawscore = TextEditCol("Raw Point Value", model_type="DataPoint")
     score = FloatCol("Score", allow_sort="rawscore")
@@ -55,7 +55,7 @@ class LeaderboardDataTable(Table):
     allow_empty = True
 
     moment = Col("Datetime")
-    category = EnumCol("Category", allow_sort="category._val")
+    category = EnumCol("Category", allow_sort="category")
     value_with_unit = Col("Value", allow_sort="value")
     rawscore = FloatCol("Point Value")
     score = FloatCol("Score", allow_sort="rawscore")

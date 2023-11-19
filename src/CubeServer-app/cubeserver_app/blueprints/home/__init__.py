@@ -50,8 +50,8 @@ def leaderboard(sel_div: str = ""):
         selected_division = TeamLevel(sel_div)
     # Fetch teams from database and populate a table:
     team_objects = [
-        Team.decode(team)
-        for team in Team.collection.find(
+        team
+        for team in Team.find(
             {
                 "status": {
                     "$nin": [TeamStatus.UNAPPROVED.value, TeamStatus.INTERNAL.value]

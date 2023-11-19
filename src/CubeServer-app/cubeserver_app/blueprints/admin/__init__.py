@@ -828,3 +828,20 @@ def referencepttest(window: str | int = ""):
         tb = traceback.format_exc()
         logging.error(tb)
         return render_template("errorpages/500.html.jinja2", message=tb)
+
+
+@bp.route("/upgrade")
+@login_required
+def upgrade():
+    """Upgrade data models"""
+    # Check admin status:
+    if current_user.level != UserLevel.ADMIN:
+        return abort(403)
+
+    [x.save() for x in Conf.find()]
+    [x.save() for x in DataPoint.find()]
+    [x.save() for x in Rules.find()]
+    [x.save() for x in Team.find()]
+    [x.save() for x in User.find()]
+
+    return redirect(url_for(".admin_home"))

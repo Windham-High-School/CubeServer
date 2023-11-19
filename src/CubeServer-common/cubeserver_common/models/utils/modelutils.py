@@ -26,6 +26,34 @@ def _locatable_name(type_to_name: type) -> str:
     return module + "." + type_to_name.__name__
 
 
+def value_ref(key):
+    """Adds in ._val reference to keys"""
+    if key == "_id":
+        return key
+
+    split_key = key.split(".", 1)
+
+    if len(split_key) == 1:
+        return f"{key}._val"
+    else:
+        return f"{split_key[0]}._val.{split_key[1]}"
+
+
+def map_filter(f):
+    """update all keys to have a value ref"""
+    if f:
+        result = {}
+        for k, v in f.items():
+            result[value_ref(k)] = v
+        return result
+    return f
+
+
+def map_sort(s):
+    """update all sort keys to have the value ref"""
+    return [(value_ref(k), d) for k, d in s]
+
+
 class _Encoder(ABC):
     @abstractmethod
     def encode(self) -> dict:
@@ -287,9 +315,20 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
                 field_type_name = x["_type"]
                 val = x["_val"]
             else:
-                field_type_name, val = x
+                try:
+                    field_type_name, val = x
+                    if field_type_name != "None":
+                        if (
+                            not isinstance(field_type_name, str)
+                            or "." not in field_type_name
+                        ):
+                            field_type_name, val = ("None", x)
+                except (ValueError, TypeError):
+                    field_type_name, val = ("None", x)
 
             if field_type_name == "None":
+                if isinstance(val, list) and len(val) == 2 and val[0] == "None":
+                    val = val[1]
                 new_object._setattr_shady(field_name, val)
             else:
                 # Try to get the codec from the fields registry
@@ -359,24 +398,34 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
     def find(cls, *args, **kwargs):
         """Finds documents from the collection
         Arguments are the same as those for PyMongo.collection's find()."""
+        args = list(args)
+        if args:
+            args[0] = map_filter(args[0])
+
+        if "filter" in kwargs:
+            kwargs["filter"] = map_filter(kwargs["filter"])
+
+        if "sort" in kwargs:
+            kwargs["sort"] = map_sort(kwargs["sort"])
+
         return [
             cls.decode(document) for document in cls.collection.find(*args, **kwargs)
-        ]
-
-    @classmethod
-    def find_sorted(cls, *args, key: str = ..., order=ASCENDING, **kwargs):
-        """Same a find(), but with sorting!"""
-        if key is ...:
-            raise ValueError("No sorting key was specified")
-        return [
-            cls.decode(document)
-            for document in cls.collection.find(*args, **kwargs).sort(key, order)
         ]
 
     @classmethod
     def find_one(cls, *args, **kwargs):
         """Finds a document from the collection
         Arguments are the same as those for PyMongo's find_one()."""
+        args = list(args)
+        if args:
+            args[0] = map_filter(args[0])
+
+        if "filter" in kwargs:
+            kwargs["filter"] = map_filter(kwargs["filter"])
+
+        if "sort" in kwargs:
+            kwargs["sort"] = map_sort(kwargs["sort"])
+
         return cls.decode(cls.collection.find_one(*args, **kwargs))
 
     def find_self(self):
@@ -400,5 +449,9 @@ class PyMongoModel(Encodable):  # TODO: Clean up some code by making an
             )
 
     @classmethod
-    def find_safe(cls, *args, **kwargs):
-        return cls.collection.find(*args, **kwargs)
+    def count_documents(cls, *args, **kwargs):
+        """Return the number of documents in the filtered collection"""
+        args = list(args)
+        if args:
+            args[0] = map_filter(args[0])
+        return cls.collection.count_documents(*args, **kwargs)

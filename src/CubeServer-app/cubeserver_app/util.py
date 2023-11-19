@@ -38,7 +38,7 @@ def parse_query(cls, cols, args, filter=None):
     if limit == -1:
         limit = 0
 
-    count = cls.collection.count_documents(filter or {})
+    count = cls.count_documents(filter or {})
     return count, cls.find(
         filter=filter, skip=int(args.get("start", 0)), limit=limit, sort=sort
     )
