@@ -219,15 +219,17 @@ class Rules(PyMongoModel):
             or datapoint.category not in DataClass.measurable
         ):
             return
+        datapoint.rawscore = 0.0
         try:
             tol = self.accuracy_tolerance[team.weight_class][datapoint.category]
             points_possible = self.point_menu[team.weight_class][datapoint.category]
-            reference = Reference.get_window_point(self.reference_window)
-            reference_val = reference.of(datapoint.category).value
-            if abs((reference_val - datapoint.value) / reference_val) <= tol:
-                datapoint.rawscore = points_possible
-            else:
-                datapoint.rawscore = 0.0
+            reference_datapoint = DataPoint.get_window_point(
+                datapoint.category, datapoint.moment, self.reference_window
+            )
+            if reference_datapoint:
+                reference_val = reference_datapoint.value
+                if abs((reference_val - datapoint.value) / reference_val) <= tol:
+                    datapoint.rawscore = points_possible
         except IndexError:
             pass
 

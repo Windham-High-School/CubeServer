@@ -63,7 +63,9 @@ class MassMultiplier(IndivMultiplier):
             +0.01 per gram below 400g
         """
         baseline = 400  # if (level == TeamLevel.JUNIOR_VARSITY) else 400
-        super().__init__(0.01 * (baseline - mass) if (mass < baseline) else 1.0, mass)
+        super().__init__(
+            1.0 + (0.01 * (baseline - mass) if (mass < baseline) else 0.0), mass
+        )
 
 
 @unique

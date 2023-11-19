@@ -122,29 +122,3 @@ class Reference:
     #     #if elapsed.total_seconds() <= window:
     #     #    return most_recent
     #     return cls.collect(Team.find_references()[0])  # If it's too old, grab a new point
-
-    @classmethod
-    def get_window_point(cls, window: int) -> ReferencePoint:
-        """Just returns a ReferencePoint object from the last most recent DataPoints"""
-        try:
-            temp_point = DataPoint.find_one(
-                {
-                    "team_reference": ObjectId(Team.find_references()[0].id),
-                    "category": DataClass.TEMPERATURE.value,
-                },
-                sort=[("moment", DESCENDING)],
-            )
-            pres_point = DataPoint.find_one(
-                {
-                    "team_reference": ObjectId(Team.find_references()[0].id),
-                    "category": DataClass.PRESSURE.value,
-                },
-                sort=[("moment", DESCENDING)],
-            )
-            return ReferencePoint(
-                temp=temp_point,
-                pressure=pres_point,
-            )
-        except Exception as e:
-            logging.error(e)
-            return cls.collect(Team.find_references()[0])

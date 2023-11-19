@@ -151,3 +151,25 @@ class DataPoint(PyMongoModel):
         """Removes bad words."""
         if isinstance(self.value, str):
             self.value = profanity.censor(self.value)
+
+    @classmethod
+    def get_window_point(
+        cls, category: DataClass, moment: datetime, window: int
+    ) -> "DataPoint":
+        """Just returns a DataPoint object from the last most recent DataPoints"""
+
+        reference_teams = Team.find_references()
+        data_point = DataPoint.find_one(
+            {
+                "team_reference": {"$in": [ObjectId(x.id) for x in reference_teams]},
+                "category": category,
+                "moment": {"$lte": moment},
+            },
+            sort=[("moment", DESCENDING)],
+        )
+
+        if data_point:
+            data_point_age = (moment - data_point.moment).total_seconds()
+
+            return data_point if data_point_age < window else None
+        return None
