@@ -55,7 +55,7 @@ class LeaderboardDataTable(Table):
     allow_empty = True
 
     moment = Col("Datetime")
-    category = EnumCol("Category", th_html_attrs={"data-orderable": "false"})
+    category = EnumCol("Category", allow_sort="category._val")
     value_with_unit = Col("Value", allow_sort="value")
     rawscore = FloatCol("Point Value")
     score = FloatCol("Score", allow_sort="rawscore")
