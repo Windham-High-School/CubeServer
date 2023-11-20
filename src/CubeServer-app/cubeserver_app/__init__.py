@@ -13,6 +13,7 @@ from cubeserver_common import config, init_logging, configure_db
 from cubeserver_common.models import PyMongoModel
 from cubeserver_common.gensecret import check_secrets
 from cubeserver_common.config import LOGGING_LEVEL
+from cubeserver_app.command import register_commands
 
 from ._version import *
 
@@ -78,6 +79,8 @@ else:
     # Load SECRET_KEY:
     # Double-check that the secret_file is actually there...
     app.config["SECRET_KEY"] = check_secrets()
+    register_commands(app)
+
 
 # Login Manager:
 logging.debug("Initializing login manager")

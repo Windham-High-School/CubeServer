@@ -56,7 +56,13 @@ class Message(PyMongoModel):
 
         success = True
         config: Conf = Conf.retrieve_instance()
-        s = smtplib.SMTP(config.smtp_server)
+        try:
+            s = smtplib.SMTP(config.smtp_server)
+        except OSError:
+            logging.error(f"unable to connect to smtp server {config.smtp_server}")
+            success = False
+            return success
+
         try:
             s.ehlo_or_helo_if_needed()
             s.starttls()

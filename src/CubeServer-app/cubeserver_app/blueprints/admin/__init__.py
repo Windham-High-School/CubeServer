@@ -11,7 +11,6 @@ from datetime import timedelta
 from math import floor
 from random import randint
 import subprocess
-from cubeserver_common.models.reference import Reference
 from bson.objectid import ObjectId
 from flask import (
     abort,
@@ -60,7 +59,6 @@ from cubeserver_common.models.beaconmessage import (
     BeaconMessageEncoding,
     SentStatus,
 )
-from cubeserver_common.models.reference import ReferencePoint
 from cubeserver_common.config import (
     FROM_NAME,
     FROM_ADDR,

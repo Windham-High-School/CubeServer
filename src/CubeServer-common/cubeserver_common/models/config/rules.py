@@ -4,7 +4,7 @@ See app.models.team for more information regarding the game aspect"""
 
 import logging
 from typing import Optional, Mapping, List
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 from bson import ObjectId
 
@@ -12,7 +12,6 @@ from cubeserver_common.config import COMMENT_FILTER_PROFANITY
 from cubeserver_common.models import PyMongoModel, Encodable
 from cubeserver_common.models.team import Team, TeamLevel
 from cubeserver_common.models.datapoint import DataPoint, DataClass
-from cubeserver_common.models.reference import ReferencePoint, Reference
 from cubeserver_common.models.utils import (
     ComplexDictCodec,
     EnumCodec,
@@ -53,6 +52,30 @@ class RegularOccurrence(Encodable):
             (abs((seconds_since_hour - 60 * 60) - offset) <= self.tolerance)
             for offset in self.offsets
         )
+
+    def get_match_window(self, moment: datetime):
+        """returns the interval that the given moment falls into"""
+
+        seconds_since_hour = moment.minute * 60 + moment.second
+        dt_start_of_hour = (moment - timedelta(seconds=seconds_since_hour)).replace(
+            microsecond=0
+        )
+        for offset in self.offsets:
+            if abs(seconds_since_hour - offset) <= self.tolerance:
+                return (
+                    dt_start_of_hour + timedelta(seconds=offset - self.tolerance),
+                    dt_start_of_hour + timedelta(seconds=offset + self.tolerance),
+                )
+
+            if abs((seconds_since_hour - 60 * 60) - offset) <= self.tolerance:
+                return (
+                    dt_start_of_hour
+                    + timedelta(hours=1, seconds=offset - self.tolerance),
+                    dt_start_of_hour
+                    + timedelta(hours=1, seconds=offset + self.tolerance),
+                )
+
+        return None
 
     def encode(self) -> dict:
         """Encodes an Encodable object into a plain old, bson-able
@@ -190,15 +213,22 @@ class Rules(PyMongoModel):
                 # If they didn't miss the window, give 'em some points:
                 window = self.times[team.weight_class][datapoint.category]
                 logging.debug(f"Window: {window}")
-                if window.follows(datapoint.moment):
+                match_window = window.get_match_window(datapoint.moment)
+
+                if match_window:
                     # Get some reference data:
-                    self._score(team, datapoint)
+                    self._score(
+                        team,
+                        datapoint,
+                        "->".join([str(x) for x in match_window]),
+                        force=_force,
+                    )
                     logging.debug("Window met.")
                 else:
                     logging.debug("Window missed.")
             except KeyError:  # If this type of datapoint doesn't get scored:
                 logging.debug("Not a scored data category for this weight class.")
-                datapoint.rawscore = 0
+                datapoint.rawscore = 0.0
 
         # Score the datapoint:
         team.health.change(datapoint.score)
@@ -207,7 +237,7 @@ class Rules(PyMongoModel):
         datapoint.save()
         return True
 
-    def _score(self, team: Team, datapoint: DataPoint, force=False):
+    def _score(self, team: Team, datapoint: DataPoint, scoring_key, force=False):
         """Scores the datapoint, storing the score in the datapoint.
         Set force to True to recalculate an already-scored datapoint
         THIS MAKES THE *ASS*UMPTION* THAT THE TIME WINDOW IS VALID!"""
@@ -220,18 +250,32 @@ class Rules(PyMongoModel):
         ):
             return
         datapoint.rawscore = 0.0
-        try:
-            tol = self.accuracy_tolerance[team.weight_class][datapoint.category]
-            points_possible = self.point_menu[team.weight_class][datapoint.category]
-            reference_datapoint = DataPoint.get_window_point(
-                datapoint.category, datapoint.moment, self.reference_window
-            )
-            if reference_datapoint:
-                reference_val = reference_datapoint.value
-                if abs((reference_val - datapoint.value) / reference_val) <= tol:
-                    datapoint.rawscore = points_possible
-        except IndexError:
-            pass
+        datapoint.scoring_key = None
+
+        existing_datapoint = DataPoint.find_one(
+            {
+                "team_reference": datapoint.team_reference,
+                "category": datapoint.category.value,
+                "scoring_key": scoring_key,
+            }
+        )
+
+        if not existing_datapoint or existing_datapoint.id == datapoint.id:
+            try:
+                tol = self.accuracy_tolerance[team.weight_class][datapoint.category]
+                points_possible = self.point_menu[team.weight_class][datapoint.category]
+                reference_datapoint = DataPoint.get_window_reference_point(
+                    datapoint.category, datapoint.moment, self.reference_window
+                )
+                if reference_datapoint:
+                    reference_val = reference_datapoint.value
+                    if abs((reference_val - datapoint.value) / reference_val) <= tol:
+                        datapoint.rawscore = points_possible
+                        datapoint.scoring_key = scoring_key
+            except IndexError:
+                pass
+        else:
+            logging.info("Existing datapoint already exists for this key {scoring_key}")
 
     # The initial instance is created in cubeserver_common/__init__.py
     @staticmethod

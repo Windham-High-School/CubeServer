@@ -98,6 +98,7 @@ class DataPoint(PyMongoModel):
             self.moment = datetime.now()
         self.is_reference = is_reference
         self.rawscore = 0.0
+        self.scoring_key = None
 
     @property
     def multiplier(self) -> float:
@@ -153,15 +154,14 @@ class DataPoint(PyMongoModel):
             self.value = profanity.censor(self.value)
 
     @classmethod
-    def get_window_point(
+    def get_window_reference_point(
         cls, category: DataClass, moment: datetime, window: int
     ) -> "DataPoint":
         """Just returns a DataPoint object from the last most recent DataPoints"""
 
-        reference_teams = Team.find_references()
         data_point = DataPoint.find_one(
             {
-                "team_reference": {"$in": [ObjectId(x.id) for x in reference_teams]},
+                "is_reference": True,
                 "category": category.value,
                 "moment": {"$lte": moment},
             },
