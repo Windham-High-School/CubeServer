@@ -133,13 +133,13 @@ class Rules(PyMongoModel):
                 ),
             },
         },
-        # % error expressed as a decimal, no longer absolute error
+        # absolute error
         accuracy_tolerance: Mapping[TeamLevel, Mapping[DataClass, float]] = {
             TeamLevel.JUNIOR_VARSITY: {
-                DataClass.PRESSURE: 0.10,
-                DataClass.TEMPERATURE: 0.10,
+                DataClass.PRESSURE: 0.3,
+                DataClass.TEMPERATURE: 5.0,
             },
-            TeamLevel.VARSITY: {DataClass.PRESSURE: 0.10, DataClass.TEMPERATURE: 0.10},
+            TeamLevel.VARSITY: {DataClass.PRESSURE: 0.3, DataClass.TEMPERATURE: 5.0},
         },
         reference_window: int = 30,
         selected: bool = True,
@@ -268,8 +268,7 @@ class Rules(PyMongoModel):
                     datapoint.category, datapoint.moment, self.reference_window
                 )
                 if reference_datapoint:
-                    reference_val = reference_datapoint.value
-                    if abs((reference_val - datapoint.value) / reference_val) <= tol:
+                    if abs(reference_datapoint.value - datapoint.value) <= tol:
                         datapoint.rawscore = points_possible
                         datapoint.scoring_key = scoring_key
             except IndexError:
