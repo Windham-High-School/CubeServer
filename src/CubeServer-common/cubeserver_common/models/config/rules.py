@@ -225,6 +225,12 @@ class Rules(PyMongoModel):
                     )
                     logging.debug("Window met.")
                 else:
+                    # the team loses full points for datapoints submitted outside of the window.
+                    points_possible = self.point_menu[team.weight_class][
+                        datapoint.category
+                    ]
+                    datapoint.rawscore = -points_possible
+
                     logging.debug("Window missed.")
             except KeyError:  # If this type of datapoint doesn't get scored:
                 logging.debug("Not a scored data category for this weight class.")
@@ -275,6 +281,10 @@ class Rules(PyMongoModel):
                 pass
         else:
             logging.info("Existing datapoint already exists for this key {scoring_key}")
+
+            # the team loses full points for each additional point submitted during the window
+            points_possible = self.point_menu[team.weight_class][datapoint.category]
+            datapoint.rawscore = -points_possible
 
     # The initial instance is created in cubeserver_common/__init__.py
     @staticmethod
