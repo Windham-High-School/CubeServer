@@ -6,6 +6,8 @@ ENV APP_HOME /code
 
 WORKDIR $APP_HOME
 
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists
+
 RUN python -m venv /code/.venv-api
 RUN python -m venv /code/.venv-app
 
