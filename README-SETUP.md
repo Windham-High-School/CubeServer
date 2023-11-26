@@ -14,7 +14,7 @@
 
 ## Create Crontab
   * crontab -e
-  * `* * * * * cd code/CubeServer && bash deploy.sh api 2> /home/admin/error.txt`
+  */5 * * * * cd code/CubeServer && bash deploy.sh api 2> /home/admin/error.txt`
 
 ## Have the raspberry pi restart nightly
   * sudo crontab -e
