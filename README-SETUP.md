@@ -10,7 +10,7 @@
     * set MONGODB_PASSWORD
 
 ## Start so that it will restart on device restart
-  * docker compose up -d
+  * docker compose up -d api
 
 ## Create Crontab
   * crontab -e
