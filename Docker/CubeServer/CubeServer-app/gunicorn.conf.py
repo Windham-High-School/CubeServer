@@ -8,10 +8,12 @@ from multiprocessing import cpu_count
 workers = cpu_count()
 threads = 2
 
-if os.path.exists("/etc/ssl/api_cert/server.key") and os.path.exists("/etc/ssl/api_cert/server.pem"):
+if os.path.exists("/etc/ssl/app_cert/server.key") and os.path.exists(
+    "/etc/ssl/app_cert/server.pem"
+):
     # HTTPS:
-    keyfile = "/etc/ssl/api_cert/server.key"
-    certfile = "/etc/ssl/api_cert/server.pem"
+    keyfile = "/etc/ssl/app_cert/server.key"
+    certfile = "/etc/ssl/app_cert/server.pem"
     ssl_version = "TLS"
     # Bind:
     bind = [f'0.0.0.0:{os.environ.get("PORT", 443)}']
@@ -20,7 +22,7 @@ else:
     bind = [f'0.0.0.0:{os.environ.get("PORT", 80)}']
 
 # Logging:
-accesslog = '-'  # Access log to stdout
+accesslog = "-"  # Access log to stdout
 
 # Reduce crashing on lower-power servers:
 preload_app = True

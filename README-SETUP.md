@@ -13,6 +13,11 @@
   * sudo crontab -e
   * 15 6 * * * reboot
 
+## Install a version of MongoDB that works on the Pi 
+  * reference: https://github.com/themattman/mongodb-raspberrypi-docker
+  * wget https://github.com/themattman/mongodb-raspberrypi-docker/releases/download/r7.0.3-mongodb-raspberrypi-docker-unofficial/mongodb.ce.pi4.r7.0.3-mongodb-raspberrypi-docker-unofficial.tar.gz
+  * docker load --input mongodb.ce.pi4.r7.0.3-mongodb-raspberrypi-docker-unofficial.tar.gz 
+
 # To just run the api server
 
 ## Start so that it will restart on device restart
