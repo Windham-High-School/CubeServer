@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 from subprocess import call
 from os import environ, mkdir, chdir
+import os.path
 from shutil import rmtree
 from random import randint, random
 
@@ -12,6 +13,16 @@ from cubeserver_app import settings
 from flask import Blueprint, render_template, session, make_response
 
 bp = Blueprint("config", __name__, url_prefix="/setup", template_folder="templates")
+
+
+def get_api_cert():
+    cert = environ.get("API_CERT")
+    if not cert:
+        cert_filename = environ.get("API_CERT_FILENAME", "/etc/ssl/api_cert/server.pem")
+        if os.path.exists(cert_filename):
+            cert = open(cert_filename, "r").read()
+
+    return cert
 
 
 @bp.route("/")
@@ -34,7 +45,7 @@ def py_file():
         ssid=environ["AP_SSID"],
         api_host=environ["API_HOST"],
         port=environ["API_PORT"],
-        server_cert=environ.get("API_CERT"),
+        server_cert=get_api_cert(),
     )
 
 
@@ -80,7 +91,7 @@ def api_cert():
     """Downloads the pem file for the cert of the api
     for server verification purposes"""
     logging.info("Downloading api_cert.pem")
-    api_cert = environ.get("API_CERT", "undefined")
+    api_cert = get_api_cert() or "undefined"
     response = make_response(api_cert)
     response.headers.set("Content-Type", "application/x-pem-file")
     response.headers.set(

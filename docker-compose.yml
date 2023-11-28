@@ -33,6 +33,7 @@ services:
       - ./config/secret_key.txt:/secret/secret_key.txt
       - ./config/server.key:/etc/ssl/app_cert/server.key
       - ./config/server.pem:/etc/ssl/app_cert/server.pem
+      - ./config/server.pem:/etc/ssl/api_cert/server.pem
     ports:
       - "8080:443"
     environment:
