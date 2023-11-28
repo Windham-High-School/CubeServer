@@ -2,4 +2,4 @@
 
 git pull
 docker compose build
-docker compose up -d $1
+docker compose --profile $1 up -d
