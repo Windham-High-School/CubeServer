@@ -51,7 +51,7 @@ services:
       - full 
   mongodb:
     restart: always
-    image: mongo
+    image: ${MONGODB_IMAGE:-mongodb-raspberrypi4-unofficial-r7.0.3}
     volumes:
       - mongodb-data:/data/db
     environment:

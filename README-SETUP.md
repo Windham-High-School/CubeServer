@@ -8,6 +8,8 @@
   * vi .env
     * set MONGODB_HOSTNAME
     * set MONGODB_PASSWORD
+    * set MONGODB_DRIVER=mongodb # used for local mongodb
+    * set MONGODB_OPTIONS=authSource=admin # used for local mongodb
 
 ## Have the raspberry pi restart nightly
   * sudo crontab -e
