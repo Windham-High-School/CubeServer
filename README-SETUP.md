@@ -20,7 +20,7 @@
 
 ## Create Crontab
   * crontab -e
-  */5 * * * * cd code/CubeServer && bash deploy.sh api 2> /home/admin/error.txt`
+  * */5 * * * * cd code/CubeServer && bash deploy.sh api 2> /home/admin/error.txt`
 
 # To run a full system
 
@@ -29,5 +29,5 @@
 
 ## Create Crontab
   * crontab -e
-  */5 * * * * cd code/CubeServer && bash deploy.sh full 2> /home/admin/error.txt`
+  * */5 * * * * cd code/CubeServer && bash deploy.sh full 2> /home/admin/error.txt`
 
