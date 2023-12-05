@@ -80,6 +80,9 @@ else:
     # Load SECRET_KEY:
     # Double-check that the secret_file is actually there...
     app.config["SECRET_KEY"] = check_secrets()
+
+    if not app.debug:
+        app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 86400 * 365
     register_commands(app)
 
 
