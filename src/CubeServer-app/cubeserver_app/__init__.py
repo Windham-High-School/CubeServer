@@ -60,19 +60,20 @@ else:
         logging.debug("Updating configuration variables from db")
         app.config["CONFIGURABLE"] = Conf.retrieve_instance()
 
-    logging.debug("Initializing APScheduler")
-    scheduler = APScheduler()
-    # Make APScheduler a little quieter:
-    logging.getLogger("apscheduler.executors.default").setLevel(LOGGING_LEVEL + 10)
+    if False:
+        logging.debug("Initializing APScheduler")
+        scheduler = APScheduler()
+        # Make APScheduler a little quieter:
+        logging.getLogger("apscheduler.executors.default").setLevel(LOGGING_LEVEL + 10)
 
-    scheduler.add_job(
-        func=_update_conf, args=[app], trigger="interval", id="configsync", seconds=30
-    )
-    scheduler.add_job(
-        func=clear_bad_attempts, trigger="interval", id="clearbadattempts", seconds=30
-    )
-    scheduler.start()
-    logging.debug("Starting scheduler")
+        scheduler.add_job(
+            func=_update_conf, args=[app], trigger="interval", id="configsync", seconds=30
+        )
+        scheduler.add_job(
+            func=clear_bad_attempts, trigger="interval", id="clearbadattempts", seconds=30
+        )
+        scheduler.start()
+        logging.debug("Starting scheduler")
 
     _update_conf(app)
 
