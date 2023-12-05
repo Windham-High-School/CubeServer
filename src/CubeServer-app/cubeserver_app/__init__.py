@@ -2,6 +2,7 @@
 and publish data received from Wifi-equipped microcontrollers for a school contest"""
 
 from os import environ
+import os.path
 import logging
 
 from flask import Flask
@@ -67,10 +68,17 @@ else:
         logging.getLogger("apscheduler.executors.default").setLevel(LOGGING_LEVEL + 10)
 
         scheduler.add_job(
-            func=_update_conf, args=[app], trigger="interval", id="configsync", seconds=30
+            func=_update_conf,
+            args=[app],
+            trigger="interval",
+            id="configsync",
+            seconds=30,
         )
         scheduler.add_job(
-            func=clear_bad_attempts, trigger="interval", id="clearbadattempts", seconds=30
+            func=clear_bad_attempts,
+            trigger="interval",
+            id="clearbadattempts",
+            seconds=30,
         )
         scheduler.start()
         logging.debug("Starting scheduler")
@@ -81,8 +89,31 @@ else:
     # Double-check that the secret_file is actually there...
     app.config["SECRET_KEY"] = check_secrets()
 
-    if not app.debug:
-        app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 86400 * 365
+    app.config["SEND_FILE_MAX_AGE_DEFAULT"] = 86400 * 365
+    app.config["STATIC_VERSION"] = environ.get("STATIC_VERSION")
+
+    @app.url_defaults
+    def static_cache_buster(endpoint, values):
+        if "." in endpoint and "filename" in values:
+            (bp_name, vf_name) = endpoint.rsplit(".", 1)
+        else:
+            (bp_name, vf_name) = (None, endpoint)
+
+        if vf_name == "static":
+            if values["filename"][0] == "/":
+                values["filename"] = values["filename"][1:]
+
+            if app.config["STATIC_VERSION"]:
+                values["_"] = app.config["STATIC_VERSION"]
+            else:
+                if bp_name:
+                    abs_filename = os.path.join(
+                        app.blueprints[bp_name].static_folder, values["filename"]
+                    )
+                else:
+                    abs_filename = os.path.join(app.static_folder, values["filename"])
+                values["_"] = os.path.getmtime(abs_filename)
+
     register_commands(app)
 
 
